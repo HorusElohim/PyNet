@@ -1,0 +1,10 @@
+wheel
+pyyaml
+pyside6
+pyqt6-tools
+GitPython
+rsa
+torch
+torchvision
+torchaudio
+ipython
