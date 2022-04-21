@@ -205,57 +205,150 @@
 <dt class="sig sig-object py" id="pynet.model.common.Size.pretty_size">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pretty_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.pretty_size" title="Permalink to this definition"></a></dt>
 <dd><p>Get human-readable file sizes.
-simplified version of <a class="reference external" href="https://pypi.python.org/pypi/hurry.filesize/">https://pypi.python.org/pypi/hurry.filesize/</a>
-:type num_bytes: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
-:param num_bytes: file size</p>
+simplified version of <a class="reference external" href="https://pypi.python.org/pypi/hurry.filesize/">https://pypi.python.org/pypi/hurry.filesize/</a></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>num_bytes : file size</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>size human-readable</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>size human-readable</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pynet.model.common.Size.get_obj_size">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_obj_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_obj_size" title="Permalink to this definition"></a></dt>
-<dd><p>Get human-readable Python object size
-:type obj: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>
-:param obj:
-:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:return: human-readable size</p>
+<dt class="sig sig-object py" id="pynet.model.common.Size.obj_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">obj_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.obj_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>obj: Target python object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>size in bytes</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Size</span><span class="o">.</span><span class="n">obj_size</span><span class="p">(</span><span class="nb">int</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">24</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pynet.model.common.Size.get_folder_size_byte">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_folder_size_byte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_folder_size_byte" title="Permalink to this definition"></a></dt>
-<dd><p>Get human-readable Python object size
-:type folder: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param folder: target folder
-:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
-:return: size in bytes</p>
+<dt class="sig sig-object py" id="pynet.model.common.Size.pretty_obj_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pretty_obj_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.pretty_obj_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>obj: Target python object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>human-readable size</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Size</span><span class="o">.</span><span class="n">pretty_obj_size</span><span class="p">(</span><span class="nb">int</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;24 byte&#39;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pynet.model.common.Size.get_folder_size">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_folder_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_folder_size" title="Permalink to this definition"></a></dt>
-<dd><p>Get human-readable Python object size
-:type folder: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param folder: target folder
-:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:return: human-readable size</p>
+<dt class="sig sig-object py" id="pynet.model.common.Size.folder_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">folder_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.folder_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get folder size in bytes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – target folder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>size in bytes</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Size</span><span class="o">.</span><span class="n">folder_size</span><span class="p">(</span><span class="s1">&#39;/etc/apt/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">55818</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pynet.model.common.Size.get_file_size_byte">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_file_size_byte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_file_size_byte" title="Permalink to this definition"></a></dt>
-<dd><p>Get human-readable Python object size
-:type file: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
-:param file: target folder
-:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
-:return: file size in bytes</p>
+<dt class="sig sig-object py" id="pynet.model.common.Size.pretty_folder_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pretty_folder_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.pretty_folder_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>folder: target folder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>human-readable size</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Size</span><span class="o">.</span><span class="n">pretty_folder_size</span><span class="p">(</span><span class="s1">&#39;/etc/apt/&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;54 KB&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.file_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.file_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get File size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>file: target folder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>file size in bytes</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Size</span><span class="o">.</span><span class="n">file_size</span><span class="p">(</span><span class="s1">&#39;/etc/apt/sources.list&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="mi">3159</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.pretty_file_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pretty_file_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.pretty_file_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>file: target folder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>file human-readable size</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Size</span><span class="o">.</span><span class="n">pretty_file_size</span><span class="p">(</span><span class="s1">&#39;/etc/apt/sources.list&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;3 KB&#39;</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>

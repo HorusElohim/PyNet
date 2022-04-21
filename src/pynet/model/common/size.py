@@ -18,10 +18,13 @@ class Size:
     def pretty_size(num_bytes: int) -> str:
         """Get human-readable file sizes.
         simplified version of https://pypi.python.org/pypi/hurry.filesize/
-        Args:
+
+        :param:
             num_bytes : file size
-        Return:
+
+        :return:
             size human-readable
+
         """
         suffix = ''
         factor = 1
@@ -35,37 +38,89 @@ class Size:
         return str(amount) + suffix
 
     @staticmethod
-    def get_obj_size(obj: object) -> str:
+    def obj_size(obj: object) -> int:
         """
         Get human-readable Python object size
-        :param obj:
+
+        :param: obj: Target python object
+        :return: size in bytes
+
+        Examples:
+            >>> Size.obj_size(int())
+            >>> 24
+
+        """
+        return asizeof.asizeof(obj)
+
+    @staticmethod
+    def pretty_obj_size(obj: object) -> str:
+        """
+        Get human-readable Python object size
+
+        :param: obj: Target python object
         :return: human-readable size
+
+        Examples:
+            >>> Size.pretty_obj_size(int())
+            >>> '24 byte'
+
         """
         return Size.pretty_size(asizeof.asizeof(obj))
 
     @staticmethod
-    def get_folder_size_byte(folder: str) -> int:
+    def folder_size(folder: str) -> int:
         """
-        Get human-readable Python object size
+        Get folder size in bytes
+
         :param folder: target folder
         :return: size in bytes
+
+        Examples:
+            >>> Size.folder_size('/etc/apt/')
+            >>> 55818
+
         """
         return sum(file.stat().st_size for file in Path(folder).rglob('*'))
 
     @staticmethod
-    def get_folder_size(folder: str) -> str:
+    def pretty_folder_size(folder: str) -> str:
         """
         Get human-readable Python object size
-        :param folder: target folder
+
+        :param: folder: target folder
         :return: human-readable size
+
+        Examples:
+            >>> Size.pretty_folder_size('/etc/apt/')
+            >>> '54 KB'
+
         """
-        return Size.pretty_size(Size.get_folder_size_byte(folder))
+        return Size.pretty_size(Size.folder_size(folder))
 
     @staticmethod
-    def get_file_size_byte(file: str) -> int:
+    def file_size(file: str) -> int:
         """
-        Get human-readable Python object size
-        :param file: target folder
+        Get File size
+
+        :param: file: target folder
         :return: file size in bytes
+        
+        Examples:
+            >>> Size.file_size('/etc/apt/sources.list')
+            >>> 3159
         """
         return os.path.getsize(file)
+
+    @staticmethod
+    def pretty_file_size(file: str) -> str:
+        """
+        Get human-readable Python object size
+
+        :param: file: target folder
+        :return: file human-readable size
+
+        Examples:
+            >>> Size.pretty_file_size('/etc/apt/sources.list')
+            >>> '3 KB'
+        """
+        return Size.pretty_size(os.path.getsize(file))
