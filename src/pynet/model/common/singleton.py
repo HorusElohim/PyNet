@@ -3,6 +3,13 @@ from typing import Dict
 
 
 class Singleton(type):
+    """
+
+    Make any class as Singleton Class.
+
+    Example Usage:
+        >>> class ExampleClass(metaclass=Singleton)
+    """
     _instances: Dict[object, object] = {}
 
     def __call__(cls: Singleton, *args: object, **kwargs: object) -> object:

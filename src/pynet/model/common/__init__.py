@@ -1,2 +1,2 @@
 from .singleton import Singleton
-from .logger import Logger
+from .logger import Logger, LoggerLevel, LoggerNotInitialized

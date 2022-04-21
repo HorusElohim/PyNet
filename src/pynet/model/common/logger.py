@@ -17,14 +17,6 @@ class LoggerNotInitialized(Exception):
 class LoggerLevel(IntEnum):
     """
         Logger Level Enum
-        * CRITICAL
-        * FATAL
-        * ERROR
-        * WARNING
-        * WARN
-        * INFO
-        * DEBUG
-        * NOTSET
     """
     CRITICAL = 50
     FATAL = 50
@@ -47,11 +39,15 @@ class Logger(metaclass=Singleton):
     Logger Singleton Class
 
     Args:
-            filelog: Flag activate file logging.
-            logfile: Filename to store the log.
-            file_log_level: File log level.
-            consolelog: Flag activate console log.
-            console_log_level: Console log level.
+            filelog: Flag activate file logging,  defaults to True
+            logfile: Filename to store the log, defaults to DEFAULT_FILE_NAME
+            file_log_level: File log level, defaults to DEFAULT_FILE_LEVEL
+            consolelog: Flag activate console log, defaults to True
+            console_log_level: Console log level, defaults to DEFAULT_CONSOLE_LEVEL
+
+
+    Examples:
+        >>> logger = Logger()
     """
     __logger: Union[logging.Logger, None] = None
 
@@ -102,6 +98,17 @@ class Logger(metaclass=Singleton):
             self.__logger.addHandler(file_handler)
 
     def __call__(self) -> logging.Logger:
+        """
+        Return the logging.Logger
+
+        :return: logging.Logger class
+
+        Examples:
+            >>> logger().debug('Debug Message')
+            >>> logger().info('Info Message')
+            >>> logger().warning('Warning Message')
+            >>> logger().error('Error Message')
+    """
         if self.__logger is None:
             raise LoggerNotInitialized()
         return self.__logger

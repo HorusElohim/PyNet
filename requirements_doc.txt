@@ -1,4 +1,6 @@
 sphinx
 livereload
 myst-parser
+sphinx_rtd_theme
+enum-tools[sphinx]
 sphinx-autodoc-typehints
