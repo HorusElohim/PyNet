@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Common &mdash; PyNet 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="About Us" href="../../about.html" />
+    <link rel="prev" title="Model" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> PyNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/quickstart.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Model</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#singleton">Singleton</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logger">Logger</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../about.html">About Us</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">PyNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
+          <li><a href="index.html">Model</a> &raquo;</li>
+      <li>Common</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/model/common.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="common">
+<h1>Common<a class="headerlink" href="#common" title="Permalink to this headline"></a></h1>
+<p>This is the common section.</p>
+<span class="target" id="module-pynet.model.common"></span></div>
+<div class="section" id="singleton">
+<h1>Singleton<a class="headerlink" href="#singleton" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.common.Singleton">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.common.</span></span><span class="sig-name descname"><span class="pre">Singleton</span></span><a class="headerlink" href="#pynet.model.common.Singleton" title="Permalink to this definition"></a></dt>
+<dd><p>Make any class as Singleton Class.</p>
+<dl>
+<dt>Example Usage:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">ExampleClass</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="logger">
+<h1>Logger<a class="headerlink" href="#logger" title="Permalink to this headline"></a></h1>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerNotInitialized">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.common.</span></span><span class="sig-name descname"><span class="pre">LoggerNotInitialized</span></span><a class="headerlink" href="#pynet.model.common.LoggerNotInitialized" title="Permalink to this definition"></a></dt>
+<dd><p>Logger Not Initialized Exception</p>
+</dd></dl>
+
+<dl class="py class enum">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel">
+<em class="property"><span class="pre">enum</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.common.</span></span><span class="sig-name descname"><span class="pre">LoggerLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.LoggerLevel" title="Permalink to this definition"></a></dt>
+<dd><p>Logger Level Enum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Member Type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+<p>Valid values are as follows:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel.CRITICAL">
+<span class="sig-name descname"><span class="pre">CRITICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LoggerLevel.CRITICAL:</span> <span class="pre">50&gt;</span></em><a class="headerlink" href="#pynet.model.common.LoggerLevel.CRITICAL" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel.ERROR">
+<span class="sig-name descname"><span class="pre">ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LoggerLevel.ERROR:</span> <span class="pre">40&gt;</span></em><a class="headerlink" href="#pynet.model.common.LoggerLevel.ERROR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LoggerLevel.WARNING:</span> <span class="pre">30&gt;</span></em><a class="headerlink" href="#pynet.model.common.LoggerLevel.WARNING" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel.INFO">
+<span class="sig-name descname"><span class="pre">INFO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LoggerLevel.INFO:</span> <span class="pre">20&gt;</span></em><a class="headerlink" href="#pynet.model.common.LoggerLevel.INFO" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel.DEBUG">
+<span class="sig-name descname"><span class="pre">DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LoggerLevel.DEBUG:</span> <span class="pre">10&gt;</span></em><a class="headerlink" href="#pynet.model.common.LoggerLevel.DEBUG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.common.LoggerLevel.NOTSET">
+<span class="sig-name descname"><span class="pre">NOTSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;LoggerLevel.NOTSET:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#pynet.model.common.LoggerLevel.NOTSET" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.common.Logger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.common.</span></span><span class="sig-name descname"><span class="pre">Logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filelog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PyNet.log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">LoggerLevel.DEBUG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consolelog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">console_log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">LoggerLevel.DEBUG</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Logger" title="Permalink to this definition"></a></dt>
+<dd><p>Logger Singleton Class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filelog</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Flag activate file logging,  defaults to True</p></li>
+<li><p><strong>logfile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Filename to store the log, defaults to DEFAULT_FILE_NAME</p></li>
+<li><p><strong>file_log_level</strong> (<a class="reference internal" href="#pynet.model.common.LoggerLevel" title="pynet.model.common.logger.LoggerLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoggerLevel</span></code></a>) – File log level, defaults to DEFAULT_FILE_LEVEL</p></li>
+<li><p><strong>consolelog</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Flag activate console log, defaults to True</p></li>
+<li><p><strong>console_log_level</strong> (<a class="reference internal" href="#pynet.model.common.LoggerLevel" title="pynet.model.common.logger.LoggerLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoggerLevel</span></code></a>) – Console log level, defaults to DEFAULT_CONSOLE_LEVEL</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Logger.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filelog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'PyNet.log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">LoggerLevel.DEBUG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consolelog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">console_log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">LoggerLevel.DEBUG</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Logger.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Logger.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Logger.__call__" title="Permalink to this definition"></a></dt>
+<dd><p>Return the logging.Logger</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>logging.Logger class</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Debug Message&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Info Message&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warning Message&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error Message&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../about.html" class="btn btn-neutral float-right" title="About Us" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, HorusElohim &lt;horuselohim@gmail.com&gt;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
