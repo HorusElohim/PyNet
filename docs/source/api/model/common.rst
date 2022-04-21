@@ -24,3 +24,14 @@ Logger
     :private-members:
     :inherited-members:
     :members:
+
+Size
+===============================
+
+.. autoclass:: Size
+    :special-members:
+    :exclude-members: __weakref__
+    :member-order: bysource
+    :private-members:
+    :inherited-members:
+    :members:

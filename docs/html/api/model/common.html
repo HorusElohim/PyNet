@@ -45,6 +45,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Common</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#singleton">Singleton</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logger">Logger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#size">Size</a></li>
 </ul>
 </li>
 </ul>
@@ -190,6 +191,71 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span><span class="p">()</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error Message&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="size">
+<h1>Size<a class="headerlink" href="#size" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.common.Size">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.common.</span></span><span class="sig-name descname"><span class="pre">Size</span></span><a class="headerlink" href="#pynet.model.common.Size" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.pretty_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pretty_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.pretty_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable file sizes.
+simplified version of <a class="reference external" href="https://pypi.python.org/pypi/hurry.filesize/">https://pypi.python.org/pypi/hurry.filesize/</a>
+:type num_bytes: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
+:param num_bytes: file size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>size human-readable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.get_obj_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_obj_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_obj_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size
+:type obj: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>
+:param obj:
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:return: human-readable size</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.get_folder_size_byte">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_folder_size_byte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_folder_size_byte" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size
+:type folder: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:param folder: target folder
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
+:return: size in bytes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.get_folder_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_folder_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_folder_size" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size
+:type folder: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:param folder: target folder
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:return: human-readable size</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.common.Size.get_file_size_byte">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_file_size_byte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.Size.get_file_size_byte" title="Permalink to this definition"></a></dt>
+<dd><p>Get human-readable Python object size
+:type file: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:param file: target folder
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>
+:return: file size in bytes</p>
 </dd></dl>
 
 </dd></dl>
