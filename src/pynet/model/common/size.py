@@ -50,7 +50,7 @@ class Size:
             >>> 24
 
         """
-        return asizeof.asizeof(obj)
+        return int(asizeof.asizeof(obj))
 
     @staticmethod
     def pretty_obj_size(obj: object) -> str:
@@ -104,7 +104,7 @@ class Size:
 
         :param: file: target folder
         :return: file size in bytes
-        
+
         Examples:
             >>> Size.file_size('/etc/apt/sources.list')
             >>> 3159
