@@ -46,6 +46,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#singleton">Singleton</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logger">Logger</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#size">Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#profiler-decorator">Profiler Decorator</a></li>
 </ul>
 </li>
 </ul>
@@ -351,6 +352,24 @@ simplified version of <a class="reference external" href="https://pypi.python.or
 </div>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="profiler-decorator">
+<h1>Profiler Decorator<a class="headerlink" href="#profiler-decorator" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pynet.model.common.profile">
+<span class="sig-prename descclassname"><span class="pre">pynet.model.common.</span></span><span class="sig-name descname"><span class="pre">profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.common.profile" title="Permalink to this definition"></a></dt>
+<dd><p>Profile Decorator
+:param method:
+:return:</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@profile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">test_function</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">pass</span>
+<span class="go">profiler.py:11 in profile_decorator     DEBUG           test_function took 0.01 ms</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>

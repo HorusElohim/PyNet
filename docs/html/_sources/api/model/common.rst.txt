@@ -35,3 +35,8 @@ Size
     :private-members:
     :inherited-members:
     :members:
+
+Profiler Decorator
+===============================
+
+.. autofunction:: profile
