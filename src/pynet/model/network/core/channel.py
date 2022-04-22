@@ -1,22 +1,23 @@
 from pathlib import Path
 from typing import Union
 from enum import Enum
+from dataclassy import dataclass
 
 DEFAULT_LOCAL_IP = '127.0.0.1'
 DEFAULT_LOCAL_PORT = 28128
 DEFAULT_LOCAL_SOCKET = '/tmp/pynet_0'
 
 
+@dataclass(unsafe_hash=True, slots=True)
 class BaseChannel:
     """
         BaseChannel class is the Ancestor for the Local and Remote Channel
     """
-    __slots__ = (
-        'target',
-    )
+    target: str
 
     def __init__(self, target: str) -> None:
         """
+
         :param target: zmq channel
 
         """
@@ -28,6 +29,7 @@ class BaseChannel:
     def __call__(self) -> str:
         """
         Simplification to return the zmq channel
+
         :return: zmq target channel
 
         """
@@ -46,10 +48,8 @@ class LocalChannel(BaseChannel):
     """
         Local Channel
     """
-    __slots__ = (
-        'path',
-        'local_type'
-    )
+    path: Path
+    local_type: LocalChannelType
 
     def __init__(self, path: Union[str, Path] = DEFAULT_LOCAL_SOCKET,
                  local_type: LocalChannelType = LocalChannelType.inproc):
@@ -68,10 +68,8 @@ class RemoteChannel(BaseChannel):
     """
         Remote Channel
     """
-    __slots__ = (
-        'ip',
-        'port'
-    )
+    ip: str
+    port: int
 
     def __init__(self, ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT):
         """
