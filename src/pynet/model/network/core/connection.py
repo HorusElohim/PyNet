@@ -6,15 +6,18 @@ from zmq import (
 from enum import Enum
 from typing import List
 from ...common import Logger
-from .channel import BaseChannel
+from . import BaseChannel, Packet
+from dataclassy import dataclass
 
 
+@dataclass(slots=True)
 class Connection:
     """
         Connection Class
         Used to manage the zmq socket
 
     """
+
     class Type(Enum):
         """
         Type of Connection
@@ -26,6 +29,7 @@ class Connection:
         pusher = PUSH
         puller = PULL
 
+    name: str
     type: Type
     socket: Socket
     channel: BaseChannel
@@ -33,7 +37,7 @@ class Connection:
     bind_types: List[Type] = [Type.publisher, Type.replier, Type.puller]
     connect_types: List[Type] = [Type.subscriber, Type.requester, Type.pusher]
 
-    def __init__(self, connection_type: Type, channel: BaseChannel, context: Context = Context()):
+    def __init__(self, name: str, connection_type: Type, channel: BaseChannel, context: Context = Context.instance()):
         """
 
         :param connection_type: Connection Type
@@ -41,6 +45,7 @@ class Connection:
         :param context: ZMQ Context
 
         """
+        self.name = name
         self.type = connection_type
         self.channel = channel
         self.socket = context.socket(self.type.value)
@@ -66,3 +71,13 @@ class Connection:
             self.logger().error(f"{self.__class__.__name__}: Error init socket for class {self} Exception -> {ex}")
         finally:
             self.logger().debug(f'{self.__class__.__name__}: Constructed')
+
+    def create_packet(self, data: object = None) -> Packet:
+        """
+        Create Packet
+
+        :param: data: User Data
+        :return: Packet
+
+        """
+        return Packet(sender=self.name, channel=self.channel(), data=data)

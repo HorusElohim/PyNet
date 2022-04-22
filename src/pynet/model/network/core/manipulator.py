@@ -1,7 +1,7 @@
 import blosc2
 import pickle
 import hashlib
-from typing import Any
+from typing import Any, Union
 
 
 class Manipulator:
@@ -18,7 +18,7 @@ class Manipulator:
         return blosc2.compress(byte, cname='zlib')
 
     @staticmethod
-    def decompress(compress_byte: Any) -> Any:
+    def decompress(compress_byte: Any) -> Union[bytes, Any]:
         """
         Decompress input
 
