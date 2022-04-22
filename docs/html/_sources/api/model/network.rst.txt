@@ -11,7 +11,7 @@ Channel
 ===============================
 
 .. autoclass:: pynet.model.network.core.channel.BaseChannel
-    :special-members:
+    :special-members: __init__
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:
@@ -21,7 +21,7 @@ Channel
 .. autoenum:: pynet.model.network.core.channel.LocalChannelType
 
 .. autoclass:: pynet.model.network.core.channel.LocalChannel
-    :special-members:
+    :special-members: __init__
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:
@@ -29,7 +29,7 @@ Channel
     :members:
 
 .. autoclass:: pynet.model.network.core.channel.RemoteChannel
-    :special-members:
+    :special-members: __init__
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:
@@ -41,7 +41,7 @@ Packet
 ===============================
 
 .. autoclass:: pynet.model.network.core.packet.Packet
-    :special-members:
+    :special-members: __init__
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:
@@ -52,7 +52,6 @@ Manipulator
 ===============================
 
 .. autoclass:: pynet.model.network.core.manipulator.Manipulator
-    :special-members:
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:
@@ -63,6 +62,18 @@ Connection
 ===============================
 
 .. autoclass:: pynet.model.network.core.connection.Connection
+    :special-members: __init__
+    :exclude-members: __weakref__
+    :member-order: bysource
+    :private-members:
+    :inherited-members:
+    :members:
+
+
+DataHandle
+===============================
+
+.. autoclass:: pynet.model.network.core.data_handle.DataHandle
     :special-members:
     :exclude-members: __weakref__
     :member-order: bysource
