@@ -1,4 +1,4 @@
-from pynet.model import Size
+from pynet.model.common import Size
 
 
 def test_size():

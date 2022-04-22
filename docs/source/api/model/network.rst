@@ -6,6 +6,10 @@ Core Section
 ===============================
 This is core network section.
 
+
+Channel
+===============================
+
 .. autoclass:: pynet.model.network.core.channel.BaseChannel
     :special-members:
     :exclude-members: __weakref__
@@ -33,3 +37,35 @@ This is core network section.
     :members:
 
 
+Packet
+===============================
+
+.. autoclass:: pynet.model.network.core.packet.Packet
+    :special-members:
+    :exclude-members: __weakref__
+    :member-order: bysource
+    :private-members:
+    :inherited-members:
+    :members:
+
+Manipulator
+===============================
+
+.. autoclass:: pynet.model.network.core.manipulator.Manipulator
+    :special-members:
+    :exclude-members: __weakref__
+    :member-order: bysource
+    :private-members:
+    :inherited-members:
+    :members:
+
+Connection
+===============================
+
+.. autoclass:: pynet.model.network.core.connection.Connection
+    :special-members:
+    :exclude-members: __weakref__
+    :member-order: bysource
+    :private-members:
+    :inherited-members:
+    :members:

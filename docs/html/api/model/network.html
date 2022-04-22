@@ -49,6 +49,10 @@
 <li class="toctree-l3"><a class="reference internal" href="common.html#profiler-decorator">Profiler Decorator</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#core-section">Core Section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#channel">Channel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#packet">Packet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manipulator">Manipulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connection">Connection</a></li>
 </ul>
 </li>
 </ul>
@@ -89,6 +93,9 @@
 <div class="section" id="core-section">
 <h1>Core Section<a class="headerlink" href="#core-section" title="Permalink to this headline"></a></h1>
 <p>This is core network section.</p>
+</div>
+<div class="section" id="channel">
+<h1>Channel<a class="headerlink" href="#channel" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pynet.model.network.core.channel.BaseChannel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.network.core.channel.</span></span><span class="sig-name descname"><span class="pre">BaseChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.channel.BaseChannel" title="Permalink to this definition"></a></dt>
@@ -282,6 +289,263 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ip</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – target ip</p></li>
 <li><p><strong>port</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – target port</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="packet">
+<h1>Packet<a class="headerlink" href="#packet" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.network.core.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Packet Class</dt><dd><p>The data is encapsulated inside this class
+with additional information</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.Info">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.Info" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Packet Class</dt><dd><p>Addition Packet Information</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.Info.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.Info.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Sender name</p></li>
+<li><p><strong>channel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Target Channel</p></li>
+<li><p><strong>sequence_left</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Sequence Packet left to send</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.Info.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.Info.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.Info.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.Info.__eq__" title="Permalink to this definition"></a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.Info.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.Info.__hash__" title="Permalink to this definition"></a></dt>
+<dd><p>Return hash(self).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.Info.__metaclass__">
+<span class="sig-name descname"><span class="pre">__metaclass__</span></span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.Info.__metaclass__" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">dataclassy.dataclass.DataClassMeta</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pynet.model.network.core.packet.Packet.__hash__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.__metaclass__">
+<span class="sig-name descname"><span class="pre">__metaclass__</span></span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.__metaclass__" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">dataclassy.dataclass.DataClassMeta</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.__eq__" title="Permalink to this definition"></a></dt>
+<dd><p>Return self==value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.packet.Packet.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.packet.Packet.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="manipulator">
+<h1>Manipulator<a class="headerlink" href="#manipulator" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.network.core.manipulator.Manipulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.network.core.manipulator.</span></span><span class="sig-name descname"><span class="pre">Manipulator</span></span><a class="headerlink" href="#pynet.model.network.core.manipulator.Manipulator" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.manipulator.Manipulator.compress">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byte</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.manipulator.Manipulator.compress" title="Permalink to this definition"></a></dt>
+<dd><p>Compress input using zlib</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>byte</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>compressed input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.manipulator.Manipulator.decompress">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compress_byte</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.manipulator.Manipulator.decompress" title="Permalink to this definition"></a></dt>
+<dd><p>Decompress input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>compress_byte:</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>decompressed input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.manipulator.Manipulator.hashing">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hashing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bytes_obg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.manipulator.Manipulator.hashing" title="Permalink to this definition"></a></dt>
+<dd><p>Given the input return the relative hash</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>bytes_obg:</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>hash</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.manipulator.Manipulator.encode">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.manipulator.Manipulator.encode" title="Permalink to this definition"></a></dt>
+<dd><p>Serialize the input object using pickle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>obj:</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>serialized input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.manipulator.Manipulator.decode">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compress_byte</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.manipulator.Manipulator.decode" title="Permalink to this definition"></a></dt>
+<dd><p>Deserialize input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>compress_byte:</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>python object deserialized</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="connection">
+<h1>Connection<a class="headerlink" href="#connection" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pynet.model.network.core.connection.</span></span><span class="sig-name descname"><span class="pre">Connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context=&lt;zmq.Context()&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.connection.Connection" title="Permalink to this definition"></a></dt>
+<dd><p>Connection Class
+Used to manage the zmq socket</p>
+<dl class="py class enum">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type">
+<em class="property"><span class="pre">enum</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type" title="Permalink to this definition"></a></dt>
+<dd><p>Type of Connection</p>
+<p>Valid values are as follows:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type.subscriber">
+<span class="sig-name descname"><span class="pre">subscriber</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Type.subscriber:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type.subscriber" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type.publisher">
+<span class="sig-name descname"><span class="pre">publisher</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Type.publisher:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type.publisher" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type.replier">
+<span class="sig-name descname"><span class="pre">replier</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Type.replier:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type.replier" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type.requester">
+<span class="sig-name descname"><span class="pre">requester</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Type.requester:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type.requester" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type.pusher">
+<span class="sig-name descname"><span class="pre">pusher</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Type.pusher:</span> <span class="pre">8&gt;</span></em><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type.pusher" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.Type.puller">
+<span class="sig-name descname"><span class="pre">puller</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Type.puller:</span> <span class="pre">7&gt;</span></em><a class="headerlink" href="#pynet.model.network.core.connection.Connection.Type.puller" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pynet.model.network.core.connection.Connection.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context=&lt;zmq.Context()&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pynet.model.network.core.connection.Connection.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection_type</strong> (<a class="reference internal" href="#pynet.model.network.core.connection.Connection.Type" title="pynet.model.network.core.connection.Connection.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>) – Connection Type</p></li>
+<li><p><strong>channel</strong> (<a class="reference internal" href="#pynet.model.network.core.channel.BaseChannel" title="pynet.model.network.core.channel.BaseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseChannel</span></code></a>) – Target Channel</p></li>
+<li><p><strong>context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code>) – ZMQ Context</p></li>
 </ul>
 </dd>
 </dl>

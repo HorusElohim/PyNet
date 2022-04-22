@@ -1,4 +1,4 @@
-from pynet.model import Logger
+from pynet.model.common import Logger
 from pynet.model.common.logger import DEFAULT_FILE_NAME
 from pathlib import Path
 
