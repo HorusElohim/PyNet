@@ -1,8 +1,9 @@
 import time
+from typing import Any
 from . import Logger
 
 
-def profile(method):
+def profile(method: Any) -> Any:
     """
     Profile Decorator
     :param method:
@@ -15,7 +16,8 @@ def profile(method):
         profiler.py:11 in profile_decorator     DEBUG           test_function took 0.01 ms
 
     """
-    def profile_decorator(*args, **kw):
+
+    def profile_decorator(*args: object, **kw: object) -> Any:
         ts = time.time_ns()
         result = method(*args, **kw)
         e_time = time.time_ns() - ts

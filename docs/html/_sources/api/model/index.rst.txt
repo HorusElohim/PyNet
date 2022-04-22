@@ -5,3 +5,4 @@ Model section:
 
 .. toctree::
     common
+    network
