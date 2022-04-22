@@ -2,6 +2,7 @@ from zmq import ZMQError
 from typing import Union
 from ...common import Logger
 from . import Packet, Connection, DataHandle
+from typing import Any
 
 LOGGER = Logger()
 
@@ -27,10 +28,10 @@ class Transmission:
             return False
 
     @staticmethod
-    def _recv_(conn: Connection) -> Union[Packet, object]:
+    def _recv_(conn: Connection) -> Union[Packet, Any]:
         if Transmission.check_connection_is_open(conn):
             try:
-                obj = DataHandle.decode(conn.socket.recv())
+                obj = DataHandle.decode(conn.socket.recv())  # type: ignore[arg-type]
                 LOGGER().debug(f"Transmission: _recv_ -> {obj}")
                 return obj
             except ZMQError as ex:
@@ -53,10 +54,10 @@ class Transmission:
             return False
 
     @staticmethod
-    def _recv_packet(conn: Connection) -> Union[Packet, object]:
+    def _recv_packet(conn: Connection) -> Union[Packet, Any]:
         if Transmission.check_connection_is_open(conn):
             try:
-                pkt = DataHandle.decode(conn.socket.recv())
+                pkt = DataHandle.decode(conn.socket.recv())  # type: ignore[arg-type]
                 LOGGER().debug(f"Transmission: recv_packet -> {pkt}")
                 return pkt
             except ZMQError as ex:

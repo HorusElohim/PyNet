@@ -10,7 +10,7 @@ class DataHandle:
 
     @staticmethod
     def _decode_(serialized_data: Union[bytes, ByteString]) -> object:
-        return Manipulator.decode(serialized_data)
+        return Manipulator.decode(serialized_data)  # type: ignore[arg-type]
 
     @staticmethod
     def _encode_(obj: object, compression: bool = False) -> bytes:
@@ -21,26 +21,30 @@ class DataHandle:
 
     @staticmethod
     def _decode_packet(packet: Packet) -> Packet:
-        if packet.info.compressed:
+        if packet.compressed:
             # Decompress
             packet.data = Manipulator.decompress(packet.data)
-            packet.info.compressed = False
-        if packet.info.encoded:
+            packet.compressed = False
+        if packet.encoded:
             # Decode
-            packet.data = Manipulator.decode(packet.data)
-            packet.info.encoded = False
+            packet.data = Manipulator.decode(packet.data)  # type: ignore[arg-type]
+            packet.encoded = False
         return packet
 
     @staticmethod
     def _encode_packet(packet: Packet, data_encode: bool = True, data_compress: bool = True) -> Packet:
-        if data_encode and not packet.info.encoded:
+        if data_encode and not packet.encoded:
             # Encode Data
             packet.data = Manipulator.encode(packet.data)
-            packet.info.encoded = True
-        if data_compress and not packet.info.compressed:
+            packet.encoded = True
+        if data_compress and not packet.compressed:
+            if not data_encode:
+                # Forcing Encode
+                packet.data = Manipulator.encode(packet.data)
+                packet.encoded = True
             # Compress Data
-            packet.data = Manipulator.compress(packet.data)
-            packet.info.compressed = True
+            packet.data = Manipulator.compress(packet.data)  # type: ignore[arg-type]
+            packet.compressed = True
         return packet
 
     @staticmethod
