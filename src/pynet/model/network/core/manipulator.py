@@ -51,12 +51,22 @@ class Manipulator:
         return pickle.dumps(obj)
 
     @staticmethod
-    def decode(compress_byte: bytes) -> object:
+    def decode(encoded_byte: bytes) -> object:
         """
         Deserialize input
 
-        :param: compress_byte:
+        :param: encoded_byte:
         :return: python object deserialized
 
         """
-        return pickle.loads(compress_byte)
+        try:
+            res = pickle.loads(encoded_byte)
+        except pickle.UnpicklingError as ex:
+            # Try decompress
+            decompress_bytes = Manipulator.decompress(encoded_byte)
+            try:
+                res = pickle.loads(decompress_bytes)
+            except pickle.UnpicklingError as ex:
+                print(f'Error Pickle -> {ex}')
+                res = None
+        return res

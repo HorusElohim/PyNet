@@ -22,7 +22,7 @@ def profile(method: Any) -> Any:
         result = method(*args, **kw)
         e_time = time.time_ns() - ts
         logger = Logger()
-        logger().debug(f'{method.__name__} took {e_time * 1e-6} ms')
+        logger.log.debug(f'{method.__name__} took {e_time * 1e-6} ms')
         return result
 
     return profile_decorator
