@@ -33,9 +33,10 @@ class Connection:
     type: Type
     socket: Socket
     channel: BaseChannel
-    open: bool = False
-    bind_types: List[Type] = [Type.publisher, Type.replier, Type.puller]
-    connect_types: List[Type] = [Type.subscriber, Type.requester, Type.pusher]
+    logger: Logger
+    open: bool
+    __bind_types: List[Type]
+    __connect_types: List[Type]
 
     def __init__(self, name: str, connection_type: Type, channel: BaseChannel, context: Context = Context.instance()):
         """
@@ -49,13 +50,16 @@ class Connection:
         self.type = connection_type
         self.channel = channel
         self.socket = context.socket(self.type.value)
+        self.open = False
         self.logger = Logger()
+        self.__bind_types = [self.Type.publisher, self.Type.replier, self.Type.puller]
+        self.__connect_types = [self.Type.subscriber, self.Type.requester, self.Type.pusher]
 
         try:
-            if self.type in self.bind_types:
+            if self.type in self.__bind_types:
                 self.socket.bind(self.channel())
                 self.logger().debug(f'{self.__class__.__name__}: BIND Socket')
-            elif self.type in self.connect_types:
+            elif self.type in self.__connect_types:
                 self.socket.connect(self.channel())
                 self.logger().debug(f'{self.__class__.__name__}: CONNECT Socket')
                 if self.type is self.Type.subscriber:
@@ -81,3 +85,10 @@ class Connection:
 
         """
         return Packet(sender=self.name, channel=self.channel(), data=data)
+
+    def close(self) -> None:
+        """
+        Close Connection
+        """
+        self.open = False
+        self.socket.close()

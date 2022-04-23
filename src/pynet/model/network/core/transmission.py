@@ -1,10 +1,7 @@
 from zmq import ZMQError
 from typing import Union
-from ...common import Logger
 from . import Packet, Connection, DataHandle
 from typing import Any
-
-LOGGER = Logger()
 
 
 class Transmission:
@@ -24,7 +21,7 @@ class Transmission:
         if conn.open:
             return True
         else:
-            LOGGER().debug(f"Transmission: the connection is close -> {conn}")
+            conn.logger().debug(f"Transmission: the connection is close -> {conn}")
             return False
 
     @staticmethod
@@ -32,10 +29,10 @@ class Transmission:
         if Transmission.check_connection_is_open(conn):
             try:
                 obj = DataHandle.decode(conn.socket.recv())  # type: ignore[arg-type]
-                LOGGER().debug(f"Transmission: _recv_ -> {obj}")
+                conn.logger().debug(f"Transmission: _recv_ -> {obj}")
                 return obj
             except ZMQError as ex:
-                LOGGER().error(f"Transmission: Error _recv_ -> {ex}")
+                conn.logger().error(f"Transmission: Error _recv_ -> {ex}")
                 return None
         return None
 
@@ -43,12 +40,12 @@ class Transmission:
     def _send_(conn: Connection, obj: object) -> bool:
         if Transmission.check_connection_is_open(conn):
             try:
-                LOGGER().debug(f"Transmission: _send_ -> {obj}")
+                conn.logger().debug(f"Transmission: _send_ -> {obj}")
                 conn.socket.send(DataHandle.encode(obj))
-                LOGGER().debug("Transmission: _send_ completed")
+                conn.logger().debug("Transmission: _send_ completed")
                 return True
             except ZMQError as ex:
-                LOGGER().error(f"Transmission: Error _send_ -> {ex}")
+                conn.logger().error(f"Transmission: Error _send_ -> {ex}")
                 return False
         else:
             return False
@@ -58,10 +55,10 @@ class Transmission:
         if Transmission.check_connection_is_open(conn):
             try:
                 pkt = DataHandle.decode(conn.socket.recv())  # type: ignore[arg-type]
-                LOGGER().debug(f"Transmission: recv_packet -> {pkt}")
+                conn.logger().debug(f"Transmission: recv_packet -> {pkt}")
                 return pkt
             except ZMQError as ex:
-                LOGGER().error(f"Transmission: Error recv_packet -> {ex}")
+                conn.logger().error(f"Transmission: Error recv_packet -> {ex}")
                 return None
         return None
 
@@ -82,12 +79,12 @@ class Transmission:
     def send_packet(conn: Connection, pkt: Packet) -> bool:
         if Transmission.check_connection_is_open(conn):
             try:
-                LOGGER().debug(f"Transmission: send_packet -> {pkt}")
+                conn.logger().debug(f"Transmission: send_packet -> {pkt}")
                 conn.socket.send(DataHandle.encode(pkt))
-                LOGGER().debug("Transmission: send_packet completed")
+                conn.logger().debug("Transmission: send_packet completed")
                 return True
             except ZMQError as ex:
-                LOGGER().error(f"Transmission: Error send_packet -> {ex}")
+                conn.logger().error(f"Transmission: Error send_packet -> {ex}")
                 return False
         else:
             return False
