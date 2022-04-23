@@ -56,14 +56,16 @@ def test_connection_base(connection_type, channel_type):
     ]
 )
 def test_connection_data_handle(target, compression):
+    c = Connection('Test', Connection.Type.publisher, LocalChannel())
     if isinstance(target, Packet):
         input_target = copy.deepcopy(target)
-        enc = Connection.encode(Connection.encode_packet(input_target), compression=compression)
-        dec = Connection.decode_packet(Connection.decode(enc))
+        enc = c.encode(c.encode_packet(input_target), compression=compression)
+        dec = c.decode_packet(c.decode(enc))
         assert dec == target
     else:
-        enc = Connection.encode(target, compression=compression)
-        dec = Connection.decode(enc)
+        enc = c.encode(target, compression=compression)
+        dec = c.decode(enc)
         assert dec == target
+    c.close()
 
 # ___________________________________________

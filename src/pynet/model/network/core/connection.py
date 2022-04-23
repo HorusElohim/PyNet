@@ -10,6 +10,9 @@ from ...common import Logger
 from . import BaseChannel, Packet, Manipulator
 from dataclassy import dataclass
 from typing import Union, Any, ByteString
+import blosc2
+import pickle
+import hashlib
 
 
 @dataclass(slots=True)
@@ -35,7 +38,6 @@ class ConnectionBase(Logger):
     type: Type
     socket: Socket
     channel: BaseChannel
-    logger: Logger
     open: bool
     __bind_types: List[Type]
     __connect_types: List[Type]
@@ -73,25 +75,26 @@ class ConnectionBase(Logger):
             else:
                 self.__incomplete()
 
-    def __error(self, exception: ZMQError):
+    def __error(self, exception: ZMQError) -> None:
         self.open = False
         self.log.error(f"Error init socket for class {self}\nException -> {exception}")
 
-    def __ready(self):
+    def __ready(self) -> None:
         self.log.debug(f'ready on channel ->{self.channel}')
 
-    def __incomplete(self):
+    def __incomplete(self) -> None:
         self.log.error(f'incomplete on channel ->{self.channel}')
 
-    def __unrecognized_connection_type(self):
+    def __unrecognized_connection_type(self) -> None:
         self.log.error(f'Zmq pattern not recognized {self.Type}')
 
-    def __bind(self):
+    def __bind(self) -> None:
         self.socket.bind(self.channel())
         self.open = True
         self.log.debug(f'on channel {self.channel()}')
 
-    def __connect(self):
+    def __connect(self) -> None:
+
         self.socket.connect(self.channel())
         if self.type is self.Type.subscriber:
             self.socket.setsockopt(SUBSCRIBE, b'')
@@ -124,10 +127,9 @@ class ConnectionBase(Logger):
         self.log.debug('Closed')
 
 
-class ConnectionDataHandler:
+class ConnectionDataHandler(ConnectionBase):
 
-    @staticmethod
-    def decode(serialized_data: Union[bytes, ByteString]) -> Union[object, Packet]:
+    def decode(self, serialized_data: Union[bytes, ByteString]) -> Union[Any, Packet]:
         """
         Decode serialized data
 
@@ -135,40 +137,114 @@ class ConnectionDataHandler:
         :return: python object
 
         """
-        return Manipulator.decode(serialized_data)  # type: ignore[arg-type]
+        res = None
 
-    @staticmethod
-    def encode(obj: object, compression: bool = False) -> bytes:
+        try:
+            res = pickle.loads(serialized_data)  # type: ignore[arg-type]
+        except pickle.UnpicklingError:
+            # Try decompress
+            decompress_bytes = Manipulator.decompress(serialized_data)
+            self.log.warning('maybe the input is compressed. Try to decompress then decode again.')
+            try:
+                res = pickle.loads(decompress_bytes)
+            except pickle.UnpicklingError as ex:
+                print(f'Error Pickle -> {ex}')
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            return res
+
+    def encode(self, obj: object, compression: bool = False) -> bytes:
         """
         Encode python object
         :param obj: input target python object
         :param compression: flag activate compression
         :return: encoded python object
         """
-        enc = Manipulator.encode(obj)
-        if compression:
-            enc = Manipulator.compress(enc)
-        return enc
+        res = None
+        try:
+            res = pickle.dumps(obj)
+            if compression:
+                res = self.compress(res)
+        except pickle.UnpicklingError as ex:
+            self.log.error(f'Error -> {ex}')
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            assert isinstance(res, bytes)
+            return res
 
-    @staticmethod
-    def decode_packet(packet: Packet) -> Packet:
+    def decompress(self, compress_byte: Any) -> Union[bytes, Any]:
+        """
+        Decompress input
+
+        :param: compress_byte:
+        :return: decompressed input
+
+        """
+        res = None
+        try:
+            res = blosc2.decompress(compress_byte)
+        except Exception as ex:
+            self.log.error(f'Error -> {ex}')
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            return res
+
+    def compress(self, byte: bytes) -> Any:
+        """
+        Compress input using zlib
+
+        :param byte:
+        :return: compressed input
+
+        """
+        res = None
+        try:
+            res = blosc2.compress(byte, cname='zlib')
+        except Exception as ex:
+            self.log.error(f'Error -> {ex}')
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            return res
+
+    def decode_packet(self, packet: Packet) -> Packet:
         """
         Decode Packet
         :param packet: input packet
         :return: decoded packet
         """
-        if packet.compressed:
-            # Decompress
-            packet.data = Manipulator.decompress(packet.data)
-            packet.compressed = False
-        if packet.encoded:
-            # Decode
-            packet.data = Manipulator.decode(packet.data)  # type: ignore[arg-type]
-            packet.encoded = False
-        return packet
+        res = True
+        try:
+            if packet.compressed:
+                # Decompress
+                packet.data = self.decompress(packet.data)
+                packet.compressed = False
+            if packet.encoded:
+                # Decode
+                packet.data = self.decode(packet.data)  # type: ignore[arg-type]
+                packet.encoded = False
+        except Exception as ex:
+            self.log.error(f'Error -> {ex}')
+            res = False
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            return packet
 
-    @staticmethod
-    def encode_packet(packet: Packet, data_encode: bool = True, data_compress: bool = True) -> Packet:
+    def encode_packet(self, packet: Packet, data_encode: bool = True, data_compress: bool = True) -> Packet:
         """
         Encode Packet
         :param packet: input packet
@@ -176,26 +252,57 @@ class ConnectionDataHandler:
         :param data_compress: flag compress data
         :return: Encoded Packet
         """
-        if data_encode and not packet.encoded:
-            # Encode Data
-            packet.data = Manipulator.encode(packet.data)
-            packet.encoded = True
-        if data_compress and not packet.compressed:
-            if not data_encode:
-                # Forcing Encode
-                packet.data = Manipulator.encode(packet.data)
+        res = True
+        try:
+            if data_encode and not packet.encoded:
+                # Encode Data
+                packet.data = self.encode(packet.data)
                 packet.encoded = True
-            # Compress Data
-            packet.data = Manipulator.compress(packet.data)  # type: ignore[arg-type]
-            packet.compressed = True
-        return packet
+            if data_compress and not packet.compressed:
+                if not data_encode:
+                    # Forcing Data Encode
+                    packet.data = self.encode(packet.data)
+                    packet.encoded = True
+                # Compress Data
+                packet.data = self.compress(packet.data)  # type: ignore[arg-type]
+                packet.compressed = True
+        except Exception as ex:
+            self.log.error(f'Error -> {ex}')
+            res = False
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            return packet
+
+    def hashing(self, bytes_obg: bytes) -> Union[str, None]:
+        """
+        Given the input return the relative hash
+
+        :param: bytes_obg:
+        :return: hash
+        """
+        res = None
+        try:
+            res = hashlib.md5(bytes_obg)
+            res = res.hexdigest()  # type: ignore[assignment]
+            assert isinstance(res, str)
+        except Exception as ex:
+            self.log.error(f'Error -> {ex}')
+        finally:
+            if res:
+                self.log.debug('success')
+            else:
+                self.log.error('failed')
+            return res  # type: ignore[return-value]
 
 
 class TryToUseConnectionTransmissionOnClosedConnection(Exception):
     pass
 
 
-class ConnectionTransmission(ConnectionBase, ConnectionDataHandler):
+class ConnectionTransmission(ConnectionDataHandler):
 
     def safe_check(self) -> ConnectionTransmission:
         """
@@ -237,6 +344,7 @@ class ConnectionTransmission(ConnectionBase, ConnectionDataHandler):
                 return self.decode_packet(obj)
             else:
                 self.log.warning("Not a Packet received with raw set to False")
+                return obj
 
     def __send(self, obj: object) -> bool:
         """

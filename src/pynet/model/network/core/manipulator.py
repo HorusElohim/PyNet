@@ -61,7 +61,7 @@ class Manipulator:
         """
         try:
             res = pickle.loads(encoded_byte)
-        except pickle.UnpicklingError as ex:
+        except pickle.UnpicklingError:
             # Try decompress
             decompress_bytes = Manipulator.decompress(encoded_byte)
             try:
