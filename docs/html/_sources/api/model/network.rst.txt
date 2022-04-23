@@ -3,12 +3,12 @@ Network
 This is the network section.
 
 Core Section
-===============================
+_______________________________
 This is core network section.
 
 
 Channel
-===============================
+_______________________________
 
 .. autoclass:: pynet.model.network.core.channel.BaseChannel
     :special-members: __init__
@@ -38,7 +38,7 @@ Channel
 
 
 Packet
-===============================
+_______________________________
 
 .. autoclass:: pynet.model.network.core.packet.Packet
     :special-members: __init__
@@ -48,33 +48,11 @@ Packet
     :inherited-members:
     :members:
 
-Manipulator
-===============================
-
-.. autoclass:: pynet.model.network.core.manipulator.Manipulator
-    :exclude-members: __weakref__
-    :member-order: bysource
-    :private-members:
-    :inherited-members:
-    :members:
-
 Connection
-===============================
+_______________________________
 
 .. autoclass:: pynet.model.network.core.connection.Connection
     :special-members: __init__
-    :exclude-members: __weakref__
-    :member-order: bysource
-    :private-members:
-    :inherited-members:
-    :members:
-
-
-DataHandle
-===============================
-
-.. autoclass:: pynet.model.network.core.data_handle.DataHandle
-    :special-members:
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:

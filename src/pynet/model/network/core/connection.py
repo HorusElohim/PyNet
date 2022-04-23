@@ -4,15 +4,15 @@ from zmq import (
     SUB, PUB, REQ, REP, PUSH, PULL,
     SUBSCRIBE
 )
-from enum import Enum
-from typing import List
-from ...common import Logger
-from . import BaseChannel, Packet, Manipulator
+from typing import Union, Any, ByteString, List
 from dataclassy import dataclass
-from typing import Union, Any, ByteString
+from enum import Enum
+import hashlib
 import blosc2
 import pickle
-import hashlib
+
+from ...common import Logger
+from . import BaseChannel, Packet
 
 
 @dataclass(slots=True)
@@ -33,6 +33,7 @@ class ConnectionBase(Logger):
         requester = REQ
         pusher = PUSH
         puller = PULL
+        helper = -100
 
     name: str
     type: Type
@@ -63,6 +64,8 @@ class ConnectionBase(Logger):
                 self.__bind()
             elif self.type in self.__connect_types:
                 self.__connect()
+            elif self.type == self.Type.helper:
+                pass
             else:
                 self.__unrecognized_connection_type()
 
@@ -73,7 +76,7 @@ class ConnectionBase(Logger):
             if self.open:
                 self.__ready()
             else:
-                self.__incomplete()
+                self.__not_connected()
 
     def __error(self, exception: ZMQError) -> None:
         self.open = False
@@ -82,8 +85,8 @@ class ConnectionBase(Logger):
     def __ready(self) -> None:
         self.log.debug(f'ready on channel ->{self.channel}')
 
-    def __incomplete(self) -> None:
-        self.log.error(f'incomplete on channel ->{self.channel}')
+    def __not_connected(self) -> None:
+        self.log.warn(f'not connected on channel ->{self.channel}')
 
     def __unrecognized_connection_type(self) -> None:
         self.log.error(f'Zmq pattern not recognized {self.Type}')
@@ -114,7 +117,9 @@ class ConnectionBase(Logger):
     def is_connection_open(self) -> bool:
         """
         Is the connection open
+
         :return: connection open
+
         """
         return self.open
 
@@ -143,7 +148,7 @@ class ConnectionDataHandler(ConnectionBase):
             res = pickle.loads(serialized_data)  # type: ignore[arg-type]
         except pickle.UnpicklingError:
             # Try decompress
-            decompress_bytes = Manipulator.decompress(serialized_data)
+            decompress_bytes = self.decompress(serialized_data)
             self.log.warning('maybe the input is compressed. Try to decompress then decode again.')
             try:
                 res = pickle.loads(decompress_bytes)
@@ -159,9 +164,11 @@ class ConnectionDataHandler(ConnectionBase):
     def encode(self, obj: object, compression: bool = False) -> bytes:
         """
         Encode python object
-        :param obj: input target python object
-        :param compression: flag activate compression
+
+        :param: obj: input target python object
+        :param: compression: flag activate compression
         :return: encoded python object
+
         """
         res = None
         try:
@@ -221,8 +228,10 @@ class ConnectionDataHandler(ConnectionBase):
     def decode_packet(self, packet: Packet) -> Packet:
         """
         Decode Packet
-        :param packet: input packet
+
+        :param: packet: input packet
         :return: decoded packet
+
         """
         res = True
         try:
@@ -247,10 +256,12 @@ class ConnectionDataHandler(ConnectionBase):
     def encode_packet(self, packet: Packet, data_encode: bool = True, data_compress: bool = True) -> Packet:
         """
         Encode Packet
-        :param packet: input packet
-        :param data_encode: flag encode data
-        :param data_compress: flag compress data
+
+        :param: packet: input packet
+        :param: data_encode: flag encode data
+        :param: data_compress: flag compress data
         :return: Encoded Packet
+
         """
         res = True
         try:
@@ -307,7 +318,9 @@ class ConnectionTransmission(ConnectionDataHandler):
     def safe_check(self) -> ConnectionTransmission:
         """
         Safe check before use any transmissions methods
+
         :return: self instance to concatenate methods
+
         """
         if self.open:
             return self
@@ -317,7 +330,9 @@ class ConnectionTransmission(ConnectionDataHandler):
     def __receive(self) -> Union[Packet, object]:
         """
         Receive main internal method
+
         :return: received data
+
         """
         try:
             # Receive from the socket
