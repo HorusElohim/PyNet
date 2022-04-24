@@ -15,6 +15,10 @@ from ...common import Logger
 from . import BaseChannel, Packet
 
 
+class ConnectionBaseArgIsNone(Exception):
+    pass
+
+
 @dataclass(slots=True)
 class ConnectionBase(Logger):
     """
@@ -51,6 +55,10 @@ class ConnectionBase(Logger):
         :param context: ZMQ Context
 
         """
+        self.__raise_input_none('name', name)
+        self.__raise_input_none('type', connection_type)
+        self.__raise_input_none('channel', channel)
+
         self.name = name
         self.type = connection_type
         self.channel = channel
@@ -78,15 +86,20 @@ class ConnectionBase(Logger):
             else:
                 self.__not_connected()
 
+    def __raise_input_none(self, name: str, arg: object):
+        if not arg:
+            self.log.error(f'Error input {name} is None')
+            raise ConnectionBaseArgIsNone
+
     def __error(self, exception: ZMQError) -> None:
         self.open = False
         self.log.error(f"Error init socket for class {self}\nException -> {exception}")
 
     def __ready(self) -> None:
-        self.log.debug(f'ready on channel ->{self.channel}')
+        self.log.debug(f'{self.name}::{self.type.name} ready on channel ->{self.channel}')
 
     def __not_connected(self) -> None:
-        self.log.warn(f'not connected on channel ->{self.channel}')
+        self.log.warning(f'{self.name}::{self.type.name} not connected on channel ->{self.channel}')
 
     def __unrecognized_connection_type(self) -> None:
         self.log.error(f'Zmq pattern not recognized {self.Type}')
@@ -94,7 +107,7 @@ class ConnectionBase(Logger):
     def __bind(self) -> None:
         self.socket.bind(self.channel())
         self.open = True
-        self.log.debug(f'on channel {self.channel()}')
+        self.log.debug(f'{self.name}::{self.type.name} on channel {self.channel()}')
 
     def __connect(self) -> None:
 
@@ -102,7 +115,7 @@ class ConnectionBase(Logger):
         if self.type is self.Type.subscriber:
             self.socket.setsockopt(SUBSCRIBE, b'')
         self.open = True
-        self.log.debug(f'on channel {self.channel()}')
+        self.log.debug(f'{self.name}::{self.type.name} on channel {self.channel()}')
 
     def create_packet(self, data: object = None) -> Packet:
         """
@@ -156,9 +169,9 @@ class ConnectionDataHandler(ConnectionBase):
                 print(f'Error Pickle -> {ex}')
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             return res
 
     def encode(self, obj: object, compression: bool = False) -> bytes:
@@ -179,9 +192,9 @@ class ConnectionDataHandler(ConnectionBase):
             self.log.error(f'Error -> {ex}')
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             assert isinstance(res, bytes)
             return res
 
@@ -200,9 +213,9 @@ class ConnectionDataHandler(ConnectionBase):
             self.log.error(f'Error -> {ex}')
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             return res
 
     def compress(self, byte: bytes) -> Any:
@@ -220,9 +233,9 @@ class ConnectionDataHandler(ConnectionBase):
             self.log.error(f'Error -> {ex}')
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             return res
 
     def decode_packet(self, packet: Packet) -> Packet:
@@ -248,9 +261,9 @@ class ConnectionDataHandler(ConnectionBase):
             res = False
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             return packet
 
     def encode_packet(self, packet: Packet, data_encode: bool = True, data_compress: bool = True) -> Packet:
@@ -282,9 +295,9 @@ class ConnectionDataHandler(ConnectionBase):
             res = False
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             return packet
 
     def hashing(self, bytes_obg: bytes) -> Union[str, None]:
@@ -303,9 +316,9 @@ class ConnectionDataHandler(ConnectionBase):
             self.log.error(f'Error -> {ex}')
         finally:
             if res:
-                self.log.debug('success')
+                self.log.debug(f'{self.name}::success')
             else:
-                self.log.error('failed')
+                self.log.error(f'{self.name}::failed')
             return res  # type: ignore[return-value]
 
 

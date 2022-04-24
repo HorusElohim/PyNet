@@ -1,4 +1,4 @@
-from pynet.model.network.core import LocalChannel, LocalChannelType, RemoteChannel
+from pynet.model.network.core import LocalChannel, RemoteChannel
 from pynet.model.network.core.channel import DEFAULT_LOCAL_IP, DEFAULT_LOCAL_PORT, DEFAULT_LOCAL_SOCKET
 from pathlib import Path
 
