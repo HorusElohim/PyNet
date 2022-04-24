@@ -86,7 +86,7 @@ class Logger:
         """
         if self.__logger_console_active or self.__logger_file_active:
             # Get dedicated Class logger
-            self.__logger: logging.Logger = logging.getLogger(str(self.__class__))
+            self.__logger: logging.Logger = logging.getLogger(self.__class__.__name__)
             # Clean all the hereditary logger
             self.__clean_logger()
             # Activate console logger handler
