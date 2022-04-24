@@ -2,6 +2,9 @@ from __future__ import annotations
 import logging
 from typing import Union
 from enum import IntEnum
+from threading import Lock
+
+SAFE_LOGGER_LOCK = Lock()
 
 # Reduce Logger Messages
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -71,9 +74,11 @@ class Logger:
         Clean Logger Handlers
         """
         assert isinstance(self.__logger, logging.Logger)
+        SAFE_LOGGER_LOCK.acquire(blocking=True)
         list(map(self.__logger.removeHandler, self.__logger.handlers))
         list(map(self.__logger.removeFilter, self.__logger.filters))
         self.__logger.setLevel(logging.DEBUG)
+        SAFE_LOGGER_LOCK.release()
 
     def __construct_logger(self) -> None:
         """
@@ -81,7 +86,7 @@ class Logger:
         """
         if self.__logger_console_active or self.__logger_file_active:
             # Get dedicated Class logger
-            self.__logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+            self.__logger: logging.Logger = logging.getLogger(str(self.__class__))
             # Clean all the hereditary logger
             self.__clean_logger()
             # Activate console logger handler
