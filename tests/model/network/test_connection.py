@@ -111,6 +111,11 @@ def thread_connection_connect(test_case: TransmissionTestCase):
                                                    channel=LocalChannel(),
                                                    data=DATA,
                                                    raw=True)),
+                             (TransmissionTestCase(c1_name='sender', c1_type=Connection.Type.pusher,
+                                                   c2_name='receiver', c2_type=Connection.Type.puller,
+                                                   channel=LocalChannel(),
+                                                   data=DATA,
+                                                   raw=True)),
                          ])
 def test_connection_transmission(test_case):
     # Parallel Task
