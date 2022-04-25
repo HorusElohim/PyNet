@@ -13,8 +13,8 @@
 
 from zmq import Context
 from typing import List, Any, Union
-from ...common import Logger
-from ..core import Connection, BaseChannel
+from ... import Logger
+from .. import Connection, BaseChannel
 
 
 class BasePattern(Logger):

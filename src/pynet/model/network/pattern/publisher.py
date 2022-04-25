@@ -13,7 +13,7 @@
 
 from zmq import Context
 from typing import List, Any, Union
-from ..core import BaseChannel, Connection
+from .. import BaseChannel, Connection
 from . import BasePattern, MethodNotSupported
 
 
