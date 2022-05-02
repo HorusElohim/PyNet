@@ -56,6 +56,8 @@ class LoggerLevel(IntEnum):
 
 
 DEFAULT_LOGGER_NAME = "PyNet"
+DEFAULT_CONSOLE_ACTIVE = True
+DEFAULT_FILE_ACTIVE = True
 DEFAULT_FILE_NAME = f"{DEFAULT_LOGGER_NAME}.log"
 DEFAULT_FILE_LEVEL = LoggerLevel.DEBUG
 DEFAULT_CONSOLE_LEVEL = LoggerLevel.DEBUG
@@ -73,11 +75,10 @@ class Logger:
         >>> t = Test()
         >>> t.log.debug('message')
     """
-
     __logger: Union[logging.Logger, None] = None
-    __logger_console_active: bool = True
+    __logger_console_active: bool = DEFAULT_CONSOLE_ACTIVE
     __logger_console_level: LoggerLevel = DEFAULT_CONSOLE_LEVEL
-    __logger_file_active: bool = True
+    __logger_file_active: bool = DEFAULT_FILE_ACTIVE
     __logger_file_level: LoggerLevel = DEFAULT_FILE_LEVEL
     __logger_file_name: str = DEFAULT_FILE_NAME
 
@@ -86,11 +87,9 @@ class Logger:
         Clean Logger Handlers
         """
         assert isinstance(self.__logger, logging.Logger)
-        SAFE_LOGGER_LOCK.acquire(blocking=True)
         list(map(self.__logger.removeHandler, self.__logger.handlers))
         list(map(self.__logger.removeFilter, self.__logger.filters))
         self.__logger.setLevel(logging.DEBUG)
-        SAFE_LOGGER_LOCK.release()
 
     def __construct_logger(self) -> None:
         """
@@ -100,6 +99,9 @@ class Logger:
             # Get dedicated Class logger
             self.__logger: logging.Logger = logging.getLogger(self.__class__.__name__)
             self.__logger.propagate = False
+            # Check already created
+            if self.__logger.hasHandlers():
+                return None
             # Clean all the hereditary logger
             self.__clean_logger()
             # Activate console logger handler
@@ -129,7 +131,9 @@ class Logger:
     @property
     def log(self) -> logging.Logger:
         if self.__logger is None:
+            SAFE_LOGGER_LOCK.acquire()
             self.__construct_logger()
+            SAFE_LOGGER_LOCK.release()
         if self.__logger is None:
             raise LoggerCannotWorkIfBothConsoleAndFileAreDisabled()
         assert isinstance(self.__logger, logging.Logger)
