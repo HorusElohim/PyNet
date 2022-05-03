@@ -47,8 +47,8 @@ class CoreType(Enum):
     puller = PULL
 
 
-BIND_TYPES = [CoreType.publisher, CoreType.replier, CoreType.puller]
-CONNECT_TYPES = [CoreType.subscriber, CoreType.requester, CoreType.pusher]
+BIND_TYPES = [CoreType.publisher, CoreType.replier, CoreType.pusher]
+CONNECT_TYPES = [CoreType.subscriber, CoreType.requester, CoreType.puller]
 
 
 class Core:

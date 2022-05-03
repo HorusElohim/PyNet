@@ -63,18 +63,19 @@ class ConnectionTestCase:
 
 
 # Actions for connection bind
-# publisher, replier, puller
+# publisher, pusher
 def thread_connection_bind(test_case: ConnectionTestCase):
     c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
     c.open()
-    res = c.send(test_case.data)
+    usleep(200)
+    res = c.send(str(test_case.data).encode("utf-8"))
     c.close()
     return res
 
 
 #
 # # Actions for connection connect
-# # subscriber, requester, pusher
+# # subscriber, puller
 def thread_connection_connect(test_case: ConnectionTestCase):
     c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
     c.open()
@@ -83,30 +84,108 @@ def thread_connection_connect(test_case: ConnectionTestCase):
     return obj
 
 
-#
-
+# Test Publisher/Subscriber
+# Test Pusher/Puller
 @pytest.mark.parametrize('test_case',
                          [
-                             (ConnectionTestCase(c1_name='sender', c1_type=CoreType.publisher,
-                                                 c2_name='receiver', c2_type=CoreType.subscriber,
+                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
+                                                 c2_name='TestSubscriber', c2_type=CoreType.subscriber,
+                                                 channel=Channel.Remote(),
+                                                 data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
+                                                 c2_name='TestSubscriber', c2_type=CoreType.subscriber,
+                                                 channel=Channel.Local(),
+                                                 data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
+                                                 c2_name='TestSubscriber', c2_type=CoreType.subscriber,
                                                  channel=Channel.Local(local_type=Channel.LocalType().ipc),
                                                  data=DATA, )),
-                             (ConnectionTestCase(c1_name='sender', c1_type=CoreType.pusher,
-                                                 c2_name='receiver', c2_type=CoreType.puller,
-                                                 channel=Channel.Local(), data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
+                                                 c2_name='TestPuller', c2_type=CoreType.puller,
+                                                 channel=Channel.Remote(),
+                                                 data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
+                                                 c2_name='TestPuller', c2_type=CoreType.puller,
+                                                 channel=Channel.Local(),
+                                                 data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
+                                                 c2_name='TestPuller', c2_type=CoreType.puller,
+                                                 channel=Channel.Local(local_type=Channel.LocalType().ipc),
+                                                 data=DATA, )),
                          ])
-def test_connection_transmission(test_case):
+def test_connections_pub_sub_pull_push(test_case):
     # Parallel Task
-
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_bind = executor.submit(thread_connection_bind, test_case)
-        usleep(100)
         future_connect = executor.submit(thread_connection_connect, test_case)
         res_bind = future_bind.result()
         res_connect = future_connect.result()
 
-    assert res_bind
-    assert isinstance(res_connect, list)
-    assert res_connect == test_case.data
+        assert res_bind
+        assert bytes(res_connect).decode("utf-8") == test_case.data
 
-# ___________________________________________
+
+# Test Requester/Replier
+
+# Actions for connection bind
+# publisher, pusher
+def thread_connection_replier(test_case: ConnectionTestCase):
+    c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
+    c.open()
+    req = c.recv()
+    usleep(200)
+    rep = c.send(str(test_case.data).encode("utf-8"))
+    c.close()
+    return {
+        'req': req,
+        'rep_result': rep
+    }
+
+
+#
+# # Actions for connection connect
+# # subscriber, puller
+def thread_connection_requester(test_case: ConnectionTestCase):
+    c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
+    c.open()
+    usleep(200)
+    req_res = c.send(str(test_case.data).encode("utf-8"))
+    rep = c.recv()
+    c.close()
+    return {
+        'req_result': req_res,
+        'rep': rep
+    }
+
+
+# Test Publisher/Subscriber
+# Test Pusher/Puller
+@pytest.mark.parametrize('test_case',
+                         [
+                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.replier,
+                                                 c2_name='TestSubscriber', c2_type=CoreType.requester,
+                                                 channel=Channel.Remote(),
+                                                 data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.replier,
+                                                 c2_name='TestSubscriber', c2_type=CoreType.requester,
+                                                 channel=Channel.Local(),
+                                                 data=DATA, )),
+                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.replier,
+                                                 c2_name='TestSubscriber', c2_type=CoreType.requester,
+                                                 channel=Channel.Local(local_type=Channel.LocalType().inproc),
+                                                 data=DATA, )),
+                         ])
+def test_connections_req_rep(test_case):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_rep = executor.submit(thread_connection_replier, test_case)
+        future_req = executor.submit(thread_connection_requester, test_case)
+        res_rep = future_rep.result()
+        res_req = future_req.result()
+
+        assert res_rep
+        assert res_req
+        assert bytes(res_rep['req']).decode("utf-8") == test_case.data
+        assert res_rep['rep_result']
+        assert res_req['req_result']
+        assert bytes(res_req['rep']).decode("utf-8") == test_case.data
+
