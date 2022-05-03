@@ -21,14 +21,6 @@ import sys
 
 
 class Node(Logger):
-    _context: Context
-    name: str
-    start_time: int = time.time_ns()
-    close_time: int = -1
-    # Class encapsulation for easier usage
-    _Publisher: Type[Publisher] = Publisher
-    _Subscriber: Type[Subscriber] = Subscriber
-
     def _sigint_(self, sig: int, frame: object) -> None:
         self.log.info("CTRL-C Pressed. Cleaning resources.")
         self.log.info(f'{type(sig)}, {type(frame)}')
@@ -40,6 +32,8 @@ class Node(Logger):
         Logger.__init__(self)
         self.name = name
         self._context = context or Context.instance()
+        self.start_time: int = time.time_ns()
+        self.close_time: int = -1
         signal.signal(signal.SIGINT, self._sigint_)
 
     def publisher(self, channel: BaseChannel) -> Publisher:

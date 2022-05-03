@@ -1,0 +1,41 @@
+from pynet.model.network.core import Core, CoreType
+from pynet.model.network.channel import Channel
+import pytest
+
+
+# _______ Core Section _______
+
+@pytest.mark.parametrize(
+    'core_type',
+    [CoreType.publisher,
+     CoreType.subscriber,
+     CoreType.pusher,
+     CoreType.puller,
+     CoreType.replier,
+     CoreType.requester,
+     ])
+def test_core_local(core_type):
+    core = Core('TestCore', core_type, Channel.Local())
+    assert not core.is_open()
+    core.open()
+    assert core.is_open()
+    core.close()
+    assert not core.is_open()
+
+
+@pytest.mark.parametrize(
+    'core_type',
+    [CoreType.publisher,
+     CoreType.subscriber,
+     CoreType.pusher,
+     CoreType.puller,
+     CoreType.replier,
+     CoreType.requester,
+     ])
+def test_core_remote(core_type):
+    core = Core('TestCore', core_type, Channel.Remote())
+    assert not core.is_open()
+    core.open()
+    assert core.is_open()
+    core.close()
+    assert not core.is_open()

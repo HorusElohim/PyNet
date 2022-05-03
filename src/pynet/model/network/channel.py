@@ -94,3 +94,13 @@ class RemoteChannel(BaseChannel):
         self.ip = ip
         self.port = port
         super(RemoteChannel, self).__init__(target=f'tcp://{str(self.ip)}:{self.port}')
+
+
+class Channel:
+    @staticmethod
+    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalChannelType = LocalChannelType.inproc):
+        return LocalChannel(path, local_type)
+
+    @staticmethod
+    def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT):
+        return RemoteChannel(ip, port)

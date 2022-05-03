@@ -15,14 +15,14 @@ from typing import Union
 from zmq import ZMQError
 
 from .. import Packet
-from . import ConnectionData
+from . import ConnectionBase
 
 
 class TryToUseConnectionTransmissionOnClosedConnection(Exception):
     pass
 
 
-class ConnectionTransmission(ConnectionData):
+class ConnectionTransmission(ConnectionBase):
 
     def safe_check(self) -> ConnectionTransmission:
         """

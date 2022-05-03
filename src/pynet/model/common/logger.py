@@ -75,12 +75,15 @@ class Logger:
         >>> t = Test()
         >>> t.log.debug('message')
     """
-    __logger: Union[logging.Logger, None] = None
-    __logger_console_active: bool = DEFAULT_CONSOLE_ACTIVE
-    __logger_console_level: LoggerLevel = DEFAULT_CONSOLE_LEVEL
-    __logger_file_active: bool = DEFAULT_FILE_ACTIVE
-    __logger_file_level: LoggerLevel = DEFAULT_FILE_LEVEL
-    __logger_file_name: str = DEFAULT_FILE_NAME
+
+    def __init__(self, name=''):
+        self.__logger_name = name
+        self.__logger: Union[logging.Logger, None] = None
+        self.__logger_console_active: bool = DEFAULT_CONSOLE_ACTIVE
+        self.__logger_console_level: LoggerLevel = DEFAULT_CONSOLE_LEVEL
+        self.__logger_file_active: bool = DEFAULT_FILE_ACTIVE
+        self.__logger_file_level: LoggerLevel = DEFAULT_FILE_LEVEL
+        self.__logger_file_name: str = DEFAULT_FILE_NAME
 
     def __clean_logger(self) -> None:
         """
@@ -97,7 +100,9 @@ class Logger:
         """
         if self.__logger_console_active or self.__logger_file_active:
             # Get dedicated Class logger
-            self.__logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+            if not self.__logger_name:
+                self.__logger_name = self.__class__.__name__
+            self.__logger: logging.Logger = logging.getLogger(self.__logger_name)
             self.__logger.propagate = False
             # Check already created
             if self.__logger.hasHandlers():

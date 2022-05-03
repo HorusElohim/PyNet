@@ -46,15 +46,6 @@ class ConnectionBase(Logger):
         requester = REQ
         pusher = PUSH
         puller = PULL
-        helper = -100
-
-    name: str
-    type: Type
-    socket: Socket
-    channel: BaseChannel
-    open: bool
-    __bind_types: List[Type]
-    __connect_types: List[Type]
 
     def __init__(self, name: str, connection_type: Type, channel: BaseChannel, context: Context = Context.instance()):
         """
@@ -81,8 +72,6 @@ class ConnectionBase(Logger):
                 self.__bind()
             elif self.type in self.__connect_types:
                 self.__connect()
-            elif self.type == self.Type.helper:
-                pass
             else:
                 self.__unrecognized_connection_type()
 

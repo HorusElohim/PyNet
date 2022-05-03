@@ -16,10 +16,10 @@ import blosc2
 import pickle
 
 from .. import Packet
-from . import ConnectionBase
+from ...common import Singleton, Logger
 
 
-class ConnectionData(ConnectionBase):
+class Serializer(metaclass=Singleton, Logger):
 
     def decode(self, serialized_data: Union[bytes, ByteString]) -> Union[Any, Packet]:
         """
@@ -43,9 +43,9 @@ class ConnectionData(ConnectionBase):
                 print(f'Error Pickle -> {ex}')
         finally:
             if res:
-                self.log.debug(f'{self.name}::success')
+                self.log.debug(f'success')
             else:
-                self.log.error(f'{self.name}::failed')
+                self.log.error(f'failed')
             return res
 
     def encode(self, obj: object, compression: bool = False) -> bytes:
@@ -59,18 +59,19 @@ class ConnectionData(ConnectionBase):
         """
         res = None
         try:
+            self.log.debug(f'input: {obj}')
             res = pickle.dumps(obj)
+            self.log.debug(f'res: {res}')
             if compression:
                 res = self.compress(res)
+            if res:
+                self.log.debug(f'success')
+            else:
+                self.log.error(f'failed {res}')
+                return res
         except pickle.UnpicklingError as ex:
             self.log.error(f'Error -> {ex}')
-        finally:
-            if res:
-                self.log.debug(f'{self.name}::success')
-            else:
-                self.log.error(f'{self.name}::failed')
-            assert isinstance(res, bytes)
-            return res
+            return bytes()
 
     def decompress(self, compress_byte: Any) -> Union[bytes, Any]:
         """
@@ -83,14 +84,14 @@ class ConnectionData(ConnectionBase):
         res = None
         try:
             res = blosc2.decompress(compress_byte)
+            if res:
+                self.log.debug(f'success')
+            else:
+                self.log.error(f'failed')
+            return res
         except Exception as ex:
             self.log.error(f'Error -> {ex}')
-        finally:
-            if res:
-                self.log.debug(f'{self.name}::success')
-            else:
-                self.log.error(f'{self.name}::failed')
-            return res
+            return None
 
     def compress(self, byte: bytes) -> Any:
         """
@@ -102,14 +103,15 @@ class ConnectionData(ConnectionBase):
         """
         res = None
         try:
+            self.log.debug(f'input: {byte}')
             res = blosc2.compress(byte, cname='zlib')
         except Exception as ex:
             self.log.error(f'Error -> {ex}')
         finally:
             if res:
-                self.log.debug(f'{self.name}::success')
+                self.log.debug(f'success')
             else:
-                self.log.error(f'{self.name}::failed')
+                self.log.error(f'failed')
             return res
 
     def decode_packet(self, packet: Packet) -> Packet:
@@ -135,9 +137,9 @@ class ConnectionData(ConnectionBase):
             res = False
         finally:
             if res:
-                self.log.debug(f'{self.name}::success')
+                self.log.debug(f'success')
             else:
-                self.log.error(f'{self.name}::failed')
+                self.log.error(f'failed')
             return packet
 
     def encode_packet(self, packet: Packet, data_encode: bool = True, data_compress: bool = True) -> Packet:
@@ -169,9 +171,9 @@ class ConnectionData(ConnectionBase):
             res = False
         finally:
             if res:
-                self.log.debug(f'{self.name}::success')
+                self.log.debug(f'success')
             else:
-                self.log.error(f'{self.name}::failed')
+                self.log.error(f'failed')
             return packet
 
     def hashing(self, bytes_obg: bytes) -> Union[str, None]:
@@ -190,7 +192,7 @@ class ConnectionData(ConnectionBase):
             self.log.error(f'Error -> {ex}')
         finally:
             if res:
-                self.log.debug(f'{self.name}::success')
+                self.log.debug(f'success')
             else:
-                self.log.error(f'{self.name}::failed')
+                self.log.error(f'failed')
             return res  # type: ignore[return-value]

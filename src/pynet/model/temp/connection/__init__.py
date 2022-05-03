@@ -1,5 +1,5 @@
 from .base import ConnectionBase
-from .data import ConnectionData
+from .manipulators import Serializer, Deserializer, Compressor, Decompressor
 from .transmission import ConnectionTransmission
 
 
