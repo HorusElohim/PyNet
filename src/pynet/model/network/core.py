@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 from zmq import (
-    Context, Socket, ZMQError,
+    Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL,
     SUBSCRIBE
 )

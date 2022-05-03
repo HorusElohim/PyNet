@@ -1,9 +1,8 @@
-from pynet.model.network import Packet
+from pynet.model.network.packet import Packet
 
 
 def test_packet():
-    p = Packet('sender', 'channel', None)
+    p = Packet('sender', None)
     assert p.sender == 'sender'
-    assert p.channel == 'channel'
     assert p.data is None
-    assert p.size == '304 byte'
+    assert p.size == '240 byte'

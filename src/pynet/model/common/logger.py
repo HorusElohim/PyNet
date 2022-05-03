@@ -76,14 +76,14 @@ class Logger:
         >>> t.log.debug('message')
     """
 
-    def __init__(self, name=''):
+    def __init__(self, name='') -> None:
         self.__logger_name = name
-        self.__logger: Union[logging.Logger, None] = None
         self.__logger_console_active: bool = DEFAULT_CONSOLE_ACTIVE
         self.__logger_console_level: LoggerLevel = DEFAULT_CONSOLE_LEVEL
         self.__logger_file_active: bool = DEFAULT_FILE_ACTIVE
         self.__logger_file_level: LoggerLevel = DEFAULT_FILE_LEVEL
         self.__logger_file_name: str = DEFAULT_FILE_NAME
+        self.__logger: Union[logging.Logger, None] = None
 
     def __clean_logger(self) -> None:
         """

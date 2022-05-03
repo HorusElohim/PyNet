@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 
 from .. import Logger, Size
-from .core import Core, CoreType
+from .core import Core
 from zmq import ZMQError
 
 CONN_LOG = Logger('Connection')
@@ -20,9 +20,9 @@ CONN_LOG.log.debug('Module Init')
 
 class Connection(Core):
 
-    def send(self, obj: bytes):
+    def send(self, obj: bytes) -> bool:
         if not self.is_open():
-            CONN_LOG.log.warning(f'{self}')
+            CONN_LOG.log.warning(f'{self} core is not open')
             return False
         try:
             CONN_LOG.log.debug(f"{self} sending data with size {Size.pretty_obj_size(obj)}")
@@ -35,7 +35,7 @@ class Connection(Core):
 
     def recv(self) -> bytes:
         if not self.is_open():
-            CONN_LOG.log.warning(f'{self}')
+            CONN_LOG.log.warning(f'{self} core is not open')
             return bytes(str('ERROR').encode())
         try:
             # Receive from the socket

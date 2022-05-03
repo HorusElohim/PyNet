@@ -1,4 +1,5 @@
-from pynet.model.network.connection import Connection, CoreType
+from pynet.model.network.connection import Connection
+from pynet.model.network.core import CoreType
 from dataclassy import dataclass
 from pynet.model.network.channel import Channel, BaseChannel
 import concurrent.futures
@@ -188,4 +189,3 @@ def test_connections_req_rep(test_case):
         assert res_rep['rep_result']
         assert res_req['req_result']
         assert bytes(res_req['rep']).decode("utf-8") == test_case.data
-

@@ -12,7 +12,7 @@
 
 
 from pathlib import Path
-from typing import Union
+from typing import Union, Type
 from enum import Enum
 from dataclassy import dataclass
 
@@ -98,13 +98,13 @@ class RemoteChannel(BaseChannel):
 
 class Channel:
     @staticmethod
-    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalType = LocalType.inproc):
+    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalType = LocalType.inproc) -> LocalChannel:
         return LocalChannel(path, local_type)
 
     @staticmethod
-    def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT):
+    def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT) -> RemoteChannel:
         return RemoteChannel(ip, port)
 
     @staticmethod
-    def LocalType():
+    def LocalType() -> Type[LocalType]:
         return LocalType

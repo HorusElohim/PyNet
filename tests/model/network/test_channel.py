@@ -25,7 +25,7 @@ def test_channel():
 def test_custom_channels():
     lc_path = Path('/tmp/test_1')
     lc = Channel().Local(lc_path)
-    assert lc.path == Path(DEFAULT_LOCAL_SOCKET)
+    assert lc.path == Path(lc_path)
     rc = Channel().Remote('192.168.1.1', 22)
     assert rc.ip == '192.168.1.1'
     assert rc.port == 22
