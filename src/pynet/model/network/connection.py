@@ -21,20 +21,26 @@ CONN_LOG.log.debug('Module Init')
 class Connection(Core):
 
     def send(self, obj: bytes):
+        if not self.is_open():
+            CONN_LOG.log.warning(f'{self}')
+            return False
         try:
-            CONN_LOG.log.debug(f"sending data with size {Size.pretty_obj_size(obj)}")
+            CONN_LOG.log.debug(f"{self} sending data with size {Size.pretty_obj_size(obj)}")
             self.socket.send(obj)
-            CONN_LOG.log.debug("success")
+            CONN_LOG.log.debug(f"{self} success")
             return True
         except ZMQError as ex:
-            CONN_LOG.log.error(f"failed. Error -> {ex}")
+            CONN_LOG.log.error(f"{self} failed. Error -> {ex}")
             return False
 
     def recv(self) -> bytes:
+        if not self.is_open():
+            CONN_LOG.log.warning(f'{self}')
+            return bytes(str('ERROR').encode())
         try:
             # Receive from the socket
             CONN_LOG.log.debug(f"{self}: waiting...")
-            obj = self.decode(self.socket.recv())  # type: ignore[arg-type]
+            obj = self.socket.recv()  # type: ignore[arg-type]
             CONN_LOG.log.debug(f"{self}: received data {obj}, with size {Size.pretty_obj_size(obj)}")
             return obj
         except ZMQError as ex:

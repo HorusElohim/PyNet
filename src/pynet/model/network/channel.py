@@ -49,7 +49,7 @@ class BaseChannel:
         return self.target
 
 
-class LocalChannelType(Enum):
+class LocalType(Enum):
     """
         Local Channel Type
     """
@@ -62,14 +62,14 @@ class LocalChannel(BaseChannel):
         Local Channel
     """
     path: Path
-    local_type: LocalChannelType
+    local_type: LocalType
 
     def __init__(self, path: Union[str, Path] = DEFAULT_LOCAL_SOCKET,
-                 local_type: LocalChannelType = LocalChannelType.inproc):
+                 local_type: LocalType = LocalType.inproc):
         """
 
         :param path: target path to the soocket object
-        :param local_type: LocalChannelType {inproc, ipc}
+        :param local_type: LocalType {inproc, ipc}
 
         """
         self.path = Path(path)
@@ -98,9 +98,13 @@ class RemoteChannel(BaseChannel):
 
 class Channel:
     @staticmethod
-    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalChannelType = LocalChannelType.inproc):
+    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalType = LocalType.inproc):
         return LocalChannel(path, local_type)
 
     @staticmethod
     def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT):
         return RemoteChannel(ip, port)
+
+    @staticmethod
+    def LocalType():
+        return LocalType

@@ -16,6 +16,7 @@ import pytest
      ])
 def test_core_local(core_type):
     core = Core('TestCore', core_type, Channel.Local())
+    assert core.core_type == core_type
     assert not core.is_open()
     core.open()
     assert core.is_open()
@@ -34,6 +35,7 @@ def test_core_local(core_type):
      ])
 def test_core_remote(core_type):
     core = Core('TestCore', core_type, Channel.Remote())
+    assert core.core_type == core_type
     assert not core.is_open()
     core.open()
     assert core.is_open()
