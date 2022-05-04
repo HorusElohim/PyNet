@@ -74,12 +74,12 @@ class Core:
         self.core_type = core_type
         self.channel = channel
 
-        self.socket = context.socket(self.core_type.value)
+        self.socket = context.socket(self.core_type.value)  # type: ignore[no-untyped-call]
         self._open = False
 
         CORE_LOG.log.debug(f'{self}: init')
 
-    def open(self):
+    def open(self) -> bool:
         try:
             # Bind
             if self.core_type in BIND_TYPES:
@@ -95,7 +95,6 @@ class Core:
                 CORE_LOG.log.debug(f'{self}: connect')
             else:
                 CORE_LOG.log.error(f'{self}: Zmq pattern not recognized {CoreType}')
-
         except ZMQError as ex:
             self._open = False
             CORE_LOG.log.error(f"{self}: Error init socket for class {self}:\nException -> {ex}")
@@ -105,6 +104,7 @@ class Core:
                 CORE_LOG.log.debug(f'{self}: ready')
             else:
                 CORE_LOG.log.warning(f'{self}: not connected!')
+            return self._open
 
     def is_open(self) -> bool:
         """
@@ -125,7 +125,7 @@ class Core:
         self.socket.close()
         CORE_LOG.log.debug(f'{self}: closed ')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'[{self.name}/{self.core_type.name} in {self.channel}]'
 
 

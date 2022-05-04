@@ -34,7 +34,10 @@ TRANS_LOG.log.debug('Module Init')
 
 class Transmission:
     @staticmethod
-    def to_packet(con: Connection, data: Any, seq_left=0, compression=False) -> Packet:
+    def to_packet(con: Connection,  # type: ignore[misc]
+                  data: Any,
+                  seq_left: int = 0,
+                  compression: bool = False) -> Packet:
         pkt = Packet(con.name, data, seq_left)
         pkt.data = encode(pkt.data)
         TRANS_LOG.log.debug('encoded')
@@ -47,7 +50,7 @@ class Transmission:
         return pkt
 
     @staticmethod
-    def from_packet(pkt: Packet) -> Any:
+    def from_packet(pkt: Packet) -> Any:  # type: ignore[misc]
         TRANS_LOG.log.debug(
             f'from Pkt: {pkt} size {Size.pretty_obj_size(pkt)} with data: {Size.pretty_obj_size(pkt.data)}')
         if pkt.compressed:
@@ -55,12 +58,12 @@ class Transmission:
             pkt.data = decompress(pkt.data)
             TRANS_LOG.log.debug('decompressed')
         if pkt.encoded:
-            pkt.data = decode(pkt.data)
+            pkt.data = decode(pkt.data)  # type: ignore[arg-type]
             TRANS_LOG.log.debug('decoded')
         return pkt.data
 
     @staticmethod
-    def send(con: Connection, data: Any, seq_left: int = 0, compression: bool = False) -> bool:
+    def send(con: Connection, data: Any, seq_left: int = 0, compression: bool = False) -> bool:  # type: ignore[misc]
         res = con.send(encode(Transmission.to_packet(con, data, seq_left, compression)))
         if res:
             TRANS_LOG.log.debug('success')
@@ -69,7 +72,7 @@ class Transmission:
         return res
 
     @staticmethod
-    def recv(con: Connection) -> Any:
+    def recv(con: Connection) -> Any:  # type: ignore[misc]
         if con:
             pass
         return None

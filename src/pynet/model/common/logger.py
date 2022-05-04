@@ -76,7 +76,7 @@ class Logger:
         >>> t.log.debug('message')
     """
 
-    def __init__(self, name='') -> None:
+    def __init__(self, name: str = '') -> None:
         self.__logger_name = name
         self.__logger_console_active: bool = DEFAULT_CONSOLE_ACTIVE
         self.__logger_console_level: LoggerLevel = DEFAULT_CONSOLE_LEVEL
@@ -102,7 +102,7 @@ class Logger:
             # Get dedicated Class logger
             if not self.__logger_name:
                 self.__logger_name = self.__class__.__name__
-            self.__logger: logging.Logger = logging.getLogger(self.__logger_name)
+            self.__logger: logging.Logger = logging.getLogger(self.__logger_name)  # type: ignore[no-redef]
             self.__logger.propagate = False
             # Check already created
             if self.__logger.hasHandlers():
