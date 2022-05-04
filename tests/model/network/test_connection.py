@@ -47,7 +47,7 @@ def test_connection_creation(connection_type, channel_type):
     assert c is not None
     c.open()
     assert c.is_open()
-    assert c.channel == channel_type
+    assert c.url == channel_type
     assert c.core_type == connection_type
     c.close()
     assert not c.is_open()

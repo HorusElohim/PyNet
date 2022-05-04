@@ -58,21 +58,21 @@ class Core:
 
     """
 
-    def __init__(self, name: str, core_type: CoreType, channel: BaseUrl, context: Context = Context.instance()):
+    def __init__(self, name: str, core_type: CoreType, url: BaseUrl, context: Context = Context.instance()):
         """
 
         :param core_type: Connection Type
-        :param channel: Target Channel
+        :param url: Target Channel
         :param context: ZMQ Context
 
         """
         raise_input_none('name', name)
         raise_input_none('core_type', core_type)
-        raise_input_none('channel', channel)
+        raise_input_none('url', url)
 
         self.name = name
         self.core_type = core_type
-        self.channel = channel
+        self.url = url
 
         self.socket = context.socket(self.core_type.value)  # type: ignore[no-untyped-call]
         self._open = False
@@ -83,12 +83,12 @@ class Core:
         try:
             # Bind
             if self.core_type in BIND_TYPES:
-                self.socket.bind(self.channel())
+                self.socket.bind(self.url())
                 self._open = True
                 CORE_LOG.log.debug(f'{self}: bind')
             # Connect
             elif self.core_type in CONNECT_TYPES:
-                self.socket.connect(self.channel())
+                self.socket.connect(self.url())
                 if self.core_type is CoreType.subscriber:
                     self.socket.setsockopt(SUBSCRIBE, b'')
                 self._open = True
@@ -120,13 +120,13 @@ class Core:
         Close Connection
         """
         self._open = False
-        self.socket.unbind(self.channel())
+        self.socket.unbind(self.url())
         CORE_LOG.log.debug(f'{self}: unbind ')
         self.socket.close()
         CORE_LOG.log.debug(f'{self}: closed ')
 
     def __repr__(self) -> str:
-        return f'[{self.name}/{self.core_type.name} in {self.channel}]'
+        return f'[{self.name}/{self.core_type.name} in {self.url}]'
 
 
 CORE_LOG.log.debug('Module Loaded')
