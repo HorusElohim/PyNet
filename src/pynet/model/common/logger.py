@@ -15,6 +15,8 @@ import logging
 from typing import Union
 from enum import IntEnum
 from threading import Lock
+from . import today
+from ... import LOG_PATH
 
 SAFE_LOGGER_LOCK = Lock()
 
@@ -58,7 +60,8 @@ class LoggerLevel(IntEnum):
 DEFAULT_LOGGER_NAME = "PyNet"
 DEFAULT_CONSOLE_ACTIVE = True
 DEFAULT_FILE_ACTIVE = True
-DEFAULT_FILE_NAME = f"{DEFAULT_LOGGER_NAME}.log"
+DEFAULT_FILE_NAME = f"{DEFAULT_LOGGER_NAME}.{today()}.log"
+DEFAULT_FILE_PATH = LOG_PATH / DEFAULT_FILE_NAME
 DEFAULT_FILE_LEVEL = LoggerLevel.DEBUG
 DEFAULT_CONSOLE_LEVEL = LoggerLevel.DEBUG
 
@@ -82,7 +85,7 @@ class Logger:
         self.__logger_console_level: LoggerLevel = DEFAULT_CONSOLE_LEVEL
         self.__logger_file_active: bool = DEFAULT_FILE_ACTIVE
         self.__logger_file_level: LoggerLevel = DEFAULT_FILE_LEVEL
-        self.__logger_file_name: str = DEFAULT_FILE_NAME
+        self.__logger_file_name: str = DEFAULT_FILE_PATH
         self.__logger: Union[logging.Logger, None] = None
 
     def __clean_logger(self) -> None:
