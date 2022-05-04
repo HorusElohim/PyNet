@@ -19,7 +19,7 @@ from zmq import (
 from enum import Enum
 
 from .. import Logger
-from .channel import BaseChannel
+from .url import BaseUrl
 
 CORE_LOG = Logger('Core')
 CORE_LOG.log.debug('Module Init')
@@ -58,7 +58,7 @@ class Core:
 
     """
 
-    def __init__(self, name: str, core_type: CoreType, channel: BaseChannel, context: Context = Context.instance()):
+    def __init__(self, name: str, core_type: CoreType, channel: BaseUrl, context: Context = Context.instance()):
         """
 
         :param core_type: Connection Type

@@ -1,6 +1,6 @@
 from pynet.model.network.transmission import Packet, Transmission, Connection
 from pynet.model.network.core import CoreType
-from pynet.model.network.channel import Channel, BaseChannel
+from pynet.model.network.url import Url, BaseUrl
 from dataclassy import dataclass
 import concurrent.futures
 import pytest
@@ -15,7 +15,7 @@ DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 def test_transmission_packets():
-    c = Connection('Transmission', CoreType.publisher, Channel.Local())
+    c = Connection('Transmission', CoreType.publisher, Url.Local())
     pkt = Transmission.to_packet(c, DATA)
     data = Transmission.from_packet(pkt)
     assert pkt.encoded
@@ -23,7 +23,7 @@ def test_transmission_packets():
 
 
 def test_transmission_compressed_packets():
-    c = Connection('Transmission', CoreType.publisher, Channel.Local())
+    c = Connection('Transmission', CoreType.publisher, Url.Local())
     pkt = Transmission.to_packet(c, DATA, compression=True)
     data = Transmission.from_packet(pkt)
     assert pkt.encoded
@@ -36,7 +36,7 @@ class TransmissionTestCase:
     c2_name: str
     c1_type: CoreType
     c2_type: CoreType
-    channel: BaseChannel
+    channel: BaseUrl
     compression: bool
     data: object
 
@@ -69,43 +69,43 @@ def thread_connection_connect(test_case: TransmissionTestCase):
                          [
                              (TransmissionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                                    c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                   channel=Channel.Remote(), compression=False, data=DATA, )),
+                                                   channel=Url.Remote(), compression=False, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                                    c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                   channel=Channel.Local(), compression=False, data=DATA, )),
+                                                   channel=Url.Local(), compression=False, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                                    c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                   channel=Channel.Local(local_type=Channel.LocalType().ipc),
+                                                   channel=Url.Local(local_type=Url.LocalType().ipc),
                                                    compression=False, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
                                                    c2_name='TestPuller', c2_type=CoreType.puller,
-                                                   channel=Channel.Remote(), compression=False, data=DATA, )),
+                                                   channel=Url.Remote(), compression=False, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
                                                    c2_name='TestPuller', c2_type=CoreType.puller,
-                                                   channel=Channel.Local(), compression=False, data=DATA, )),
+                                                   channel=Url.Local(), compression=False, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
                                                    c2_name='TestPuller', c2_type=CoreType.puller,
-                                                   channel=Channel.Local(local_type=Channel.LocalType().ipc),
+                                                   channel=Url.Local(local_type=Url.LocalType().ipc),
                                                    compression=False, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                                    c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                   channel=Channel.Remote(), compression=True, data=DATA, )),
+                                                   channel=Url.Remote(), compression=True, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                                    c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                   channel=Channel.Local(), compression=True, data=DATA, )),
+                                                   channel=Url.Local(), compression=True, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                                    c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                   channel=Channel.Local(local_type=Channel.LocalType().ipc),
+                                                   channel=Url.Local(local_type=Url.LocalType().ipc),
                                                    compression=True, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
                                                    c2_name='TestPuller', c2_type=CoreType.puller,
-                                                   channel=Channel.Remote(), compression=True, data=DATA, )),
+                                                   channel=Url.Remote(), compression=True, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
                                                    c2_name='TestPuller', c2_type=CoreType.puller,
-                                                   channel=Channel.Local(), compression=True, data=DATA, )),
+                                                   channel=Url.Local(), compression=True, data=DATA, )),
                              (TransmissionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
                                                    c2_name='TestPuller', c2_type=CoreType.puller,
-                                                   channel=Channel.Local(local_type=Channel.LocalType().ipc),
+                                                   channel=Url.Local(local_type=Url.LocalType().ipc),
                                                    compression=True, data=DATA, )),
                          ])
 def test_transmission_pub_sub_pull_push(test_case):

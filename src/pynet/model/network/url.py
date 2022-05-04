@@ -22,7 +22,7 @@ DEFAULT_LOCAL_SOCKET = '/tmp/pynet_0'
 
 
 @dataclass(unsafe_hash=True, slots=True)
-class BaseChannel:
+class BaseUrl:
     """
         BaseChannel class is the Ancestor for the Local and Remote Channel
     """
@@ -57,7 +57,7 @@ class LocalType(Enum):
     inproc = 1
 
 
-class LocalChannel(BaseChannel):
+class LocalUrl(BaseUrl):
     """
         Local Channel
     """
@@ -74,10 +74,10 @@ class LocalChannel(BaseChannel):
         """
         self.path = Path(path)
         self.local_type = local_type
-        super(LocalChannel, self).__init__(target=f'{self.local_type.name}://{self.path}')
+        super(LocalUrl, self).__init__(target=f'{self.local_type.name}://{self.path}')
 
 
-class RemoteChannel(BaseChannel):
+class RemoteUrl(BaseUrl):
     """
         Remote Channel
     """
@@ -93,17 +93,17 @@ class RemoteChannel(BaseChannel):
         """
         self.ip = ip
         self.port = port
-        super(RemoteChannel, self).__init__(target=f'tcp://{str(self.ip)}:{self.port}')
+        super(RemoteUrl, self).__init__(target=f'tcp://{str(self.ip)}:{self.port}')
 
 
-class Channel:
+class Url:
     @staticmethod
-    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalType = LocalType.inproc) -> LocalChannel:
-        return LocalChannel(path, local_type)
+    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalType = LocalType.inproc) -> LocalUrl:
+        return LocalUrl(path, local_type)
 
     @staticmethod
-    def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT) -> RemoteChannel:
-        return RemoteChannel(ip, port)
+    def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT) -> RemoteUrl:
+        return RemoteUrl(ip, port)
 
     @staticmethod
     def LocalType() -> Type[LocalType]:
