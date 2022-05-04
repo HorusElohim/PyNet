@@ -41,7 +41,7 @@ class Connection(Core):
             # Receive from the socket
             CONN_LOG.log.debug(f"{self}: waiting...")
             obj = self.socket.recv()
-            CONN_LOG.log.debug(f"{self}: received data {obj}, with size {Size.pretty_obj_size(obj)}")
+            CONN_LOG.log.debug(f"{self}: received data bytes, with size {Size.pretty_obj_size(obj)}")
             return bytes(obj)
         except ZMQError as ex:
             CONN_LOG.log.error(f"{self}: Error -> {ex}")

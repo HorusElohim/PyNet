@@ -1,6 +1,5 @@
 from pynet.model.common import Logger
-from pynet.model.common.logger import DEFAULT_FILE_NAME
-from pathlib import Path
+from pynet.model.common.logger import DEFAULT_FILE_PATH
 
 
 def test_logger_creation():
@@ -13,4 +12,4 @@ def test_logger_file():
     logger = Logger()
     assert logger is not None
     logger.log.debug('debug')
-    assert Path(Path().cwd() / DEFAULT_FILE_NAME).exists()
+    assert DEFAULT_FILE_PATH.exists()

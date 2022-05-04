@@ -46,7 +46,7 @@ class Transmission:
             pkt.data = compress(pkt.data)
             TRANS_LOG.log.debug('compressed')
             pkt.compressed = True
-        TRANS_LOG.log.debug(f'Pkt: {pkt} size {Size.pretty_obj_size(pkt)} with data data: {Size.pretty_obj_size(data)}')
+        TRANS_LOG.log.debug(f'Pkt: {pkt} size {Size.pretty_obj_size(pkt)} with data data: {Size.pretty_obj_size(pkt.data)}')
         return pkt
 
     @staticmethod
@@ -73,9 +73,13 @@ class Transmission:
 
     @staticmethod
     def recv(con: Connection) -> Any:  # type: ignore[misc]
-        if con:
-            pass
-        return None
+        pkt: Packet = decode(con.recv())  # type: ignore[arg-type]
+        data = Transmission.from_packet(pkt)
+        if data:
+            TRANS_LOG.log.debug('success')
+        else:
+            TRANS_LOG.log.error('failed')
+        return data
 
 
 TRANS_LOG.log.debug('Module Loader')
