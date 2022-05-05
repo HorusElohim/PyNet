@@ -30,8 +30,8 @@ class ChannelTestCase:
 def thread_connection_bind(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c1_name, test_case.c1_type)
     c.add(f'Test-{test_case.c1_type}', test_case.url)
-    usleep(500)
-    res = c.send(test_case.data, compression=test_case.compression)
+    usleep(750)
+    res = c._send(test_case.data, compression=test_case.compression)
     c.close()
     return res[0]
 
@@ -42,7 +42,7 @@ def thread_connection_bind(test_case: ChannelTestCase):
 def thread_connection_connect(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c2_name, test_case.c2_type)
     c.add(f'Test-{test_case.c2_type}', test_case.url)
-    data = c.recv()
+    data = c._recv()
     c.close()
     return data[0]
 
@@ -111,9 +111,9 @@ def test_channel_pub_sub_push_pull(test_case):
 def thread_connection_replier(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c1_name, test_case.c1_type)
     c.add(f'Test-{test_case.c1_name}', test_case.url)
-    req = c.recv()
-    usleep(500)
-    rep = c.send(test_case.data, test_case.compression)
+    req = c._recv()
+    usleep(750)
+    rep = c._send(test_case.data, test_case.compression)
     c.close()
     return {
         'req': req[0],
@@ -127,9 +127,9 @@ def thread_connection_replier(test_case: ChannelTestCase):
 def thread_connection_requester(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c2_name, test_case.c2_type)
     c.add(f'Test-{test_case.c2_name}', test_case.url)
-    usleep(500)
-    req_res = c.send(test_case.data, test_case.compression)
-    rep = c.recv()
+    usleep(750)
+    req_res = c._send(test_case.data, test_case.compression)
+    rep = c._recv()
     c.close()
     return {
         'req_result': req_res,

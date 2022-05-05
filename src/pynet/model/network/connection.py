@@ -25,9 +25,8 @@ class Connection(Core):
             CONN_LOG.log.warning(f'{self} core is not open')
             return False
         try:
-            CONN_LOG.log.debug(f"{self} sending data with size {Size.pretty_obj_size(obj)}")
             self.socket.send(obj)
-            CONN_LOG.log.debug(f"{self} success")
+            CONN_LOG.log.debug(f"{self} sent data with size {Size.pretty_obj_size(obj)}")
             return True
         except ZMQError as ex:
             CONN_LOG.log.error(f"{self} failed. Error -> {ex}")

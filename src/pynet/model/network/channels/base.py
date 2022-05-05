@@ -28,27 +28,30 @@ class BaseChannel:
     def open(self):
         for name, con in self.connections.items():
             con.open()
-            CHA_LOG.log.debug(f'{name} open completed')
+            CHA_LOG.log.debug(f'{self} done')
         CHA_LOG.log.debug('done')
 
-    def send(self, data: Any, compression=False) -> List[bool]:
+    def _send(self, data: Any, compression=False) -> List[bool]:
         res = []
         for name, con in self.connections.items():
             res.append(Transmission.send(con, data, compression=compression))
-            CHA_LOG.log.debug(f'{name} recv completed')
+            CHA_LOG.log.debug(f'{self} done')
         CHA_LOG.log.debug('done')
         return res
 
-    def recv(self) -> List[Any]:
+    def _recv(self) -> List[Any]:
         res = []
         for name, con in self.connections.items():
             res.append(Transmission.recv(con))
-            CHA_LOG.log.debug(f'{name} send completed')
+            CHA_LOG.log.debug(f'{self} done')
         CHA_LOG.log.debug('done')
         return res
 
     def close(self):
         for name, con in self.connections.items():
             con.close()
-            CHA_LOG.log.debug(f'{name} close completed')
+            CHA_LOG.log.debug(f'{self}  done')
         CHA_LOG.log.debug('done')
+
+    def __repr__(self) -> str:
+        return f'{self.name}: {[str(c) for c in self.connections]}'
