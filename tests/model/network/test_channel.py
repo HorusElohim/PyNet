@@ -30,7 +30,7 @@ class ChannelTestCase:
 def thread_connection_bind(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c1_name, test_case.c1_type)
     c.add(f'Test-{test_case.c1_type}', test_case.url)
-    usleep(200)
+    usleep(500)
     res = c.send(test_case.data, compression=test_case.compression)
     c.close()
     return res[0]
@@ -51,6 +51,7 @@ def thread_connection_connect(test_case: ChannelTestCase):
 # Test Pusher/Puller
 @pytest.mark.parametrize('test_case',
                          [
+                             # Without Compression
                              (ChannelTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                               c2_name='TestSubscriber', c2_type=CoreType.subscriber,
                                               url=Url.Remote(), compression=False, data=DATA, )),
@@ -71,6 +72,7 @@ def thread_connection_connect(test_case: ChannelTestCase):
                                               c2_name='TestPuller', c2_type=CoreType.puller,
                                               url=Url.Local(local_type=Url.LocalType().ipc),
                                               compression=False, data=DATA, )),
+                             # With Compression
                              (ChannelTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
                                               c2_name='TestSubscriber', c2_type=CoreType.subscriber,
                                               url=Url.Remote(), compression=True, data=DATA, )),
@@ -102,3 +104,78 @@ def test_channel_pub_sub_push_pull(test_case):
 
         assert res_bind
         assert res_connect == test_case.data
+
+
+# Actions for connection bind
+# replier
+def thread_connection_replier(test_case: ChannelTestCase):
+    c = BaseChannel(test_case.c1_name, test_case.c1_type)
+    c.add(f'Test-{test_case.c1_name}', test_case.url)
+    req = c.recv()
+    usleep(500)
+    rep = c.send(test_case.data, test_case.compression)
+    c.close()
+    return {
+        'req': req[0],
+        'rep_result': rep
+    }
+
+
+#
+# Actions for connection connect
+# requester
+def thread_connection_requester(test_case: ChannelTestCase):
+    c = BaseChannel(test_case.c2_name, test_case.c2_type)
+    c.add(f'Test-{test_case.c2_name}', test_case.url)
+    usleep(500)
+    req_res = c.send(test_case.data, test_case.compression)
+    rep = c.recv()
+    c.close()
+    return {
+        'req_result': req_res,
+        'rep': rep[0]
+    }
+
+
+# Test Publisher/Subscriber
+# Test Pusher/Puller
+@pytest.mark.parametrize('test_case',
+                         [
+                             (ChannelTestCase(c1_name='TestReplier', c1_type=CoreType.replier,
+                                              c2_name='TestRequester', c2_type=CoreType.requester,
+                                              url=Url.Remote(),
+                                              data=DATA, compression=False)),
+                             (ChannelTestCase(c1_name='TestReplier', c1_type=CoreType.replier,
+                                              c2_name='TestRequester', c2_type=CoreType.requester,
+                                              url=Url.Local(),
+                                              data=DATA, compression=False)),
+                             (ChannelTestCase(c1_name='TestReplier', c1_type=CoreType.replier,
+                                              c2_name='TestRequester', c2_type=CoreType.requester,
+                                              url=Url.Local(local_type=Url.LocalType().inproc),
+                                              data=DATA, compression=False)),
+                             (ChannelTestCase(c1_name='TestReplier', c1_type=CoreType.replier,
+                                              c2_name='TestRequester', c2_type=CoreType.requester,
+                                              url=Url.Remote(),
+                                              data=DATA, compression=True)),
+                             (ChannelTestCase(c1_name='TestReplier', c1_type=CoreType.replier,
+                                              c2_name='TestRequester', c2_type=CoreType.requester,
+                                              url=Url.Local(),
+                                              data=DATA, compression=True)),
+                             (ChannelTestCase(c1_name='TestReplier', c1_type=CoreType.replier,
+                                              c2_name='TestRequester', c2_type=CoreType.requester,
+                                              url=Url.Local(local_type=Url.LocalType().inproc),
+                                              data=DATA, compression=True)),
+                         ])
+def test_connections_req_rep(test_case):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_rep = executor.submit(thread_connection_replier, test_case)
+        future_req = executor.submit(thread_connection_requester, test_case)
+        res_rep = future_rep.result()
+        res_req = future_req.result()
+
+        assert res_rep
+        assert res_req
+        assert res_rep['req'] == test_case.data
+        assert res_rep['rep_result']
+        assert res_req['req_result']
+        assert res_req['rep'] == test_case.data

@@ -80,6 +80,8 @@ class Core:
         CORE_LOG.log.debug(f'{self}: init')
 
     def open(self) -> bool:
+        if self.is_open():
+            return True
         try:
             # Bind
             if self.core_type in BIND_TYPES:

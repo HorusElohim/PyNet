@@ -17,11 +17,18 @@ class BaseChannel:
         self.context = context
         CHA_LOG.log.debug('done')
 
-    def add(self, name: str, url: BaseUrl):
+    def add(self, name: str, url: BaseUrl, auto_open=True):
         self.connections.update({
             name: Connection(name=f'{self.name}.{name}', url=url, core_type=self.core_type, context=self.context)
         })
-        self.connections[name].open()
+        if auto_open:
+            self.connections[name].open()
+        CHA_LOG.log.debug('done')
+
+    def open(self):
+        for name, con in self.connections.items():
+            con.open()
+            CHA_LOG.log.debug(f'{name} open completed')
         CHA_LOG.log.debug('done')
 
     def send(self, data: Any, compression=False) -> List[bool]:

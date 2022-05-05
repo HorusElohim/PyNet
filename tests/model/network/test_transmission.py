@@ -123,7 +123,7 @@ def test_transmission_pub_sub_pull_push(test_case):
 
 
 # Actions for connection bind
-# publisher, pusher
+# replier
 def thread_connection_replier(test_case: TransmissionTestCase):
     c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
     c.open()
@@ -138,8 +138,8 @@ def thread_connection_replier(test_case: TransmissionTestCase):
 
 
 #
-# # Actions for connection connect
-# # subscriber, puller
+# Actions for connection connect
+# requester
 def thread_connection_requester(test_case: TransmissionTestCase):
     c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
     c.open()
