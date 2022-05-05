@@ -46,7 +46,8 @@ class Transmission:
             pkt.data = compress(pkt.data)
             TRANS_LOG.log.debug('compressed')
             pkt.compressed = True
-        TRANS_LOG.log.debug(f'Pkt: {pkt} size {Size.pretty_obj_size(pkt)} with data data: {Size.pretty_obj_size(pkt.data)}')
+        TRANS_LOG.log.debug(
+            f'Pkt: {pkt} size {Size.pretty_obj_size(pkt)} with data data: {Size.pretty_obj_size(pkt.data)}')
         return pkt
 
     @staticmethod
@@ -55,9 +56,11 @@ class Transmission:
             f'from Pkt: {pkt} size {Size.pretty_obj_size(pkt)} with data: {Size.pretty_obj_size(pkt.data)}')
         if pkt.compressed:
             assert isinstance(pkt.data, bytes)
+            pkt.compressed = False
             pkt.data = decompress(pkt.data)
             TRANS_LOG.log.debug('decompressed')
         if pkt.encoded:
+            pkt.encoded = False
             pkt.data = decode(pkt.data)  # type: ignore[arg-type]
             TRANS_LOG.log.debug('decoded')
         return pkt.data

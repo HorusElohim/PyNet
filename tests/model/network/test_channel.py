@@ -1,4 +1,3 @@
-from pynet.model.network.transmission import Packet, Transmission, Connection
 from pynet.model.network.channels.base import BaseChannel
 from pynet.model.network.core import CoreType
 from pynet.model.network.url import Url, BaseUrl
