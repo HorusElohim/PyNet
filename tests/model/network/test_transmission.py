@@ -48,7 +48,7 @@ class TransmissionTestCase:
 def thread_connection_bind(test_case: TransmissionTestCase):
     c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
     c.open()
-    usleep(750)
+    usleep(5000)
     res = Transmission.send(c, test_case.data, compression=test_case.compression)
     c.close()
     return res
@@ -128,7 +128,7 @@ def thread_connection_replier(test_case: TransmissionTestCase):
     c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
     c.open()
     req = Transmission.recv(c)
-    usleep(750)
+    usleep(5000)
     rep = Transmission.send(c, test_case.data, compression=test_case.compression)
     c.close()
     return {
@@ -143,7 +143,7 @@ def thread_connection_replier(test_case: TransmissionTestCase):
 def thread_connection_requester(test_case: TransmissionTestCase):
     c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
     c.open()
-    usleep(750)
+    usleep(5000)
     req_res = Transmission.send(c, test_case.data, compression=test_case.compression)
     rep = Transmission.recv(c)
     c.close()

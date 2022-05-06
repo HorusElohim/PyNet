@@ -30,8 +30,9 @@ class ChannelTestCase:
 def thread_connection_bind(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c1_name, test_case.c1_type)
     c.add(f'Test-{test_case.c1_type}', test_case.url)
-    usleep(750)
+    usleep(8000)
     res = c._send(test_case.data, compression=test_case.compression)
+    usleep(8000)
     c.close()
     return res[0]
 
@@ -112,7 +113,7 @@ def thread_connection_replier(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c1_name, test_case.c1_type)
     c.add(f'Test-{test_case.c1_name}', test_case.url)
     req = c._recv()
-    usleep(750)
+    usleep(5000)
     rep = c._send(test_case.data, test_case.compression)
     c.close()
     return {
@@ -127,8 +128,9 @@ def thread_connection_replier(test_case: ChannelTestCase):
 def thread_connection_requester(test_case: ChannelTestCase):
     c = BaseChannel(test_case.c2_name, test_case.c2_type)
     c.add(f'Test-{test_case.c2_name}', test_case.url)
-    usleep(750)
+    usleep(8000)
     req_res = c._send(test_case.data, test_case.compression)
+    usleep(8000)
     rep = c._recv()
     c.close()
     return {

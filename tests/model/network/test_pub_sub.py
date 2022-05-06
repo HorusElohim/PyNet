@@ -25,8 +25,9 @@ class PubSubTestCase:
 def thread_publisher(test_case: PubSubTestCase):
     p = Publishers('Test')
     p.add(f'Test-{type(test_case.url).__name__}', test_case.url)
-    usleep(750)
+    usleep(8000)
     res = p.publish(test_case.data, compression=test_case.compression)
+    usleep(8000)
     p.close()
     return res[0]
 
