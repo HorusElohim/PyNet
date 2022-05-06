@@ -208,8 +208,8 @@ class ConnectionRequesterWorker(Worker):
 def test_connections_req_rep(test_case):
     workers = [ConnectionReplierWorker(test_case), ConnectionRequesterWorker(test_case)]
     WorkerRunner.run(workers)
-    assert workers[0]
-    assert workers[1]
+    assert workers[0].result
+    assert workers[1].result
 
     assert workers[0].result['rep_result']
     assert bytes(workers[0].result['req']).decode("utf-8") == test_case.data

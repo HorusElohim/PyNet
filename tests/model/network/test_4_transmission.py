@@ -2,7 +2,7 @@ from pynet.model.network.transmission import Packet, Transmission, Connection
 from pynet.model.network.core import CoreType
 from pynet.model.network.url import Url, BaseUrl
 from dataclassy import dataclass
-import concurrent.futures
+from .thread_runner import WorkerRunner, Worker
 import pytest
 import time
 
@@ -45,24 +45,33 @@ class TransmissionTestCase:
 
 # Actions for connection bind
 # publisher, pusher
-def thread_connection_bind(test_case: TransmissionTestCase):
-    c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
-    c.open()
-    usleep(5000)
-    res = Transmission.send(c, test_case.data, compression=test_case.compression)
-    c.close()
-    return res
+class TransmissionBindWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: TransmissionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c1_name, self.test_case.c1_type, self.test_case.channel)
+        c.open()
+        usleep(5000)
+        self.result = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
+        c.close()
 
 
-#
 # # Actions for connection connect
 # # subscriber, puller
-def thread_connection_connect(test_case: TransmissionTestCase):
-    c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
-    c.open()
-    data = Transmission.recv(c)
-    c.close()
-    return data
+class TransmissionConnectWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: TransmissionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c2_name, self.test_case.c2_type, self.test_case.channel)
+        c.open()
+        self.result = Transmission.recv(c)
+        c.close()
 
 
 # Test Publisher/Subscriber
@@ -111,15 +120,52 @@ def thread_connection_connect(test_case: TransmissionTestCase):
                                                    compression=True, data=DATA, )),
                          ])
 def test_transmission_pub_sub_pull_push(test_case):
-    # Parallel Task
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_bind = executor.submit(thread_connection_bind, test_case)
-        future_connect = executor.submit(thread_connection_connect, test_case)
-        res_bind = future_bind.result()
-        res_connect = future_connect.result()
+    worker = [TransmissionBindWorker(test_case), TransmissionConnectWorker(test_case)]
+    WorkerRunner.run(worker)
+    assert worker[0].result
+    assert worker[1].result == test_case.data
 
-        assert res_bind
-        assert res_connect == test_case.data
+
+# Actions for connection bind
+# replier
+class TransmissionReplierWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: TransmissionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c1_name, self.test_case.c1_type, self.test_case.channel)
+        c.open()
+        req = Transmission.recv(c)
+        usleep(5000)
+        rep = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
+        c.close()
+        self.result = {
+            'req': req,
+            'rep_result': rep
+        }
+
+
+# # Actions for connection connect
+# requester
+class TransmissionRequesterWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: TransmissionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c2_name, self.test_case.c2_type, self.test_case.channel)
+        c.open()
+        usleep(5000)
+        req_res = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
+        rep = Transmission.recv(c)
+        c.close()
+        self.result = {
+            'req_result': req_res,
+            'rep': rep
+        }
 
 
 # Actions for connection bind
@@ -183,15 +229,13 @@ def thread_connection_requester(test_case: TransmissionTestCase):
                                                    data=DATA, compression=True)),
                          ])
 def test_connections_req_rep(test_case):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_rep = executor.submit(thread_connection_replier, test_case)
-        future_req = executor.submit(thread_connection_requester, test_case)
-        res_rep = future_rep.result()
-        res_req = future_req.result()
+    workers = [TransmissionReplierWorker(test_case), TransmissionRequesterWorker(test_case)]
+    WorkerRunner.run(workers)
+    assert workers[0].result
+    assert workers[1].result
 
-        assert res_rep
-        assert res_req
-        assert res_rep['req'] == test_case.data
-        assert res_rep['rep_result']
-        assert res_req['req_result']
-        assert res_req['rep'] == test_case.data
+    assert workers[0].result['req'] == test_case.data
+    assert workers[0].result['rep_result']
+
+    assert workers[1].result['rep'] == test_case.data
+    assert workers[1].result['req_result']
