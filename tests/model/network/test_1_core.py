@@ -1,6 +1,9 @@
 from pynet.model.network.core import Core, CoreType
 from pynet.model.network.url import Url
 import pytest
+from zmq import Context
+
+CTX = Context.instance()
 
 
 # _______ Core Section _______
@@ -15,7 +18,7 @@ import pytest
      CoreType.requester,
      ])
 def test_core_local(core_type):
-    core = Core('TestCore', core_type, Url.Local())
+    core = Core('TestCore', core_type, Url.Local(), context=CTX)
     assert core.core_type == core_type
     assert not core.is_open()
     core.open()
@@ -34,10 +37,12 @@ def test_core_local(core_type):
      CoreType.requester,
      ])
 def test_core_remote(core_type):
-    core = Core('TestCore', core_type, Url.Remote())
+    core = Core('TestCore', core_type, Url.Remote(), context=CTX)
     assert core.core_type == core_type
     assert not core.is_open()
     core.open()
     assert core.is_open()
     core.close()
     assert not core.is_open()
+
+

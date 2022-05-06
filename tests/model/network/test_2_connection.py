@@ -2,7 +2,7 @@ from pynet.model.network.connection import Connection
 from pynet.model.network.core import CoreType
 from dataclassy import dataclass
 from pynet.model.network.url import Url, BaseUrl
-import concurrent.futures
+from .thread_runner import Worker, WorkerRunner
 import pytest
 import time
 
@@ -65,24 +65,33 @@ class ConnectionTestCase:
 
 # Actions for connection bind
 # publisher, pusher
-def thread_connection_bind(test_case: ConnectionTestCase):
-    c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
-    c.open()
-    usleep(5000)
-    res = c.send(str(test_case.data).encode("utf-8"))
-    c.close()
-    return res
+class ConnectionBindWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: ConnectionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c1_name, self.test_case.c1_type, self.test_case.channel)
+        c.open()
+        usleep(5000)
+        self.result = c.send(str(self.test_case.data).encode("utf-8"))
+        c.close()
 
 
-#
 # # Actions for connection connect
 # # subscriber, puller
-def thread_connection_connect(test_case: ConnectionTestCase):
-    c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
-    c.open()
-    obj = c.recv()
-    c.close()
-    return obj
+class ConnectionConnectWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: ConnectionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c2_name, self.test_case.c2_type, self.test_case.channel)
+        c.open()
+        self.result = c.recv()
+        c.close()
 
 
 # Test Publisher/Subscriber
@@ -115,21 +124,35 @@ def thread_connection_connect(test_case: ConnectionTestCase):
                                                  data=DATA, )),
                          ])
 def test_connections_pub_sub_pull_push(test_case):
-    # Parallel Task
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_bind = executor.submit(thread_connection_bind, test_case)
-        future_connect = executor.submit(thread_connection_connect, test_case)
-        res_bind = future_bind.result()
-        res_connect = future_connect.result()
-
-        assert res_bind
-        assert bytes(res_connect).decode("utf-8") == test_case.data
+    workers = [ConnectionBindWorker(test_case), ConnectionConnectWorker(test_case)]
+    WorkerRunner.run(workers)
+    assert workers[0].result
+    assert bytes(workers[1].result).decode('utf-8') == test_case.data
 
 
 # Test Requester/Replier
 
 # Actions for connection bind
 # publisher, pusher
+class ConnectionReplierWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: ConnectionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c1_name, self.test_case.c1_type, self.test_case.channel)
+        c.open()
+        req = c.recv()
+        usleep(5000)
+        rep = c.send(str(self.test_case.data).encode("utf-8"))
+        c.close()
+        self.result = {
+            'req': req,
+            'rep_result': rep
+        }
+
+
 def thread_connection_replier(test_case: ConnectionTestCase):
     c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
     c.open()
@@ -146,17 +169,23 @@ def thread_connection_replier(test_case: ConnectionTestCase):
 #
 # # Actions for connection connect
 # # subscriber, puller
-def thread_connection_requester(test_case: ConnectionTestCase):
-    c = Connection(test_case.c2_name, test_case.c2_type, test_case.channel)
-    c.open()
-    usleep(5000)
-    req_res = c.send(str(test_case.data).encode("utf-8"))
-    rep = c.recv()
-    c.close()
-    return {
-        'req_result': req_res,
-        'rep': rep
-    }
+class ConnectionRequesterWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: ConnectionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.c2_name, self.test_case.c2_type, self.test_case.channel)
+        c.open()
+        usleep(5000)
+        req_res = c.send(str(self.test_case.data).encode("utf-8"))
+        rep = c.recv()
+        c.close()
+        self.result = {
+            'req_result': req_res,
+            'rep': rep
+        }
 
 
 # Test Publisher/Subscriber
@@ -177,15 +206,13 @@ def thread_connection_requester(test_case: ConnectionTestCase):
                                                  data=DATA, )),
                          ])
 def test_connections_req_rep(test_case):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_rep = executor.submit(thread_connection_replier, test_case)
-        future_req = executor.submit(thread_connection_requester, test_case)
-        res_rep = future_rep.result()
-        res_req = future_req.result()
+    workers = [ConnectionReplierWorker(test_case), ConnectionRequesterWorker(test_case)]
+    WorkerRunner.run(workers)
+    assert workers[0]
+    assert workers[1]
 
-        assert res_rep
-        assert res_req
-        assert bytes(res_rep['req']).decode("utf-8") == test_case.data
-        assert res_rep['rep_result']
-        assert res_req['req_result']
-        assert bytes(res_req['rep']).decode("utf-8") == test_case.data
+    assert workers[0].result['rep_result']
+    assert bytes(workers[0].result['req']).decode("utf-8") == test_case.data
+
+    assert workers[1].result['req_result']
+    assert bytes(workers[1].result['rep']).decode("utf-8") == test_case.data
