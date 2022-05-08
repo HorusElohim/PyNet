@@ -38,7 +38,7 @@ class Transmission:
                   data: Any,
                   seq_left: int = 0,
                   compression: bool = False) -> Packet:
-        pkt = Packet(con.name, data, seq_left)
+        pkt = Packet(con._connection_name, data, seq_left)
         pkt.data = encode(pkt.data)
         TRANS_LOG.log.debug('encoded')
         pkt.encoded = True

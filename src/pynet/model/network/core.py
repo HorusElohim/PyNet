@@ -19,7 +19,7 @@ from zmq import (
 from enum import Enum
 
 from .. import Logger
-from .url import BaseUrl
+from .url import BaseUrl, Url
 
 CORE_LOG = Logger('Core')
 CORE_LOG.log.debug('Module Init')
@@ -45,10 +45,6 @@ class CoreType(Enum):
     requester = REQ
     pusher = PUSH
     puller = PULL
-
-
-BIND_TYPES = [CoreType.publisher, CoreType.replier, CoreType.pusher]
-CONNECT_TYPES = [CoreType.subscriber, CoreType.requester, CoreType.puller]
 
 
 class Core:
@@ -79,33 +75,46 @@ class Core:
 
         CORE_LOG.log.debug(f'{self}: init')
 
+    def _bind(self):
+        self.socket.bind(self.url())
+        CORE_LOG.log.debug(f'{self}: ok')
+
+    def _unbind(self):
+        self.socket.unbind(self.url())
+        CORE_LOG.log.debug(f'{self}: ok')
+
+    def _connect(self):
+        self.socket.connect(self.url())
+        CORE_LOG.log.debug(f'{self}: ok')
+
+    def _disconnect(self):
+        self.socket.disconnect(self.url())
+        CORE_LOG.log.debug(f'{self}: ok')
+
     def open(self) -> bool:
         if self.is_open():
+            CORE_LOG.log.warning('try to open Core already opened!')
             return True
-        try:
-            # Bind
-            if self.core_type in BIND_TYPES:
-                self.socket.bind(self.url())
-                self._open = True
-                CORE_LOG.log.debug(f'{self}: bind')
-            # Connect
-            elif self.core_type in CONNECT_TYPES:
-                self.socket.connect(self.url())
-                if self.core_type is CoreType.subscriber:
-                    self.socket.setsockopt(SUBSCRIBE, b'')
-                self._open = True
-                CORE_LOG.log.debug(f'{self}: connect')
-            else:
-                CORE_LOG.log.error(f'{self}: Zmq pattern not recognized {CoreType}')
-        except ZMQError as ex:
-            self._open = False
-            CORE_LOG.log.error(f"{self}: Error init socket for class {self}:\nException -> {ex}")
 
+        try:
+            if self.url.socket_type == Url.SocketType.bind:
+                self._bind()
+                self._open = True
+            elif self.url.socket_type == Url.SocketType.connect:
+                self._connect()
+                self._open = True
+            if self.core_type is CoreType.subscriber:
+                CORE_LOG.log.debug(f'{self}: is type subscriber')
+                self.socket.setsockopt(SUBSCRIBE, b'')
+            CORE_LOG.log.debug(f'{self}: ok')
+        except ZMQError as ex:
+            CORE_LOG.log.error(f"{self}: Error opening socket for url {self.url}:\nException -> {ex}")
+            self._open = False
         finally:
             if self._open:
                 CORE_LOG.log.debug(f'{self}: ready')
             else:
-                CORE_LOG.log.warning(f'{self}: not connected!')
+                CORE_LOG.log.error(f'{self}: not connected!')
             return self._open
 
     def is_open(self) -> bool:
@@ -122,8 +131,10 @@ class Core:
         Close Connection
         """
         self._open = False
-        self.socket.unbind(self.url())
-        CORE_LOG.log.debug(f'{self}: unbind ')
+        if self.url.socket_type == Url.SocketType.bind:
+            self._unbind()
+        elif self.url.socket_type == Url.SocketType.connect:
+            self._disconnect()
         self.socket.close()
         CORE_LOG.log.debug(f'{self}: closed ')
 

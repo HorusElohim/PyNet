@@ -26,18 +26,8 @@ class BaseUrl:
     """
         BaseChannel class is the Ancestor for the Local and Remote Channel
     """
-    target: str
-
-    def __init__(self, target: str) -> None:
-        """
-
-        :param target: zmq channel
-
-        """
-        self.target = target
-
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__}, {self.target}>'
+        return f'<{self.__class__.__name__}::{self.__call__()}>'
 
     def __call__(self) -> str:
         """
@@ -46,7 +36,10 @@ class BaseUrl:
         :return: zmq target channel
 
         """
-        return self.target
+        if isinstance(self, RemoteUrl):
+            return f'tcp://{str(self.ip)}:{self.port}'
+        elif isinstance(self, LocalUrl):
+            return f'{self.local_type.name}://{self.path}'
 
 
 class LocalType(Enum):
@@ -72,9 +65,9 @@ class LocalUrl(BaseUrl):
         :param local_type: LocalType {inproc, ipc}
 
         """
+        BaseUrl.__init__(self)
         self.path = Path(path)
         self.local_type = local_type
-        super(LocalUrl, self).__init__(target=f'{self.local_type.name}://{self.path}')
 
 
 class RemoteUrl(BaseUrl):
@@ -91,20 +84,13 @@ class RemoteUrl(BaseUrl):
         :param port: target port
 
         """
+        BaseUrl.__init__(self)
         self.ip = ip
         self.port = port
-        super(RemoteUrl, self).__init__(target=f'tcp://{str(self.ip)}:{self.port}')
 
 
 class Url:
-    @staticmethod
-    def Local(path: Union[str, Path] = DEFAULT_LOCAL_SOCKET, local_type: LocalType = LocalType.inproc) -> LocalUrl:
-        return LocalUrl(path, local_type)
-
-    @staticmethod
-    def Remote(ip: str = DEFAULT_LOCAL_IP, port: int = DEFAULT_LOCAL_PORT) -> RemoteUrl:
-        return RemoteUrl(ip, port)
-
-    @staticmethod
-    def LocalType() -> Type[LocalType]:
-        return LocalType
+    BaseUrl: Type[BaseUrl] = BaseUrl
+    Local: Type[LocalUrl] = LocalUrl
+    LocalType: Type[LocalType] = LocalType
+    Remote: Type[RemoteUrl] = RemoteUrl
