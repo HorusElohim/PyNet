@@ -106,7 +106,7 @@ class ConnectionBase:
     def __repr__(self) -> str:
         return f'<{self._connection_name}:{self._connection_type.name}:{self._connection_pattern_type.name}>'
 
-    def send(self, obj: bytes) -> bool:
+    def _send(self, obj: bytes) -> bool:
         if not self.is_open:
             CONN_LOG.log.warning(f'{self} core is not open')
             return False
@@ -118,7 +118,7 @@ class ConnectionBase:
             CONN_LOG.log.error(f"{self} failed. Error -> {ex}")
             return False
 
-    def recv(self) -> bytes:
+    def _recv(self) -> bytes:
         if not self.is_open:
             CONN_LOG.log.warning(f'{self} core is not open')
             return bytes(str('ERROR').encode())

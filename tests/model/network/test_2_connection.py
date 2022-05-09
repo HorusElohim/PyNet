@@ -37,7 +37,7 @@ class ConnectionSenderWorker(Worker):
         c.url = self.test_case.url1
         c.open()
         sleep(self.test_case.wait1)
-        self.result = c.send(str(self.test_case.data).encode("utf-8"))
+        self.result = c._send(str(self.test_case.data).encode("utf-8"))
         sleep(self.test_case.wait1)
         c.close()
 
@@ -55,7 +55,7 @@ class ConnectionReceiverWorker(Worker):
         c.url = self.test_case.url2
         c.open()
         sleep(self.test_case.wait2)
-        self.result = c.recv()
+        self.result = c._recv()
         c.close()
 
 
@@ -143,9 +143,9 @@ class ConnectionReplierWorker(Worker):
         c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
         c.url = self.test_case.url1
         c.open()
-        req = c.recv()
+        req = c._recv()
         sleep(self.test_case.wait1)
-        rep = c.send(str(self.test_case.data).encode("utf-8"))
+        rep = c._send(str(self.test_case.data).encode("utf-8"))
         sleep(self.test_case.wait1)
         c.close()
         self.result = {
@@ -168,8 +168,8 @@ class ConnectionRequesterWorker(Worker):
         c.url = self.test_case.url2
         c.open()
         sleep(self.test_case.wait2)
-        req_res = c.send(str(self.test_case.data).encode("utf-8"))
-        rep = c.recv()
+        req_res = c._send(str(self.test_case.data).encode("utf-8"))
+        rep = c._recv()
         sleep(self.test_case.wait2)
         c.close()
         self.result = {

@@ -67,7 +67,7 @@ class Transmission:
 
     @staticmethod
     def send(con: Connection, data: Any, seq_left: int = 0, compression: bool = False) -> bool:  # type: ignore[misc]
-        res = con.send(encode(Transmission.to_packet(con._connection_name, data, seq_left, compression)))
+        res = con._send(encode(Transmission.to_packet(con._connection_name, data, seq_left, compression)))
         if res:
             TRANS_LOG.log.debug('success')
         else:
@@ -76,7 +76,7 @@ class Transmission:
 
     @staticmethod
     def recv(con: Connection) -> Any:  # type: ignore[misc]
-        pkt: Packet = decode(con.recv())  # type: ignore[arg-type]
+        pkt: Packet = decode(con._recv())  # type: ignore[arg-type]
         data = Transmission.from_packet(pkt)
         if data:
             TRANS_LOG.log.debug('success')
