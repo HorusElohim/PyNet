@@ -19,8 +19,8 @@ CUSTOM_PATH = Path('/tmp/test')
 
 
 @pytest.mark.parametrize('local_type',
-                         [Url.LocalType.ipc,
-                          Url.LocalType.inproc,
+                         [Url.IPC,
+                          Url.INPROC,
                           ])
 def test_local_channel_custom(local_type: Url.LocalType):
     lc = Url().Local(local_type=local_type, path=CUSTOM_PATH)

@@ -186,8 +186,8 @@ TestCaseConnectionsRepReq = [
     (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.SERVER, url1=Url.Local(), wait1=0.4,
                         name2='TestRequester', pattern2=Connection.REQ, type2=Connection.CLIENT, url2=Url.Local(), wait2=0.3,
                         data=DATA, )),
-    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.SERVER, url1=Url.Local(local_type=Url.INPROC), wait1=0.4,
-                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.CLIENT, url2=Url.Local(local_type=Url.INPROC),
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.SERVER, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.CLIENT, url2=Url.Local(local_type=Url.IPC),
                         wait2=0.3,
                         data=DATA, )),
     # Client/Server
@@ -197,8 +197,8 @@ TestCaseConnectionsRepReq = [
     (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.CLIENT, url1=Url.Local(), wait1=0.4,
                         name2='TestRequester', pattern2=Connection.REQ, type2=Connection.SERVER, url2=Url.Local(), wait2=0.3,
                         data=DATA, )),
-    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.CLIENT, url1=Url.Local(local_type=Url.INPROC), wait1=0.4,
-                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.SERVER, url2=Url.Local(local_type=Url.INPROC),
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.CLIENT, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.SERVER, url2=Url.Local(local_type=Url.IPC),
                         wait2=0.3,
                         data=DATA, )),
 ]

@@ -94,5 +94,6 @@ class Url:
     BaseUrl: Type[BaseUrl] = BaseUrl
     Remote: Type[RemoteUrl] = RemoteUrl
     Local: Type[LocalUrl] = LocalUrl
+    LocalType: Type[LocalType] = LocalType
     INPROC: LocalType = LocalType.inproc
     IPC: LocalType = LocalType.ipc

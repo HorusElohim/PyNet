@@ -187,88 +187,125 @@ def test_transmission_pub_sub_pull_push_client_server(test_case):
     assert worker[1].result
     assert worker[0].result == test_case.data
 
+
 # Actions for connection bind
 # replier
-# class TransmissionReplierWorker(Worker):
-#     def __init__(self, test_case):
-#         Worker.__init__(self)
-#         self.test_case: TransmissionTestCase = test_case
-#         self.result = None
-#
-#     def run(self) -> None:
-#         c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
-#         c.url = self.test_case.url1
-#         c.open()
-#         req = Transmission.recv(c)
-#         sleep(self.test_case.wait1)
-#         rep = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
-#         c.close()
-#         self.result = {
-#             'req': req,
-#             'rep_result': rep
-#         }
-#
-#
+class TransmissionReplierWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: TransmissionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
+        c.url = self.test_case.url1
+        c.open()
+        sleep(self.test_case.wait1)
+        req = Transmission.recv(c)
+        rep = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
+        c.close()
+        self.result = {
+            'req': req,
+            'rep_result': rep
+        }
+
+
 # # # Actions for connection connect
 # # requester
-# class TransmissionRequesterWorker(Worker):
-#     def __init__(self, test_case):
-#         Worker.__init__(self)
-#         self.test_case: TransmissionTestCase = test_case
-#         self.result = None
-#
-#     def run(self) -> None:
-#         c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
-#         c.url = self.test_case.url2
-#         c.open()
-#         sleep(self.test_case.wait2)
-#         req_res = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
-#         rep = Transmission.recv(c)
-#         sleep(self.test_case.wait2)
-#         c.close()
-#         self.result = {
-#             'req_result': req_res,
-#             'rep': rep
-#         }
-#
-#
-# # Test Publisher/Subscriber
-# # Test Pusher/Puller
-# @pytest.mark.parametrize('test_case',
-#                          [
-#                              (TransmissionTestCase(name1='TestReplier', type1=CoreType.replier,
-#                                                    name2='TestRequester', type2=CoreType.requester,
-#
-#                                                    data=DATA, compression=False)),
-#                              (TransmissionTestCase(name1='TestReplier', type1=CoreType.replier,
-#                                                    name2='TestRequester', type2=CoreType.requester,
-#                                                    channel=Url.Local(),
-#                                                    data=DATA, compression=False)),
-#                              (TransmissionTestCase(name1='TestReplier', type1=CoreType.replier,
-#                                                    name2='TestRequester', type2=CoreType.requester,
-#                                                    channel=Url.Local(local_type=Url.LocalType().inproc),
-#                                                    data=DATA, compression=False)),
-#                              (TransmissionTestCase(name1='TestReplier', type1=CoreType.replier,
-#                                                    name2='TestRequester', type2=CoreType.requester,
-#
-#                                                    data=DATA, compression=True)),
-#                              (TransmissionTestCase(name1='TestReplier', type1=CoreType.replier,
-#                                                    name2='TestRequester', type2=CoreType.requester,
-#                                                    channel=Url.Local(),
-#                                                    data=DATA, compression=True)),
-#                              (TransmissionTestCase(name1='TestReplier', type1=CoreType.replier,
-#                                                    name2='TestRequester', type2=CoreType.requester,
-#                                                    channel=Url.Local(local_type=Url.LocalType().inproc),
-#                                                    data=DATA, compression=True)),
-#                          ])
-# def test_connections_req_rep(test_case):
-#     workers = [TransmissionReplierWorker(test_case), TransmissionRequesterWorker(test_case)]
-#     WorkerRunner.run(workers)
-#     assert workers[0].result
-#     assert workers[1].result
-#
-#     assert workers[0].result['req'] == test_case.data
-#     assert workers[0].result['rep_result']
-#
-#     assert workers[1].result['rep'] == test_case.data
-#     assert workers[1].result['req_result']
+class TransmissionRequesterWorker(Worker):
+    def __init__(self, test_case):
+        Worker.__init__(self)
+        self.test_case: TransmissionTestCase = test_case
+        self.result = None
+
+    def run(self) -> None:
+        c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
+        c.url = self.test_case.url2
+        c.open()
+        sleep(self.test_case.wait2)
+        req_res = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
+        rep = Transmission.recv(c)
+        sleep(self.test_case.wait2)
+        c.close()
+        self.result = {
+            'req_result': req_res,
+            'rep': rep
+        }
+
+
+TestCasesReqRepServerClient = [
+    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Remote(ip='*'), wait1=0.4,
+                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Remote(), wait2=0.2,
+                         data=DATA, compression=False),
+    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(), wait1=0.4,
+                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.2,
+                         data=DATA, compression=False),
+    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                         data=DATA, compression=False),
+    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Remote(ip='*'), wait1=0.4,
+                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Remote(), wait2=0.2,
+                         data=DATA, compression=True),
+    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(), wait1=0.4,
+                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.2,
+                         data=DATA, compression=True),
+    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                         data=DATA, compression=True),
+
+]
+
+
+# Test Publisher/Subscriber
+# Test Pusher/Puller
+@pytest.mark.parametrize('test_case', TestCasesReqRepServerClient)
+def test_connections_req_rep_server_client(test_case):
+    workers = [TransmissionReplierWorker(test_case), TransmissionRequesterWorker(test_case)]
+    WorkerRunner.run(workers)
+    assert workers[0].result
+    assert workers[1].result
+
+    assert workers[0].result['req'] == test_case.data
+    assert workers[0].result['rep_result']
+
+    assert workers[1].result['rep'] == test_case.data
+    assert workers[1].result['req_result']
+
+
+TestCasesReqRepClientServer = [
+    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Remote(), wait1=0.2,
+                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Remote(ip='*'), wait2=0.4,
+                         data=DATA, compression=False),
+    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(), wait1=0.2,
+                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.4,
+                         data=DATA, compression=False),
+    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.2,
+                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                         data=DATA, compression=False),
+    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Remote(), wait1=0.2,
+                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Remote(ip='*'), wait2=0.4,
+                         data=DATA, compression=True),
+    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(), wait1=0.2,
+                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.4,
+                         data=DATA, compression=True),
+    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.2,
+                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                         data=DATA, compression=True),
+
+]
+
+
+# Test Publisher/Subscriber
+# Test Pusher/Puller
+@pytest.mark.parametrize('test_case', TestCasesReqRepClientServer)
+def test_connections_req_rep_client_server(test_case):
+    workers = [TransmissionReplierWorker(test_case), TransmissionRequesterWorker(test_case)]
+    WorkerRunner.run(workers)
+    assert workers[0].result
+    assert workers[1].result
+
+    assert workers[0].result['req'] == test_case.data
+    assert workers[0].result['rep_result']
+
+    assert workers[1].result['rep'] == test_case.data
+    assert workers[1].result['req_result']
