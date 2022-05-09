@@ -6,6 +6,9 @@ import hashlib
 import blosc2
 import pickle
 
+TRANS_LOG = Logger('Transmission')
+TRANS_LOG.log.debug('Module Init')
+
 
 def compress(byte: bytes) -> Any:
     return blosc2.compress(byte, cname='zlib')
@@ -26,10 +29,6 @@ def encode(obj: object) -> bytes:
 
 def decode(compress_byte: bytes) -> object:
     return pickle.loads(compress_byte)
-
-
-TRANS_LOG = Logger('Transmission')
-TRANS_LOG.log.debug('Module Init')
 
 
 class Transmission:
