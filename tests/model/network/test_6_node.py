@@ -9,7 +9,7 @@ DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 class NodePublisher(Node):
     def __init__(self):
         super().__init__('NodePublisher')
-        self.pub = self.Publisher(Url.Remote(ip='*'))
+        self.pub = self.new_publisher(Url.Remote(ip='*'))
         sleep(0.3)
         self.result = self.pub.send(DATA)
         self.pub.close()
@@ -18,7 +18,7 @@ class NodePublisher(Node):
 class NodeSubscriber(Node):
     def __init__(self):
         super().__init__('NodeSubscriber')
-        self.sub = self.Subscriber(Url.Remote())
+        self.sub = self.new_subscriber(Url.Remote())
         sleep(0.3)
         self.result = self.sub.receive()
         self.sub.close()
@@ -55,7 +55,7 @@ def test_transmission_pub_sub():
 class NodePusher(Node):
     def __init__(self):
         super().__init__('NodePusher')
-        self.pusher = self.Publisher(Url.Remote(ip='*'))
+        self.pusher = self.new_publisher(Url.Remote(ip='*'))
         sleep(0.3)
         self.result = self.pusher.send(DATA)
         self.pusher.close()
@@ -64,7 +64,7 @@ class NodePusher(Node):
 class NodePuller(Node):
     def __init__(self):
         super().__init__('NodePuller')
-        self.puller = self.Subscriber(Url.Remote())
+        self.puller = self.new_subscriber(Url.Remote())
         sleep(0.3)
         self.result = self.puller.receive()
         self.puller.close()

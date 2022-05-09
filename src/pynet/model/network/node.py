@@ -10,17 +10,26 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-from zmq import Context
 from .patterns import *
+from typing import Type
 import time
 import signal
 import sys
 
 
 class Node(Logger):
+    Publisher: Type[Publisher] = Publisher
+    Subscriber: Type[Subscriber] = Subscriber
+    Pusher: Type[Pusher] = Pusher
+    Puller: Type[Puller] = Puller
+    Requester: Type[Requester] = Requester
+    Replier: Type[Replier] = Replier
+    Pair: Type[Pair] = Pair
+
     def _sigint_(self, sig: int, frame: object) -> None:
         self.log.info("CTRL-C Pressed. Cleaning resources.")
         self.log.info(f'{type(sig)}, {type(frame)}')
+        self.clean_resources()
         self.log.info("Resources cleaned. Exiting ...")
         sys.exit(0)
 
@@ -32,22 +41,25 @@ class Node(Logger):
         if enable_signal:
             signal.signal(signal.SIGINT, self._sigint_)
 
-    def Publisher(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Publisher:
+    def new_publisher(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Publisher:
         self.log.debug(f'new publisher on channel: {url}')
         return Publisher(self.name, connection_type, url)
 
-    def Subscriber(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Subscriber:
+    def new_subscriber(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Subscriber:
         self.log.debug(f'new subscriber on url: {url}')
         return Subscriber(self.name, connection_type, url)
 
-    def Requester(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Requester:
+    def new_requester(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Requester:
         self.log.debug(f'new requester on url: {url}')
         return Requester(self.name, connection_type, url)
 
-    def Replier(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Replier:
+    def new_replier(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Replier:
         self.log.debug(f'new replier on url: {url}')
         return Replier(self.name, connection_type, url)
 
-    def Pair(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Pair:
+    def new_pair(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Pair:
         self.log.debug(f'new pair on url: {url}')
         return Pair(self.name, connection_type, url)
+
+    def clean_resources(self):
+        pass

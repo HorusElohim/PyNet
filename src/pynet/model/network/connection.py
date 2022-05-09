@@ -109,7 +109,7 @@ class ConnectionBase:
 
     def _send(self, obj: bytes) -> bool:
         if not self.is_open:
-            CONN_LOG.log.warning(f'{self} core is not open')
+            CONN_LOG.log.warning(f'{self} socket is not open')
             return False
         try:
             self._socket.send(obj)
@@ -121,7 +121,7 @@ class ConnectionBase:
 
     def _recv(self) -> bytes:
         if not self.is_open:
-            CONN_LOG.log.warning(f'{self} core is not open')
+            CONN_LOG.log.warning(f'{self} socket is not open')
             return bytes(str('ERROR').encode())
         try:
             # Receive from the socket
