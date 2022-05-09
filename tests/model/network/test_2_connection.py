@@ -80,6 +80,16 @@ TestCaseConnectionsServerClient = [
     (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
                         name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
                         data=DATA, )),
+    # Pair - Server/Client
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.3,
+                        name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.4,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.3,
+                        name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.4,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
+                        name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                        data=DATA, )),
 ]
 
 
@@ -115,6 +125,17 @@ TestCaseConnectionsClientServer = [
     (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
                         name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
                         data=DATA, )),
+    # Pair - Client/Server
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PAIR, url1=Url.Remote(), wait1=0.4,
+                        name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PAIR, url2=Url.Remote(ip='*'), wait2=0.2,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.4,
+                        name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.2,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                        name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                        data=DATA, )),
+
 ]
 
 

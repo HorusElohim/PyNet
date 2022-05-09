@@ -118,6 +118,27 @@ TestCasesPubSubPushPullServerClient = [
     (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
                           name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
                           compression=True, data=DATA, )),
+
+    # Pair Server/Client No Compression
+    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.3,
+                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.4,
+                          compression=False, data=DATA, )),
+    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.3,
+                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.4,
+                          compression=False, data=DATA, )),
+    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
+                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                          compression=False, data=DATA, )),
+    # Pair Server/Client With Compression
+    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.3,
+                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.4,
+                          compression=True, data=DATA, )),
+    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.3,
+                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.4,
+                          compression=True, data=DATA, )),
+    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
+                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                          compression=True, data=DATA, )),
 ]
 
 
@@ -133,7 +154,7 @@ def test_transmission_pub_sub_pull_push_server_client(test_case):
 
 
 TestCasesPubSubPushPullClientServer = [
-    # Publisher/Subscriber Server/Client No Compression
+    # Publisher/Subscriber Client/Server No Compression
     (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.4,
                           name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.2,
                           compression=False, data=DATA, )),
@@ -143,7 +164,7 @@ TestCasesPubSubPushPullClientServer = [
     (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
                           name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
                           compression=False, data=DATA, )),
-    # Publisher/Subscriber Server/Client With Compression
+    # Publisher/Subscriber Client/Server With Compression
     (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.4,
                           name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.2,
                           compression=True, data=DATA, )),
@@ -153,8 +174,7 @@ TestCasesPubSubPushPullClientServer = [
     (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
                           name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
                           compression=True, data=DATA, )),
-
-    # Pusher/Puller Server/Client No Compression
+    # Pusher/Puller Client/Server No Compression
     (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.4,
                           name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.2,
                           compression=False, data=DATA, )),
@@ -164,7 +184,7 @@ TestCasesPubSubPushPullClientServer = [
     (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
                           name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
                           compression=False, data=DATA, )),
-    # Pusher/Puller Server/Client With Compression
+    # Pusher/Puller Client/Server With Compression
     (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.4,
                           name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.2,
                           compression=True, data=DATA, )),
@@ -173,6 +193,26 @@ TestCasesPubSubPushPullClientServer = [
                           compression=True, data=DATA, )),
     (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
                           name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                          compression=True, data=DATA, )),
+    # Pair Client/Server  No Compression
+    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.4,
+                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.2,
+                          compression=False, data=DATA, )),
+    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.4,
+                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.2,
+                          compression=False, data=DATA, )),
+    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                          compression=False, data=DATA, )),
+    # Pair Client/Server  With Compression
+    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.4,
+                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.2,
+                          compression=True, data=DATA, )),
+    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.4,
+                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.2,
+                          compression=True, data=DATA, )),
+    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
                           compression=True, data=DATA, )),
 ]
 

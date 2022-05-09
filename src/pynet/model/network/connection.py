@@ -16,7 +16,7 @@ import abc
 
 from zmq import (
     Context, ZMQError,
-    SUB, PUB, REQ, REP, PUSH, PULL,
+    SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
     SUBSCRIBE
 )
 from enum import Enum
@@ -44,6 +44,7 @@ class PatternType(Enum):
     requester = REQ
     pusher = PUSH
     puller = PULL
+    pair = PAIR
 
 
 class ConnectionUrlNotSet(Exception):
@@ -212,6 +213,7 @@ class Connection(ConnectionServerBase, ConnectionClientBase):
     PULL: PatternType = PatternType.puller
     REQ: PatternType = PatternType.requester
     REP: PatternType = PatternType.replier
+    PAIR: PatternType = PatternType.pair
 
     def open(self) -> bool:
         CONN_LOG.log.debug(f'{self} {self.url}')

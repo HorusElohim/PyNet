@@ -14,6 +14,7 @@ from time import sleep
         (Connection.SERVER, Connection.PULL, Url.INPROC),
         (Connection.SERVER, Connection.REP, Url.INPROC),
         (Connection.SERVER, Connection.REQ, Url.INPROC),
+        (Connection.SERVER, Connection.PAIR, Url.INPROC),
 
         (Connection.CLIENT, Connection.PUB, Url.INPROC),
         (Connection.CLIENT, Connection.SUB, Url.INPROC),
@@ -21,6 +22,7 @@ from time import sleep
         (Connection.CLIENT, Connection.PULL, Url.INPROC),
         (Connection.CLIENT, Connection.REP, Url.INPROC),
         (Connection.CLIENT, Connection.REQ, Url.INPROC),
+        (Connection.CLIENT, Connection.PAIR, Url.INPROC),
 
         (Connection.SERVER, Connection.PUB, Url.IPC),
         (Connection.SERVER, Connection.SUB, Url.IPC),
@@ -28,6 +30,7 @@ from time import sleep
         (Connection.SERVER, Connection.PULL, Url.IPC),
         (Connection.SERVER, Connection.REP, Url.IPC),
         (Connection.SERVER, Connection.REQ, Url.IPC),
+        (Connection.SERVER, Connection.PAIR, Url.IPC),
 
         (Connection.CLIENT, Connection.PUB, Url.IPC),
         (Connection.CLIENT, Connection.SUB, Url.IPC),
@@ -35,6 +38,7 @@ from time import sleep
         (Connection.CLIENT, Connection.PULL, Url.IPC),
         (Connection.CLIENT, Connection.REP, Url.IPC),
         (Connection.CLIENT, Connection.REQ, Url.IPC),
+        (Connection.CLIENT, Connection.PAIR, Url.IPC),
     ])
 def test_connection_local_open_close(connection_type, pattern_type, local_type):
     con = Connection('TestConnection', connection_type, pattern_type)
@@ -58,6 +62,7 @@ def test_connection_local_open_close(connection_type, pattern_type, local_type):
      (Connection.SERVER, Connection.PULL),
      (Connection.SERVER, Connection.REP),
      (Connection.SERVER, Connection.REQ),
+     (Connection.SERVER, Connection.PAIR),
 
      (Connection.CLIENT, Connection.PUB),
      (Connection.CLIENT, Connection.SUB),
@@ -65,6 +70,7 @@ def test_connection_local_open_close(connection_type, pattern_type, local_type):
      (Connection.CLIENT, Connection.PULL),
      (Connection.CLIENT, Connection.REP),
      (Connection.CLIENT, Connection.REQ),
+     (Connection.CLIENT, Connection.PAIR),
      ])
 def test_connection_remote_open_close(connection_type, pattern_type):
     con = Connection('TestConnection', connection_type, pattern_type)
