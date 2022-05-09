@@ -26,6 +26,7 @@ class BaseUrl:
     """
         BaseChannel class is the Ancestor for the Local and Remote Channel
     """
+
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__}::{self.__call__()}>'
 
@@ -91,6 +92,7 @@ class RemoteUrl(BaseUrl):
 
 class Url:
     BaseUrl: Type[BaseUrl] = BaseUrl
-    Local: Type[LocalUrl] = LocalUrl
-    LocalType: Type[LocalType] = LocalType
     Remote: Type[RemoteUrl] = RemoteUrl
+    Local: Type[LocalUrl] = LocalUrl
+    INPROC: LocalType = LocalType.inproc
+    IPC: LocalType = LocalType.ipc

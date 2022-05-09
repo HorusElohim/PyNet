@@ -30,8 +30,8 @@ CONN_LOG.log.debug('Module Init')
 
 
 class ConnectionType(Enum):
-    bind = 0,
-    connect = 1
+    Server = 0,
+    Client = 1
 
 
 class PatternType(Enum):
@@ -90,7 +90,7 @@ class ConnectionBase:
         if len(self._connection_urls) == 0:
             raise ConnectionUrlNotSet
 
-        if self._connection_type == ConnectionType.bind and len(self._connection_urls) > 1:
+        if self._connection_type == ConnectionType.Server and len(self._connection_urls) > 1:
             raise ConnectionServerCannotHasMoreThenOneUrl
 
         return self._connection_urls
@@ -104,7 +104,7 @@ class ConnectionBase:
         CONN_LOG.log.debug(f'{self} url updated')
 
     def __repr__(self) -> str:
-        return f'<{self._connection_name}::{self._connection_pattern_type.name}>'
+        return f'<{self._connection_name}:{self._connection_type.name}:{self._connection_pattern_type.name}>'
 
     def send(self, obj: bytes) -> bool:
         if not self.is_open:
@@ -141,6 +141,11 @@ class ConnectionServerBase(ConnectionBase):
         try:
             CONN_LOG.log.debug(f'{self} binding -> {self.url[0]()}')
             self._socket.bind(self.url[0]())
+            if self._connection_pattern_type.name == PatternType.subscriber.name:
+                self._socket.setsockopt(SUBSCRIBE, b'')
+                CONN_LOG.log.debug(f'{self} subscribe set-sockopt')
+                # res = self._socket.poll(timeout=0)
+                # CONN_LOG.log.debug(f'{self} (Bug-LIBZMQ-270) polling first time: {res}')
             self.is_open = True
             CONN_LOG.log.debug(f'{self} done *')
         except ZMQError as ex:
@@ -149,8 +154,14 @@ class ConnectionServerBase(ConnectionBase):
         finally:
             return self.is_open
 
+    def _unbind(self):
+        url = self._socket.LAST_ENDPOINT
+        CONN_LOG.log.debug(f'{self} unbinding -> {url}')
+        self._socket.unbind(url)
+        CONN_LOG.log.debug(f'{self} done *')
+
     def close(self):
-        self._socket.unbind(self.url[0]())
+        self._unbind()
         self._socket.close()
         self.is_open = False
         CONN_LOG.log.debug(f'{self} done *')
@@ -166,6 +177,9 @@ class ConnectionClientBase(ConnectionBase):
             for url in self.url:
                 CONN_LOG.log.debug(f'{self} connecting -> {url()}')
                 self._socket.connect(url())
+            if self._connection_pattern_type.name == PatternType.subscriber.name:
+                self._socket.setsockopt(SUBSCRIBE, b'')
+                CONN_LOG.log.debug(f'{self} subscribe set-sockopt')
             CONN_LOG.log.debug(f'{self} done *')
             self.is_open = True
         except ZMQError as ex:
@@ -177,6 +191,9 @@ class ConnectionClientBase(ConnectionBase):
             return self.is_open
 
     def close(self):
+        if not self.is_open:
+            CONN_LOG.log.warning(f'{self} the connection is not opened')
+            return
         for url in self.url:
             self._socket.disconnect(url())
             CONN_LOG.log.debug(f'{self} disconnected from {url()}')
@@ -187,19 +204,27 @@ class ConnectionClientBase(ConnectionBase):
 class Connection(ConnectionServerBase, ConnectionClientBase):
     Type: ConnectionType = ConnectionType
     Pattern: PatternType = PatternType
+    SERVER: ConnectionType = ConnectionType.Server
+    CLIENT: ConnectionType = ConnectionType.Client
+    PUB: PatternType = PatternType.publisher
+    SUB: PatternType = PatternType.subscriber
+    PUSH: PatternType = PatternType.pusher
+    PULL: PatternType = PatternType.puller
+    REQ: PatternType = PatternType.requester
+    REP: PatternType = PatternType.replier
 
     def open(self) -> bool:
-        CONN_LOG.log.debug(f'{self.url}')
+        CONN_LOG.log.debug(f'{self} {self.url}')
         return self._call_parent_method('open')
 
     def close(self):
-        CONN_LOG.log.debug(f'{self.url}')
+        CONN_LOG.log.debug(f'{self} {self.url}')
         self._call_parent_method('close')
 
     def _call_parent_method(self, method: str):
-        if self._connection_type == ConnectionType.bind:
+        if self._connection_type == ConnectionType.Server:
             return getattr(ConnectionServerBase, method)(self)
-        if self._connection_type == ConnectionType.connect:
+        if self._connection_type == ConnectionType.Client:
             return getattr(ConnectionClientBase, method)(self)
 
 

@@ -34,11 +34,11 @@ TRANS_LOG.log.debug('Module Init')
 
 class Transmission:
     @staticmethod
-    def to_packet(con: Connection,  # type: ignore[misc]
+    def to_packet(con_name: str,  # type: ignore[misc]
                   data: Any,
                   seq_left: int = 0,
                   compression: bool = False) -> Packet:
-        pkt = Packet(con._connection_name, data, seq_left)
+        pkt = Packet(con_name, data, seq_left)
         pkt.data = encode(pkt.data)
         TRANS_LOG.log.debug('encoded')
         pkt.encoded = True
@@ -67,7 +67,7 @@ class Transmission:
 
     @staticmethod
     def send(con: Connection, data: Any, seq_left: int = 0, compression: bool = False) -> bool:  # type: ignore[misc]
-        res = con.send(encode(Transmission.to_packet(con, data, seq_left, compression)))
+        res = con.send(encode(Transmission.to_packet(con._connection_name, data, seq_left, compression)))
         if res:
             TRANS_LOG.log.debug('success')
         else:

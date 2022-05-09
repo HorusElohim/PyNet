@@ -1,4 +1,3 @@
-from pynet.model.network.core import Core, CoreType
 from pynet.model.network.connection import Connection
 from pynet.model.network.url import Url
 import pytest
@@ -8,20 +7,35 @@ from time import sleep
 
 @pytest.mark.parametrize(
     'connection_type , pattern_type, local_type',
-    [(Connection.Type.bind, Connection.Pattern.publisher, Url.LocalType.inproc),
-     (Connection.Type.bind, Connection.Pattern.subscriber, Url.LocalType.inproc),
-     (Connection.Type.bind, Connection.Pattern.pusher, Url.LocalType.inproc),
-     (Connection.Type.bind, Connection.Pattern.puller, Url.LocalType.inproc),
-     (Connection.Type.bind, Connection.Pattern.replier, Url.LocalType.inproc),
-     (Connection.Type.bind, Connection.Pattern.requester, Url.LocalType.inproc),
+    [
+        (Connection.SERVER, Connection.PUB, Url.INPROC),
+        (Connection.SERVER, Connection.SUB, Url.INPROC),
+        (Connection.SERVER, Connection.PUSH, Url.INPROC),
+        (Connection.SERVER, Connection.PULL, Url.INPROC),
+        (Connection.SERVER, Connection.REP, Url.INPROC),
+        (Connection.SERVER, Connection.REQ, Url.INPROC),
 
-     (Connection.Type.connect, Connection.Pattern.publisher, Url.LocalType.inproc),
-     (Connection.Type.connect, Connection.Pattern.subscriber, Url.LocalType.inproc),
-     (Connection.Type.connect, Connection.Pattern.pusher, Url.LocalType.inproc),
-     (Connection.Type.connect, Connection.Pattern.puller, Url.LocalType.inproc),
-     (Connection.Type.connect, Connection.Pattern.replier, Url.LocalType.inproc),
-     (Connection.Type.connect, Connection.Pattern.requester, Url.LocalType.inproc),
-     ])
+        (Connection.CLIENT, Connection.PUB, Url.INPROC),
+        (Connection.CLIENT, Connection.SUB, Url.INPROC),
+        (Connection.CLIENT, Connection.PUSH, Url.INPROC),
+        (Connection.CLIENT, Connection.PULL, Url.INPROC),
+        (Connection.CLIENT, Connection.REP, Url.INPROC),
+        (Connection.CLIENT, Connection.REQ, Url.INPROC),
+
+        (Connection.SERVER, Connection.PUB, Url.IPC),
+        (Connection.SERVER, Connection.SUB, Url.IPC),
+        (Connection.SERVER, Connection.PUSH, Url.IPC),
+        (Connection.SERVER, Connection.PULL, Url.IPC),
+        (Connection.SERVER, Connection.REP, Url.IPC),
+        (Connection.SERVER, Connection.REQ, Url.IPC),
+
+        (Connection.CLIENT, Connection.PUB, Url.IPC),
+        (Connection.CLIENT, Connection.SUB, Url.IPC),
+        (Connection.CLIENT, Connection.PUSH, Url.IPC),
+        (Connection.CLIENT, Connection.PULL, Url.IPC),
+        (Connection.CLIENT, Connection.REP, Url.IPC),
+        (Connection.CLIENT, Connection.REQ, Url.IPC),
+    ])
 def test_connection_local_open_close(connection_type, pattern_type, local_type):
     con = Connection('TestConnection', connection_type, pattern_type)
     assert con._connection_type == connection_type
@@ -38,19 +52,19 @@ def test_connection_local_open_close(connection_type, pattern_type, local_type):
 
 @pytest.mark.parametrize(
     'connection_type , pattern_type',
-    [(Connection.Type.bind, Connection.Pattern.publisher),
-     (Connection.Type.bind, Connection.Pattern.subscriber),
-     (Connection.Type.bind, Connection.Pattern.pusher),
-     (Connection.Type.bind, Connection.Pattern.puller),
-     (Connection.Type.bind, Connection.Pattern.replier),
-     (Connection.Type.bind, Connection.Pattern.requester),
+    [(Connection.SERVER, Connection.PUB),
+     (Connection.SERVER, Connection.SUB),
+     (Connection.SERVER, Connection.PUSH),
+     (Connection.SERVER, Connection.PULL),
+     (Connection.SERVER, Connection.REP),
+     (Connection.SERVER, Connection.REQ),
 
-     (Connection.Type.connect, Connection.Pattern.publisher),
-     (Connection.Type.connect, Connection.Pattern.subscriber),
-     (Connection.Type.connect, Connection.Pattern.pusher),
-     (Connection.Type.connect, Connection.Pattern.puller),
-     (Connection.Type.connect, Connection.Pattern.replier),
-     (Connection.Type.connect, Connection.Pattern.requester),
+     (Connection.CLIENT, Connection.PUB),
+     (Connection.CLIENT, Connection.SUB),
+     (Connection.CLIENT, Connection.PUSH),
+     (Connection.CLIENT, Connection.PULL),
+     (Connection.CLIENT, Connection.REP),
+     (Connection.CLIENT, Connection.REQ),
      ])
 def test_connection_remote_open_close(connection_type, pattern_type):
     con = Connection('TestConnection', connection_type, pattern_type)
@@ -66,7 +80,7 @@ def test_connection_remote_open_close(connection_type, pattern_type):
 
 
 def test_connection_multiple():
-    con = Connection('TestConnection', Connection.Type.connect, Connection.Pattern.publisher)
+    con = Connection('TestConnection', Connection.CLIENT, Connection.SUB)
     # Add Url
     con.url = Url.Remote()
     con.url = Url.Remote(port=29129)

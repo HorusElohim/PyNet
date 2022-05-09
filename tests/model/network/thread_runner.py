@@ -12,5 +12,6 @@ class WorkerRunner:
     def run(workers: List[Worker]):
         for worker in workers:
             worker.start()
+            sleep(0.1)
         for worker in workers:
             worker.join()

@@ -1,133 +1,132 @@
 from pynet.model.network.connection import Connection
-from pynet.model.network.core import CoreType
 from dataclassy import dataclass
 from pynet.model.network.url import Url, BaseUrl
 from .thread_runner import Worker, WorkerRunner
 import pytest
-import time
-
-
-def usleep(microsecond):
-    time.sleep(microsecond / 1000000.0)
-
+from time import sleep
 
 # DATA = [1, 2, 3, 4, 6, 8, 9]
 DATA = "TestData"
 
 
-# _______ ConnectionBase Section _______
-
-@pytest.mark.parametrize(
-    'connection_type, channel_type',
-    [
-        (CoreType.publisher, Url.Local(local_type=Url.LocalType().ipc)),
-        (CoreType.subscriber, Url.Local(local_type=Url.LocalType().ipc)),
-        (CoreType.puller, Url.Local(local_type=Url.LocalType().ipc)),
-        (CoreType.pusher, Url.Local(local_type=Url.LocalType().ipc)),
-        (CoreType.replier, Url.Local(local_type=Url.LocalType().ipc)),
-        (CoreType.requester, Url.Local(local_type=Url.LocalType().ipc)),
-
-        (CoreType.publisher, Url.Local(local_type=Url.LocalType().inproc)),
-        (CoreType.subscriber, Url.Local(local_type=Url.LocalType().inproc)),
-        (CoreType.puller, Url.Local(local_type=Url.LocalType().inproc)),
-        (CoreType.pusher, Url.Local(local_type=Url.LocalType().inproc)),
-        (CoreType.replier, Url.Local(local_type=Url.LocalType().inproc)),
-        (CoreType.requester, Url.Local(local_type=Url.LocalType().inproc)),
-
-        (CoreType.publisher, Url.Remote(port=28128)),
-        (CoreType.subscriber, Url.Remote(port=28128)),
-        (CoreType.puller, Url.Remote(port=28129)),
-        (CoreType.pusher, Url.Remote(port=28129)),
-        (CoreType.replier, Url.Remote(port=28130)),
-        (CoreType.requester, Url.Remote(port=28130)),
-
-    ])
-def test_connection_creation(connection_type, channel_type):
-    c = Connection('TestConnectionCreation', connection_type, channel_type)
-    assert c is not None
-    c.open()
-    assert c.is_open()
-    assert c.url == channel_type
-    assert c.core_type == connection_type
-    c.close()
-    assert not c.is_open()
-
-
 @dataclass(unsafe_hash=True, slots=True)
 class ConnectionTestCase:
-    c1_name: str
-    c2_name: str
-    c1_type: CoreType
-    c2_type: CoreType
-    channel: BaseUrl
+    name1: str
+    name2: str
+    type1: Connection.Type
+    type2: Connection.Type
+    pattern1: Connection.Pattern
+    pattern2: Connection.Pattern
+    wait1: float
+    wait2: float
+    url1: BaseUrl
+    url2: BaseUrl
     data: object
 
 
 # Actions for connection bind
 # publisher, pusher
-class ConnectionBindWorker(Worker):
+class ConnectionSenderWorker(Worker):
     def __init__(self, test_case):
         Worker.__init__(self)
         self.test_case: ConnectionTestCase = test_case
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.c1_name, self.test_case.c1_type, self.test_case.channel)
+        c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
+        c.url = self.test_case.url1
         c.open()
-        usleep(5000)
+        sleep(self.test_case.wait1)
         self.result = c.send(str(self.test_case.data).encode("utf-8"))
+        sleep(self.test_case.wait1)
         c.close()
 
 
 # # Actions for connection connect
 # # subscriber, puller
-class ConnectionConnectWorker(Worker):
+class ConnectionReceiverWorker(Worker):
     def __init__(self, test_case):
         Worker.__init__(self)
         self.test_case: ConnectionTestCase = test_case
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.c2_name, self.test_case.c2_type, self.test_case.channel)
+        c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
+        c.url = self.test_case.url2
         c.open()
+        sleep(self.test_case.wait2)
         self.result = c.recv()
         c.close()
 
 
+TestCaseConnectionsServerClient = [
+    # Publisher / Subscribers - Server/Client
+    (ConnectionTestCase(name1='TestPublisher', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.3,
+                        name2='TestSubscriber', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.4,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPublisher', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(), wait1=0.3,
+                        name2='TestSubscriber', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(), wait2=0.4,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPublisher', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
+                        name2='TestSubscriber', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                        data=DATA, )),
+    # Pusher / Puller - Server/Client
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.3,
+                        name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.4,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(), wait1=0.3,
+                        name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(), wait2=0.4,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
+                        name2='TestPuller', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+                        data=DATA, )),
+]
+
+
 # Test Publisher/Subscriber
 # Test Pusher/Puller
-@pytest.mark.parametrize('test_case',
-                         [
-                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
-                                                 c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                 channel=Url.Remote(),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
-                                                 c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                 channel=Url.Local(),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.publisher,
-                                                 c2_name='TestSubscriber', c2_type=CoreType.subscriber,
-                                                 channel=Url.Local(local_type=Url.LocalType().ipc),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
-                                                 c2_name='TestPuller', c2_type=CoreType.puller,
-                                                 channel=Url.Remote(),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
-                                                 c2_name='TestPuller', c2_type=CoreType.puller,
-                                                 channel=Url.Local(),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPusher', c1_type=CoreType.pusher,
-                                                 c2_name='TestPuller', c2_type=CoreType.puller,
-                                                 channel=Url.Local(local_type=Url.LocalType().ipc),
-                                                 data=DATA, )),
-                         ])
-def test_connections_pub_sub_pull_push(test_case):
-    workers = [ConnectionBindWorker(test_case), ConnectionConnectWorker(test_case)]
+# Server/ Client
+@pytest.mark.parametrize('test_case', TestCaseConnectionsServerClient)
+def test_connections_pub_sub_pull_push_server_client(test_case):
+    workers = [ConnectionSenderWorker(test_case), ConnectionReceiverWorker(test_case)]
     WorkerRunner.run(workers)
     assert workers[0].result
     assert bytes(workers[1].result).decode('utf-8') == test_case.data
+
+
+TestCaseConnectionsClientServer = [
+    # Publisher / Subscribers - Client/Server
+    (ConnectionTestCase(name1='TestPublisher', type1=Connection.CLIENT, pattern1=Connection.PUB, url1=Url.Remote(), wait1=0.4,
+                        name2='TestSubscriber', type2=Connection.SERVER, pattern2=Connection.SUB, url2=Url.Remote(ip='*'), wait2=0.2,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPublisher', type1=Connection.CLIENT, pattern1=Connection.PUB, url1=Url.Local(), wait1=0.4,
+                        name2='TestSubscriber', type2=Connection.SERVER, pattern2=Connection.SUB, url2=Url.Local(), wait2=0.2,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPublisher', type1=Connection.CLIENT, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                        name2='TestSubscriber', type2=Connection.SERVER, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                        data=DATA, )),
+    # Pusher / Puller - Client/Server
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PUSH, url1=Url.Remote(), wait1=0.4,
+                        name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PULL, url2=Url.Remote(ip='*'), wait2=0.2,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PUSH, url1=Url.Local(), wait1=0.4,
+                        name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PULL, url2=Url.Local(), wait2=0.2,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestPusher', type1=Connection.CLIENT, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
+                        name2='TestPuller', type2=Connection.SERVER, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+                        data=DATA, )),
+]
+
+
+# Test Publisher/Subscriber
+# Test Pusher/Puller
+# Client / Server
+@pytest.mark.parametrize('test_case', TestCaseConnectionsClientServer)
+def test_connections_pub_sub_pull_push_client_server(test_case):
+    workers = [ConnectionReceiverWorker(test_case), ConnectionSenderWorker(test_case)]
+    WorkerRunner.run(workers)
+    assert workers[1].result
+    assert bytes(workers[0].result).decode('utf-8') == test_case.data
 
 
 # Test Requester/Replier
@@ -141,29 +140,18 @@ class ConnectionReplierWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.c1_name, self.test_case.c1_type, self.test_case.channel)
+        c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
+        c.url = self.test_case.url1
         c.open()
         req = c.recv()
-        usleep(5000)
+        sleep(self.test_case.wait1)
         rep = c.send(str(self.test_case.data).encode("utf-8"))
+        sleep(self.test_case.wait1)
         c.close()
         self.result = {
             'req': req,
             'rep_result': rep
         }
-
-
-def thread_connection_replier(test_case: ConnectionTestCase):
-    c = Connection(test_case.c1_name, test_case.c1_type, test_case.channel)
-    c.open()
-    req = c.recv()
-    usleep(5000)
-    rep = c.send(str(test_case.data).encode("utf-8"))
-    c.close()
-    return {
-        'req': req,
-        'rep_result': rep
-    }
 
 
 #
@@ -176,11 +164,13 @@ class ConnectionRequesterWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.c2_name, self.test_case.c2_type, self.test_case.channel)
+        c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
+        c.url = self.test_case.url2
         c.open()
-        usleep(5000)
+        sleep(self.test_case.wait2)
         req_res = c.send(str(self.test_case.data).encode("utf-8"))
         rep = c.recv()
+        sleep(self.test_case.wait2)
         c.close()
         self.result = {
             'req_result': req_res,
@@ -188,23 +178,35 @@ class ConnectionRequesterWorker(Worker):
         }
 
 
+TestCaseConnectionsRepReq = [
+    # Server/Client
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.SERVER, url1=Url.Remote(), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.CLIENT, url2=Url.Remote(), wait2=0.3,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.SERVER, url1=Url.Local(), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.CLIENT, url2=Url.Local(), wait2=0.3,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.SERVER, url1=Url.Local(local_type=Url.INPROC), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.CLIENT, url2=Url.Local(local_type=Url.INPROC),
+                        wait2=0.3,
+                        data=DATA, )),
+    # Client/Server
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.CLIENT, url1=Url.Remote(), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.SERVER, url2=Url.Remote(), wait2=0.3,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.CLIENT, url1=Url.Local(), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.SERVER, url2=Url.Local(), wait2=0.3,
+                        data=DATA, )),
+    (ConnectionTestCase(name1='TestReplier', pattern1=Connection.REP, type1=Connection.CLIENT, url1=Url.Local(local_type=Url.INPROC), wait1=0.4,
+                        name2='TestRequester', pattern2=Connection.REQ, type2=Connection.SERVER, url2=Url.Local(local_type=Url.INPROC),
+                        wait2=0.3,
+                        data=DATA, )),
+]
+
+
 # Test Publisher/Subscriber
 # Test Pusher/Puller
-@pytest.mark.parametrize('test_case',
-                         [
-                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.replier,
-                                                 c2_name='TestSubscriber', c2_type=CoreType.requester,
-                                                 channel=Url.Remote(),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.replier,
-                                                 c2_name='TestSubscriber', c2_type=CoreType.requester,
-                                                 channel=Url.Local(),
-                                                 data=DATA, )),
-                             (ConnectionTestCase(c1_name='TestPublisher', c1_type=CoreType.replier,
-                                                 c2_name='TestSubscriber', c2_type=CoreType.requester,
-                                                 channel=Url.Local(local_type=Url.LocalType().inproc),
-                                                 data=DATA, )),
-                         ])
+@pytest.mark.parametrize('test_case', TestCaseConnectionsRepReq)
 def test_connections_req_rep(test_case):
     workers = [ConnectionReplierWorker(test_case), ConnectionRequesterWorker(test_case)]
     WorkerRunner.run(workers)

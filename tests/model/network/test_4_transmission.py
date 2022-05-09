@@ -43,6 +43,17 @@ class TransmissionTestCase:
     data: object
 
 
+@dataclass(unsafe_hash=True, slots=True)
+class TC:
+    name1: str
+    name2: str
+    type1: Connection.Type
+    type2: Connection.Type
+    url: Url.BaseUrl
+    compression: bool
+    data: object
+
+
 # Actions for connection bind
 # publisher, pusher
 class TransmissionBindWorker(Worker):
@@ -72,6 +83,12 @@ class TransmissionConnectWorker(Worker):
         c.open()
         self.result = Transmission.recv(c)
         c.close()
+
+
+Transmission_pub_sub_push_pull = [
+    TC(name1='PUB', type1=Connection.SERVER, name2='SUB', type2=Connection.CLIENT, url=Url.Remote(), data=DATA, compression=False),
+    TC(name1='PUB', type1=Connection.CLIENT, name2='SUB', type2=Connection.SERVER, url=Url.Remote(), data=DATA, compression=False)
+]
 
 
 # Test Publisher/Subscriber
