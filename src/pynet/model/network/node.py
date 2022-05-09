@@ -10,36 +10,44 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# from zmq import Context
-# from typing import Type, Union
-# from ..common import Logger
-# from . import BaseChannel
-# from . import Subscriber, Publisher
-# import time
-# import signal
-# import sys
-#
-#
-# class Node(Logger):
-#     def _sigint_(self, sig: int, frame: object) -> None:
-#         self.log.info("CTRL-C Pressed. Cleaning resources.")
-#         self.log.info(f'{type(sig)}, {type(frame)}')
-#         self._context.destroy()
-#         self.log.info("Resources cleaned. Exiting ...")
-#         sys.exit(0)
-#
-#     def __init__(self, name: str, context: Union[Context, None] = None) -> None:
-#         Logger.__init__(self)
-#         self.name = name
-#         self._context = context or Context.instance()
-#         self.start_time: int = time.time_ns()
-#         self.close_time: int = -1
-#         signal.signal(signal.SIGINT, self._sigint_)
-#
-#     def publisher(self, channel: BaseChannel) -> Publisher:
-#         self.log.debug(f'new publisher on channel: {channel}')
-#         return Publisher(self.name, channel, self._context)
-#
-#     def subscriber(self, channel: BaseChannel) -> Subscriber:
-#         self.log.debug(f'new subscriber on channel: {channel}')
-#         return Subscriber(self.name, channel, self._context)
+from zmq import Context
+from .patterns import *
+import time
+import signal
+import sys
+
+
+class Node(Logger):
+    def _sigint_(self, sig: int, frame: object) -> None:
+        self.log.info("CTRL-C Pressed. Cleaning resources.")
+        self.log.info(f'{type(sig)}, {type(frame)}')
+        self.log.info("Resources cleaned. Exiting ...")
+        sys.exit(0)
+
+    def __init__(self, name: str, enable_signal=False) -> None:
+        Logger.__init__(self)
+        self.name = name
+        self.start_time: int = time.time_ns()
+        self.close_time: int = -1
+        if enable_signal:
+            signal.signal(signal.SIGINT, self._sigint_)
+
+    def Publisher(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Publisher:
+        self.log.debug(f'new publisher on channel: {url}')
+        return Publisher(self.name, connection_type, url)
+
+    def Subscriber(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Subscriber:
+        self.log.debug(f'new subscriber on url: {url}')
+        return Subscriber(self.name, connection_type, url)
+
+    def Requester(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Requester:
+        self.log.debug(f'new requester on url: {url}')
+        return Requester(self.name, connection_type, url)
+
+    def Replier(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Replier:
+        self.log.debug(f'new replier on url: {url}')
+        return Replier(self.name, connection_type, url)
+
+    def Pair(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Pair:
+        self.log.debug(f'new pair on url: {url}')
+        return Pair(self.name, connection_type, url)
