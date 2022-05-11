@@ -4,6 +4,11 @@ from threading import Thread
 from .. import Node, Url, Process
 from . import Execute, URLS
 
+from subprocess import Popen, PIPE
+from time import sleep
+from fcntl import fcntl, F_GETFL, F_SETFL
+from os import O_NONBLOCK, read, system
+
 
 class ConsoleExecutor(Thread):
     publisher: Node.Publisher
@@ -16,15 +21,24 @@ class ConsoleExecutor(Thread):
 
     def run(self) -> None:
         self.active = True
-        proc = subprocess.Popen([self.cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        while self.active:
-            out = proc.stdout.read()
-            err = proc.stdout.read()
-            self.publisher.send(out.decode().strip())
-            self.publisher.send(err.decode().strip())
-            if proc.wait(timeout=0.1) == 0:
-                self.active = False
-        proc.terminate()
+        # run the shell as a subprocess:
+        p = Popen([self.cmd], stdout=PIPE)
+        # set the O_NONBLOCK flag of p.stdout file descriptor:
+        flags = fcntl(p.stdout, F_GETFL)  # get current p.stdout flags
+        fcntl(p.stdout, F_SETFL, flags | O_NONBLOCK)
+
+        # while self.active:
+        while True:
+            try:
+                result = read(p.stdout.fileno(), 1024).decode("utf-8")
+                self.publisher.send(result.strip())
+            except OSError:
+                # the os throws an exception if there is no data
+                sleep(0.1)
+                continue
+
+        fcntl(p.stdout, F_SETFL, flags)
+        p.terminate()
 
     def stop(self):
         self.active = False
@@ -52,9 +66,9 @@ class DurinDoor(Node):
                 self.executor.stop()
                 self.executor.join()
             rep = self.dispatch(req)
-            if rep == 'exit':
-                return
             self.replier.send(rep)
+            if rep == 'Closed':
+                self.clean_resources()
         print('[x] Closed')
         self.log.debug('done * ')
 
@@ -62,11 +76,14 @@ class DurinDoor(Node):
         self.log.debug(f' <- {data}')
         response = False
         if isinstance(data, Execute):
-            if data.command == 'exit':
+            if data.command == 'close':
                 self.active = False
-                self.clean_resources()
-                print('[x] Exit')
-                return 'exit'
+                print('[x] Closing')
+                return 'Closed'
+            elif data.command == 'CRTL-C':
+                print(f'[CX] > {data.command}')
+                if self.executor.active:
+                    self.executor.stop()
             else:
                 print(f'[-] > {data.command}')
                 try:
