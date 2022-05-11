@@ -1,6 +1,8 @@
-from . import Exit, Execute, URL_REQUEST_CLIENT, URL_CONSOLE_CLIENT
+from . import Execute, URL_REQUEST_CLIENT, URL_CONSOLE_CLIENT
 from .. import Node
 from threading import Thread
+from time import sleep
+import signal
 
 
 class Console(Thread):
@@ -18,11 +20,13 @@ class Console(Thread):
 
     def stop(self):
         self.active = False
+        self.subscriber.close()
 
 
 class Gandalf(Node):
     requester: Node.Requester
     console: Console
+    active: bool = False
 
     def __init__(self):
         Node.__init__(self, 'DurinServer', enable_signal=True)
@@ -31,11 +35,27 @@ class Gandalf(Node):
         self.console.start()
         self.log.debug('done *')
 
+    def _sigint_(self, sig: int, frame: object) -> None:
+        pass
+
     def demand(self, cmd: str):
+        print(f'[+] Command: {cmd} -> {self.requester.url}')
         self.requester.send(Execute(command=cmd))
         res = self.requester.receive()
         self.log.debug(f'{self} done {res}')
 
+    def start(self):
+        print('Gandalf has started!')
+        self.active = True
+        while self.active:
+            sleep(0.3)
+            cmd = input('> ')
+            self.demand(cmd)
+            if cmd == 'exit':
+                self.active = False
+                print('Exiting...')
+                self.console.stop()
+        self.log.debug('done * ')
+
     def clean_resources(self):
-        self.console.stop()
-        # self.requester.send(Exit())
+        self.requester.close()

@@ -10,9 +10,6 @@ class Process(Logger):
         self.func = func
         self.log.debug('DONE')
 
-    def __del__(self):
-        self.log.debug('DONE')
-
     def run(self, cmd: str, qt_parent=None) -> Union[int, Tuple[int, str]]:
         if self.func:
             return self.__run_stream(cmd)
