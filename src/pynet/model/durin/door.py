@@ -2,7 +2,7 @@ from typing import Any
 import subprocess
 from threading import Thread
 from .. import Node, Url, Process
-from . import Execute, URL_CONSOLE_SERVER, URL_REQUEST_SERVER
+from . import Execute, URLS
 
 
 class ConsoleExecutor(Thread):
@@ -38,8 +38,8 @@ class DurinDoor(Node):
 
     def __init__(self):
         Node.__init__(self, 'DurinServer', enable_signal=True)
-        self.replier = self.new_replier(URL_REQUEST_SERVER)
-        self.publisher = self.new_publisher(URL_CONSOLE_SERVER)
+        self.replier = self.new_replier(URLS.server.demander)
+        self.publisher = self.new_publisher(URLS.server.console)
         self.executor = None
         self.log.debug('done *')
 

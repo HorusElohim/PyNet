@@ -1,4 +1,4 @@
-from . import Execute, URL_REQUEST_CLIENT, URL_CONSOLE_CLIENT
+from . import Execute, URLS
 from .. import Node
 from threading import Thread
 from time import sleep
@@ -11,7 +11,7 @@ class Console(Thread):
 
     def __init__(self, node: Node):
         Thread.__init__(self)
-        self.subscriber = node.new_subscriber(URL_CONSOLE_CLIENT)
+        self.subscriber = node.new_subscriber(URLS.client.console)
 
     def run(self) -> None:
         self.active = True
@@ -30,7 +30,7 @@ class Gandalf(Node):
 
     def __init__(self):
         Node.__init__(self, 'DurinServer', enable_signal=True)
-        self.requester = self.new_requester(URL_REQUEST_CLIENT)
+        self.requester = self.new_requester(URLS.client.demander)
         self.console = Console(self)
         self.console.start()
         self.log.debug('done *')
@@ -59,3 +59,4 @@ class Gandalf(Node):
 
     def clean_resources(self):
         self.requester.close()
+        self.active = False

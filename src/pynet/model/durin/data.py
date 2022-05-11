@@ -1,10 +1,17 @@
 from dataclassy import dataclass
 from .. import Url
+from .. import DDict
 
-URL_CONSOLE_SERVER = Url.Remote(ip='*', port=28128)
-URL_CONSOLE_CLIENT = Url.Remote(port=28128)
-URL_REQUEST_SERVER = Url.Remote(ip='*', port=28129)
-URL_REQUEST_CLIENT = Url.Remote(port=28129)
+URLS = DDict(
+    server=DDict(
+        demander=Url.Remote(ip='*', port=28128),
+        console=Url.Remote(ip='*', port=28129),
+    ),
+    client=DDict(
+        demander=Url.Remote(port=28128),
+        console=Url.Remote(port=28129),
+    )
+)
 
 
 @dataclass(unsafe_hash=True, slots=True, init=True, repr=True)
