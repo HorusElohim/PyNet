@@ -10,15 +10,41 @@ from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read, system
 
 
-class ConsoleExecutor(Thread):
-    publisher: Node.Publisher
-    active: bool = False
+class BaseConsoleExecutor(Thread):
+    active: bool
+    pub: Node.Publisher
 
     def __init__(self, publisher: Node.Publisher, cmd: str):
         Thread.__init__(self)
-        self.publisher = publisher
+        self.active = False
+        self.pub = publisher
         self.cmd = cmd
 
+    def publish(self, output: str):
+        self.pub.send(output)
+
+    def stop(self):
+        self.active = False
+
+
+class ConsoleExecutor(BaseConsoleExecutor):
+    def run(self) -> None:
+        self.active = True
+        proc = subprocess.Popen([self.cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        while self.active:
+            out = proc.stdout.read()
+            err = proc.stdout.read()
+            self.publish(out.decode().strip())
+            self.publish(err.decode().strip())
+            if proc.wait(timeout=0.1) == 0:
+                self.active = False
+        proc.terminate()
+
+    def stop(self):
+        self.active = False
+
+
+class ConsoleFileDescriptorExecutor(BaseConsoleExecutor):
     def run(self) -> None:
         self.active = True
         # run the shell as a subprocess:
@@ -28,10 +54,10 @@ class ConsoleExecutor(Thread):
         fcntl(p.stdout, F_SETFL, flags | O_NONBLOCK)
 
         # while self.active:
-        while True:
+        while self.active:
             try:
                 result = read(p.stdout.fileno(), 1024).decode("utf-8")
-                self.publisher.send(result.strip())
+                self.publish(result.strip())
             except OSError:
                 # the os throws an exception if there is no data
                 sleep(0.1)
@@ -40,14 +66,11 @@ class ConsoleExecutor(Thread):
         fcntl(p.stdout, F_SETFL, flags)
         p.terminate()
 
-    def stop(self):
-        self.active = False
-
 
 class DurinDoor(Node):
     replier: Node.Replier
     publisher: Node.Publisher
-    executor: ConsoleExecutor
+    executor: BaseConsoleExecutor
     active: bool = False
 
     def __init__(self):
@@ -87,14 +110,43 @@ class DurinDoor(Node):
             else:
                 print(f'[-] > {data.command}')
                 try:
-                    self.executor = ConsoleExecutor(self.publisher, data.command)
-                    self.executor.start()
+                    if '+' in data.command:
+                        cmd = data.command.replace('+', '')
+                        self.executor = ConsoleFileDescriptorExecutor(self.publisher, cmd)
+                        self.executor.start()
+                    else:
+                        self.executor = ConsoleExecutor(self.publisher, data.command)
+                        self.executor.start()
                     response = True
                 except Exception as ex:
                     response = False
                     self.log.error(f'Error starting ConsoleExecutor - Exception: {ex}')
         self.log.debug(f' -> {response}')
         return response
+
+    def execute_command(self, command: str) -> Any:
+        if command == 'close':
+            self.active = False
+            print('[x] Closing')
+            return 'Closed'
+        elif command == 'CRTL-C':
+            print(f'[CX] > {command}')
+            if self.executor.active:
+                self.executor.stop()
+        else:
+            print(f'[-] > {command}')
+            try:
+                if '+' in command:
+                    command = command.replace('+', '')
+                    self.executor = ConsoleFileDescriptorExecutor(self.publisher, command)
+                    self.executor.start()
+                else:
+                    self.executor = ConsoleExecutor(self.publisher, command)
+                    self.executor.start()
+                response = True
+            except Exception as ex:
+                response = False
+                self.log.error(f'Error starting ConsoleExecutor - Exception: {ex}')
 
     def console_output(self, line: str):
         self.publisher.send(line)

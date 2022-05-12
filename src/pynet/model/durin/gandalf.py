@@ -10,9 +10,9 @@ class Console(Thread):
     subscriber: Node.Subscriber
     active: bool = False
 
-    def __init__(self, node: Node):
+    def __init__(self, subscriber: Node.Subscriber):
         Thread.__init__(self)
-        self.subscriber = node.new_subscriber(URLS.client.console)
+        self.subscriber = subscriber
 
     def run(self) -> None:
         self.active = True
@@ -22,26 +22,27 @@ class Console(Thread):
     def stop(self):
         self.active = False
 
-    def terminate(self):
-        self.stop()
-        self.subscriber.close()
-
 
 class Gandalf(Node):
     requester: Node.Requester
+    subscriber: Node.Subscriber
     console: Console
     active: bool = False
 
     def __init__(self):
         Node.__init__(self, 'DurinServer', enable_signal=False)
         self.requester = self.new_requester(URLS.client.demander)
-        self.console = Console(self)
+        self.subscriber = self.new_subscriber(URLS.client.console)
+        self.console = Console(self.subscriber)
         self.console.start()
         self.log.debug('done *')
         signal.signal(signal.SIGINT, self._sigint_)
 
     def _sigint_(self, sig: int, frame: object) -> None:
         print("CRTL-C")
+        self.console.stop()
+        self.console = Console(self.subscriber)
+        self.console.start()
         self.demand('CRTL-C')
         system('clear')
 
@@ -69,6 +70,7 @@ class Gandalf(Node):
 
     def stop(self):
         print("Exiting ... ")
-        self.console.terminate()
+        self.console.stop()
         self.console.join(timeout=1)
+        self.subscriber.close()
         self.active = False
