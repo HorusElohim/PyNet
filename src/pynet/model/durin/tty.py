@@ -2,14 +2,17 @@ from subprocess import Popen, PIPE
 from threading import Thread
 from time import sleep
 import os
+from .. import Node
 
 
 class Stdout(Thread):
     active: bool = False
+    publisher: Node.Publisher
 
-    def __init__(self, stdout: PIPE):
+    def __init__(self, stdout: PIPE, publisher: Node.Publisher):
         Thread.__init__(self)
         self.stdout = stdout
+        self.publisher = publisher
         os.set_blocking(self.stdout.fileno(), False)
 
     def run(self) -> None:
@@ -22,7 +25,7 @@ class Stdout(Thread):
                     if output:
                         output = output.decode('utf-8')
                         if output:
-                            print(output)
+                            self.publisher.send(output)
                 except OSError:
                     sleep(0.1)
 
@@ -32,23 +35,25 @@ class Stdout(Thread):
 
 class Stderr(Thread):
     active: bool = False
+    publisher: Node.Publisher
 
-    def __init__(self, stdout: PIPE):
+    def __init__(self, stderr: PIPE, publisher: Node.Publisher):
         Thread.__init__(self)
-        self.stdout = stdout
-        os.set_blocking(self.stdout.fileno(), False)
+        self.stderr = stderr
+        self.publisher = publisher
+        os.set_blocking(self.stderr.fileno(), False)
 
     def run(self) -> None:
         self.active = True
         print('Stderr started...')
         while self.active:
-            if self.stdout:
+            if self.stderr:
                 try:
-                    output = os.read(self.stdout.fileno(), 1024)
+                    output = os.read(self.stderr.fileno(), 1024)
                     if output:
                         output = output.decode('utf-8')
                         if output:
-                            print(f'\033[91m{output}\033[0m')
+                            self.publisher.send(f'\033[91m{output}\033[0m')
                 except OSError:
                     sleep(0.5)
 
@@ -59,11 +64,16 @@ class Stderr(Thread):
 class TTY:
     p: Popen
     th_stdout: Stdout
+    th_stderr: Stderr
+    publisher: Node.Publisher
 
-    def __init__(self):
+    def __init__(self, publisher: Node.Publisher):
+        self.publisher = publisher
+
+    def start(self):
         self.p = Popen(['python', '-c', 'import pty; pty.spawn("/bin/bash")'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        self.th_stdout = Stdout(self.p.stdout)
-        self.th_stderr = Stderr(self.p.stderr)
+        self.th_stdout = Stdout(self.p.stdout, self.publisher)
+        self.th_stderr = Stderr(self.p.stderr, self.publisher)
         self.th_stdout.start()
         self.th_stderr.start()
 
