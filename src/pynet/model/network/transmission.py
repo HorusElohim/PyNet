@@ -1,6 +1,6 @@
 from .. import Logger, Size
 from .packet import Packet
-from .connection import Connection
+from .connection import Connection, RECV_ERROR
 from typing import Any
 import hashlib
 import blosc2
@@ -75,7 +75,11 @@ class Transmission:
 
     @staticmethod
     def recv(con: Connection) -> Any:  # type: ignore[misc]
-        pkt: Packet = decode(con._recv())  # type: ignore[arg-type]
+        raw = con._recv()
+        if raw == RECV_ERROR:
+            TRANS_LOG.log.error('failed')
+            return RECV_ERROR
+        pkt: Packet = decode(raw)  # type: ignore[arg-type]
         data = Transmission.from_packet(pkt)
         if data:
             TRANS_LOG.log.debug('success')

@@ -1,3 +1,4 @@
+import signal
 from subprocess import Popen, PIPE
 from threading import Thread
 from time import sleep
@@ -23,7 +24,7 @@ class Stdout(Thread):
                 try:
                     output = os.read(self.stdout.fileno(), 1024)
                     if output:
-                        output = output.decode('utf-8')
+                        output = output.decode('utf-8') + '\n'
                         if output:
                             self.publisher.send(output)
                 except OSError:
@@ -81,6 +82,13 @@ class TTY:
         self.p.stdin.write(f'{cmd}\n'.encode('utf-8'))
         self.p.stdin.flush()
 
+    def crtl_c(self):
+        os.kill(self.p.pid, signal.SIGINT)
+
     def terminate(self):
         self.p.terminate()
+        self.p.wait(timeout=0.1)
         self.th_stdout.stop()
+        self.th_stderr.stop()
+        self.th_stdout.join(timeout=0.1)
+        self.th_stderr.join(timeout=0.1)

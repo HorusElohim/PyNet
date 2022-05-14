@@ -1,23 +1,28 @@
+import os
+import signal
+
 from . import Execute, URLS
 from .. import Node
+from typing import Any
 from threading import Thread
-from os import system
-from pynput import keyboard
-import signal
+from time import sleep
 
 
 class Console(Thread):
     subscriber: Node.Subscriber
     active: bool = False
+    last_recv: str
 
     def __init__(self, subscriber: Node.Subscriber):
         Thread.__init__(self)
         self.subscriber = subscriber
+        self.last_recv = ''
 
     def run(self) -> None:
         self.active = True
         while self.active:
-            print(self.subscriber.receive())
+            self.last_recv = self.subscriber.receive()
+            print(self.last_recv)
 
     def stop(self):
         self.active = False
@@ -27,48 +32,44 @@ class Gandalf(Node):
     requester: Node.Requester
     subscriber: Node.Subscriber
     console: Console
-    keyboard_listener: keyboard.Listener
     active: bool = False
 
     def __init__(self):
-        Node.__init__(self, 'DurinServer', enable_signal=False)
+        Node.__init__(self, 'Gandalf', enable_signal=False)
         self.requester = self.new_requester(URLS.client.demander)
         self.subscriber = self.new_subscriber(URLS.client.console)
         self.console = Console(self.subscriber)
         self.console.start()
         self.log.debug('done *')
-        signal.signal(signal.SIGINT, self._sigint_)
 
-    def _sigint_(self, sig: int, frame: object) -> None:
-        self.console.stop()
-        self.console = Console(self.subscriber)
-        self.console.start()
-        self.key_pressed('CRTL-C')
-        system('clear')
-
-    def key_pressed(self, cmd: str):
+    def demand(self, cmd: str) -> Any:
         self.requester.send(Execute(command=cmd))
         res = self.requester.receive()
-        if res == 'Closed':
-            print('Durin Door Closed')
-            self.stop()
         self.log.debug(f'{self} done {res}')
+        return res
 
     def start(self):
         print('Gandalf has started!')
         self.active = True
         while self.active:
             cmd = input('')
-            self.key_pressed(cmd)
+            answer = self.demand(cmd)
+            if answer == 'close':
+                self.stop()
+        self.clean_resources()
+        print('Exiting ...')
         self.log.debug('done * ')
+        os.kill(os.getpid(), signal.SIGKILL)
 
     def clean_resources(self):
+        print('Cleaning resources ...')
+        self.log.debug('Cleaning resources ...')
+        self.console.stop()
         self.requester.close()
-        self.active = False
+        self.subscriber.close()
+        self.console.join(timeout=0.1)
 
     def stop(self):
-        print("Exiting ... ")
-        self.console.stop()
-        self.console.join(timeout=1)
-        self.subscriber.close()
+        print("Stopping ...")
         self.active = False
+        self.log.debug('done *')

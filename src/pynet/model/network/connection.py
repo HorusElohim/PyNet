@@ -17,7 +17,7 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE
+    SUBSCRIBE, LINGER
 )
 from enum import Enum
 
@@ -27,6 +27,8 @@ from typing import Union, List
 
 CONN_LOG = Logger('Connection')
 CONN_LOG.log.debug('Module Init')
+
+RECV_ERROR = bytes(str('ERROR').encode())
 
 
 class ConnectionType(Enum):
@@ -122,7 +124,7 @@ class ConnectionBase:
     def _recv(self) -> bytes:
         if not self.is_open:
             CONN_LOG.log.warning(f'{self} socket is not open')
-            return bytes(str('ERROR').encode())
+            return RECV_ERROR
         try:
             # Receive from the socket
             CONN_LOG.log.debug(f"{self} waiting...")
@@ -131,7 +133,7 @@ class ConnectionBase:
             return bytes(obj)
         except ZMQError as ex:
             CONN_LOG.log.error(f"{self} Error -> {ex}")
-            return bytes(str('ERROR').encode())
+            return RECV_ERROR
 
 
 class ConnectionServerBase(ConnectionBase):
@@ -142,6 +144,7 @@ class ConnectionServerBase(ConnectionBase):
         try:
             CONN_LOG.log.debug(f'{self} binding -> {self.url[0]()}')
             self._socket.bind(self.url[0]())
+            self._socket.setsockopt(LINGER, 1)
             if self._connection_pattern_type.name == PatternType.subscriber.name:
                 self._socket.setsockopt(SUBSCRIBE, b'')
                 CONN_LOG.log.debug(f'{self} subscribe set-sockopt')
@@ -178,6 +181,7 @@ class ConnectionClientBase(ConnectionBase):
             for url in self.url:
                 CONN_LOG.log.debug(f'{self} connecting -> {url()}')
                 self._socket.connect(url())
+                self._socket.setsockopt(LINGER, 1)
             if self._connection_pattern_type.name == PatternType.subscriber.name:
                 self._socket.setsockopt(SUBSCRIBE, b'')
                 CONN_LOG.log.debug(f'{self} subscribe set-sockopt')

@@ -12,6 +12,7 @@
 #
 from .patterns import *
 from typing import Type
+from zmq import Context
 import time
 import signal
 import sys
@@ -63,3 +64,7 @@ class Node(Logger):
 
     def clean_resources(self):
         pass
+
+    def terminate(self):
+        Context.instance().term()
+        self.log.debug('done* ')
