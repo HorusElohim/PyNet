@@ -1,6 +1,5 @@
 wheel
 pyyaml
-pyside6
 GitPython
 rsa
 ipython
@@ -8,6 +7,3 @@ pympler
 dataclassy
 pyzmq
 blosc2
-torch
-torchvision
-torchaudio
