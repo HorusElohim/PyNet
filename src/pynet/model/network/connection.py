@@ -17,10 +17,10 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE, LINGER
+    SUBSCRIBE, LINGER, NOBLOCK
 )
 from enum import Enum
-
+import traceback
 from .. import Logger, Size
 from .url import BaseUrl, Url
 from typing import Union, List
@@ -118,21 +118,24 @@ class ConnectionBase:
             CONN_LOG.log.debug(f"{self} sent data with size {Size.pretty_obj_size(obj)}")
             return True
         except ZMQError as ex:
-            CONN_LOG.log.error(f"{self} failed. Error -> {ex}")
+            CONN_LOG.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
             return False
 
-    def _recv(self) -> bytes:
+    def _recv(self, wait=True) -> bytes:
         if not self.is_open:
             CONN_LOG.log.warning(f'{self} socket is not open')
             return RECV_ERROR
         try:
             # Receive from the socket
             CONN_LOG.log.debug(f"{self} waiting...")
-            obj = self._socket.recv()
+            if wait:
+                obj = self._socket.recv()
+            else:
+                obj = self._socket.recv(NOBLOCK)
             CONN_LOG.log.debug(f"{self} received data bytes, with size {Size.pretty_obj_size(obj)}")
             return bytes(obj)
         except ZMQError as ex:
-            CONN_LOG.log.error(f"{self} Error -> {ex}")
+            CONN_LOG.log.error(f"{self} Error -> {ex}. \n{traceback.format_exc()}")
             return RECV_ERROR
 
 
@@ -188,10 +191,10 @@ class ConnectionClientBase(ConnectionBase):
             CONN_LOG.log.debug(f'{self} done *')
             self.is_open = True
         except ZMQError as ex:
-            CONN_LOG.log.error(f"{self} Error opening socket for url {self.url}:\nException -> {ex}")
+            CONN_LOG.log.error(f"{self} Error opening socket for url {self.url}:\nException -> {ex}  \n{traceback.format_exc()}")
             self.is_open = False
         except TypeError as terr:
-            CONN_LOG.log.error(f"{self} Error opening socket for url {self.url}:\nException -> {terr}")
+            CONN_LOG.log.error(f"{self} Error opening socket for url {self.url}:\nException -> {terr} \n{traceback.format_exc()}")
         finally:
             return self.is_open
 

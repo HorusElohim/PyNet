@@ -74,8 +74,8 @@ class Transmission:
         return res
 
     @staticmethod
-    def recv(con: Connection) -> Any:  # type: ignore[misc]
-        raw = con._recv()
+    def recv(con: Connection, wait=True) -> Any:  # type: ignore[misc]
+        raw = con._recv(wait)
         if raw == RECV_ERROR:
             TRANS_LOG.log.error('failed')
             return RECV_ERROR

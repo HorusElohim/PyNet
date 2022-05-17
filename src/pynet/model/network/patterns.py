@@ -29,9 +29,9 @@ class PatternBase(Connection):
         PATTERN_LOG.log.debug(f'{self} send')
         return Transmission.send(self, data, compression=compression)
 
-    def receive(self) -> Any:
+    def receive(self, wait=True) -> Any:
         PATTERN_LOG.log.debug(f'{self} receive')
-        return Transmission.recv(self)
+        return Transmission.recv(self, wait)
 
 
 class Publisher(PatternBase):
