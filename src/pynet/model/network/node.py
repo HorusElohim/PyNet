@@ -19,6 +19,9 @@ import sys
 
 
 class Node(Logger):
+    SERVER: Connection.SERVER = Connection.SERVER
+    CLIENT: Connection.CLIENT = Connection.CLIENT
+    Url: Url = Url
     Publisher: Type[Publisher] = Publisher
     Subscriber: Type[Subscriber] = Subscriber
     Pusher: Type[Pusher] = Pusher
