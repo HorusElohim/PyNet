@@ -45,25 +45,30 @@ class Node(Logger):
         if enable_signal:
             signal.signal(signal.SIGINT, self._sigint_)
 
-    def new_publisher(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Publisher:
+    def new_publisher(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER,
+                      flags: Union[List[Tuple[int, int]], None] = None) -> Publisher:
         self.log.debug(f'new publisher on channel: {url}')
-        return Publisher(self.name, connection_type, url)
+        return Publisher(self.name, connection_type, url, flags=flags)
 
-    def new_subscriber(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Subscriber:
+    def new_subscriber(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT,
+                       flags: Union[List[Tuple[int, int]], None] = None) -> Subscriber:
         self.log.debug(f'new subscriber on url: {url}')
-        return Subscriber(self.name, connection_type, url)
+        return Subscriber(self.name, connection_type, url, flags=flags)
 
-    def new_requester(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT) -> Requester:
+    def new_requester(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.CLIENT,
+                      flags: Union[List[Tuple[int, int]], None] = None) -> Requester:
         self.log.debug(f'new requester on url: {url}')
-        return Requester(self.name, connection_type, url)
+        return Requester(self.name, connection_type, url, flags=flags)
 
-    def new_replier(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Replier:
+    def new_replier(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER,
+                    flags: Union[List[Tuple[int, int]], None] = None) -> Replier:
         self.log.debug(f'new replier on url: {url}')
-        return Replier(self.name, connection_type, url)
+        return Replier(self.name, connection_type, url, flags=flags)
 
-    def new_pair(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER) -> Pair:
+    def new_pair(self, url: Url.BaseUrl, connection_type: Connection.Type = Connection.SERVER,
+                 flags: Union[List[Tuple[int, int]], None] = None) -> Pair:
         self.log.debug(f'new pair on url: {url}')
-        return Pair(self.name, connection_type, url)
+        return Pair(self.name, connection_type, url, flags=flags)
 
     def clean_resources(self):
         pass

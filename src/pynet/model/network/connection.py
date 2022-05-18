@@ -23,7 +23,7 @@ from enum import Enum
 import traceback
 from .. import Logger, Size
 from .url import BaseUrl, Url
-from typing import Union, List
+from typing import Union, List, Tuple
 
 CONN_LOG = Logger('Connection')
 CONN_LOG.log.debug('Module Init')
@@ -49,6 +49,11 @@ class PatternType(Enum):
     pair = PAIR
 
 
+CONNECTION_DEFAULT_FLAGS = [
+    (LINGER, 1),
+]
+
+
 class ConnectionUrlNotSet(Exception):
     pass
 
@@ -64,17 +69,17 @@ class ConnectionBase:
 
     """
 
-    def __init__(self, name: str, connection_type: ConnectionType, pattern_type: PatternType):
+    def __init__(self, name: str, connection_type: ConnectionType, pattern_type: PatternType, flags: Union[List[Tuple[int, int]], None] = None):
         """
 
         :param pattern_type: Connection ZMQ Pattern Type
 
         """
-
         self._connection_name = name
         self._connection_type = connection_type
         self._connection_pattern_type = pattern_type
         self._connection_urls = []
+        self._connection_flags = flags if flags else CONNECTION_DEFAULT_FLAGS
         self.is_open = False
         # ZMQ Socket
         self._socket = Context.instance().socket(self._connection_pattern_type.value)  # type: ignore[no-untyped-call]
@@ -147,7 +152,10 @@ class ConnectionServerBase(ConnectionBase):
         try:
             CONN_LOG.log.debug(f'{self} binding -> {self.url[0]()}')
             self._socket.bind(self.url[0]())
-            self._socket.setsockopt(LINGER, 1)
+            for flags in self._connection_flags:
+                CONN_LOG.log.debug(f'{self} setting Connections flag: {flags}')
+                assert len(flags) == 2, f"{self} wrong Connections Flags {flags}"
+                self._socket.setsockopt(flags[0], flags[1])
             if self._connection_pattern_type.name == PatternType.subscriber.name:
                 self._socket.setsockopt(SUBSCRIBE, b'')
                 CONN_LOG.log.debug(f'{self} subscribe set-sockopt')
@@ -184,7 +192,10 @@ class ConnectionClientBase(ConnectionBase):
             for url in self.url:
                 CONN_LOG.log.debug(f'{self} connecting -> {url()}')
                 self._socket.connect(url())
-                self._socket.setsockopt(LINGER, 1)
+                for flags in self._connection_flags:
+                    CONN_LOG.log.debug(f'{self} setting Connections flag: {flags}')
+                    assert len(flags) == 2, f"{self} wrong Connections Flags {flags}"
+                    self._socket.setsockopt(flags[0], flags[1])
             if self._connection_pattern_type.name == PatternType.subscriber.name:
                 self._socket.setsockopt(SUBSCRIBE, b'')
                 CONN_LOG.log.debug(f'{self} subscribe set-sockopt')
