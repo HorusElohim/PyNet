@@ -17,7 +17,7 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE, LINGER, NOBLOCK
+    SUBSCRIBE, LINGER, NOBLOCK, EAGAIN
 )
 from enum import Enum
 import traceback
@@ -123,7 +123,10 @@ class ConnectionBase:
             CONN_LOG.log.debug(f"{self} sent data with size {Size.pretty_obj_size(obj)}")
             return True
         except ZMQError as ex:
-            CONN_LOG.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
+            if ex.errno == EAGAIN:
+                CONN_LOG.log.warning(f"{self} resource not available. Error -> {ex}")
+            else:
+                CONN_LOG.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
             return False
 
     def _recv(self, wait=True) -> bytes:
@@ -140,7 +143,10 @@ class ConnectionBase:
             CONN_LOG.log.debug(f"{self} received data bytes, with size {Size.pretty_obj_size(obj)}")
             return bytes(obj)
         except ZMQError as ex:
-            CONN_LOG.log.error(f"{self} Error -> {ex}. \n{traceback.format_exc()}")
+            if ex.errno == EAGAIN:
+                CONN_LOG.log.warning(f"{self} resource not available. Error -> {ex}")
+            else:
+                CONN_LOG.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
             return RECV_ERROR
 
 
