@@ -70,9 +70,9 @@ class Node(Logger):
         self.log.debug(f'new pair on url: {url}')
         return Pair(self.name, connection_type, url, flags=flags)
 
-    def clean_resources(self):
+    def clean_resources(self) -> None:
         pass
 
-    def terminate(self):
+    def terminate(self) -> None:
         Context.instance().term()
         self.log.debug('done* ')
