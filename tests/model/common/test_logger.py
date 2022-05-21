@@ -1,6 +1,6 @@
 from pynet.model.common import Logger
 
-TEST_LOGGER = Logger('Test-Logger')
+TEST_LOGGER = Logger('test_0_logger')
 
 
 def test_logger():
@@ -19,7 +19,7 @@ def test_logger_file():
 
 def test_logger_change_name():
     logger = Logger(logger_other=TEST_LOGGER)
-    new_name = 'Test-Logger-NameChanged'
+    new_name = 'test_logger_name_changed'
     assert logger is not None
     logger.log.debug('[3]')
     assert logger.logger_file_path.exists()
@@ -32,7 +32,7 @@ def test_logger_change_name():
 
 def test_logger_change_file_name():
     logger = Logger(logger_other=TEST_LOGGER)
-    new_name = 'Test-Logger-FileChanged'
+    new_name = 'test_0_logger_swap_file'
     logger.log.debug('[5]')
     logger.logger_file_name = new_name
     logger.log.debug('[6] debug logger has change file')

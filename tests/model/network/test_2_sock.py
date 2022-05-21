@@ -1,7 +1,7 @@
 from pynet.model.network.sock import Sock
 from pynet.model import Logger
 from dataclassy import dataclass
-from ..thread_runner import Worker, WorkerRunner
+from .thread_runner import Worker, WorkerRunner
 import pytest
 from time import sleep
 
