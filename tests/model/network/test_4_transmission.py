@@ -1,11 +1,14 @@
-from pynet.model.network.transmission import Packet, Transmission, Connection
-from pynet.model.network.url import Url, BaseUrl
+from pynet.model.network.transmission import Transmission
+from pynet.model.network.sock import Sock
+from pynet.model import Logger
 from dataclassy import dataclass
 from .thread_runner import WorkerRunner, Worker
 from time import sleep
 import pytest
 
 DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+TEST_LOG = Logger('test_4_transmission')
 
 
 def test_transmission_packets():
@@ -28,47 +31,45 @@ def test_transmission_compressed_packets():
 class TransmissionTestCase:
     name1: str
     name2: str
-    type1: Connection.Type
-    type2: Connection.Type
-    pattern1: Connection.Pattern
-    pattern2: Connection.Pattern
+    pattern1: Sock.Pattern
+    pattern2: Sock.Pattern
     wait1: float
     wait2: float
-    url1: BaseUrl
-    url2: BaseUrl
+    url1: Sock.SockUrl
+    url2: Sock.SockUrl
     data: object
     compression: bool
 
 
 # Actions for connection bind
 # publisher, pusher
-class TransmissionBindWorker(Worker):
+class TransmissionSendWorker(Worker):
     def __init__(self, test_case):
         Worker.__init__(self)
         self.test_case: TransmissionTestCase = test_case
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
-        c.url = self.test_case.url1
-        c.open()
+        sock = Sock(self.test_case.name1, self.test_case.pattern1, logger_other=TEST_LOG)
+        sock.sock_urls = self.test_case.url1
+        sock.open()
         sleep(self.test_case.wait1)
-        self.result = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
+        self.result = Transmission.send(sock, self.test_case.data, compression=self.test_case.compression)
         sleep(self.test_case.wait1)
-        c.close()
+        sock.close()
 
 
 # # Actions for connection connect
 # # subscriber, puller
-class TransmissionConnectWorker(Worker):
+class TransmissionReceiveWorker(Worker):
     def __init__(self, test_case):
         Worker.__init__(self)
         self.test_case: TransmissionTestCase = test_case
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
-        c.url = self.test_case.url2
+        c = Sock(self.test_case.name2, self.test_case.pattern2, logger_other=TEST_LOG)
+        c.sock_urls = self.test_case.url2
         c.open()
         sleep(self.test_case.wait2)
         self.result = Transmission.recv(c)
@@ -78,66 +79,69 @@ class TransmissionConnectWorker(Worker):
 
 TestCasesPubSubPushPullServerClient = [
     # Publisher/Subscriber Server/Client No Compression
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.3,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.3,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(), wait1=0.3,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.3,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
-                          compression=False, data=DATA, )),
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                          wait1=0.3,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
+                          wait2=0.4, compression=False, data=DATA, )),
     # Publisher/Subscriber Server/Client With Compression
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.3,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.3,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(), wait1=0.3,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.3,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                          wait1=0.3,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
+                          wait2=0.4,
                           compression=True, data=DATA, )),
 
     # Pusher/Puller Server/Client No Compression
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.3,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.3,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(), wait1=0.3,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.3,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait1=0.3,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait2=0.4,
                           compression=False, data=DATA, )),
     # Pusher/Puller Server/Client With Compression
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.3,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.3,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(), wait1=0.3,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.3,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait1=0.3,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait2=0.4,
                           compression=True, data=DATA, )),
 
     # Pair Server/Client No Compression
-    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.3,
-                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPair', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.3,
+                          name2='TestPair', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.3,
-                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPair', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.3,
+                          name2='TestPair', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
-                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    (TransmissionTestCase(name1='TestPair', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait1=0.3,
+                          name2='TestPair', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait2=0.4,
                           compression=False, data=DATA, )),
     # Pair Server/Client With Compression
-    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.3,
-                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPair', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.3,
+                          name2='TestPair', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.3,
-                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.4,
+    (TransmissionTestCase(name1='TestPair', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.3,
+                          name2='TestPair', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.4,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPair', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.3,
-                          name2='TestPair', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    (TransmissionTestCase(name1='TestPair', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait1=0.3,
+                          name2='TestPair', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait2=0.4,
                           compression=True, data=DATA, )),
 ]
 
@@ -147,7 +151,7 @@ TestCasesPubSubPushPullServerClient = [
 # Server/Client
 @pytest.mark.parametrize('test_case', TestCasesPubSubPushPullServerClient)
 def test_transmission_pub_sub_pull_push_server_client(test_case):
-    worker = [TransmissionBindWorker(test_case), TransmissionConnectWorker(test_case)]
+    worker = [TransmissionSendWorker(test_case), TransmissionReceiveWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[0].result
     assert worker[1].result == test_case.data
@@ -155,64 +159,68 @@ def test_transmission_pub_sub_pull_push_server_client(test_case):
 
 TestCasesPubSubPushPullClientServer = [
     # Publisher/Subscriber Client/Server No Compression
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.4,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip="*"), wait2=0.1,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(), wait1=0.4,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.1,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
+                          wait1=0.5,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                          wait2=0.1,
                           compression=False, data=DATA, )),
     # Publisher/Subscriber Client/Server With Compression
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Remote(ip='*'), wait1=0.4,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Remote(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.1,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(), wait1=0.4,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.1,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUB, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                          name2='TestSUB', type2=Connection.CLIENT, pattern2=Connection.SUB, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.publisher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
+                          wait1=0.5,
+                          name2='TestSUB', pattern2=Sock.Pattern.subscriber, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                          wait2=0.1,
                           compression=True, data=DATA, )),
     # Pusher/Puller Client/Server No Compression
-    (TransmissionTestCase(name1='TestPUB', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.4,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUB', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.1,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(), wait1=0.4,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.1,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait1=0.5,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait2=0.1,
                           compression=False, data=DATA, )),
     # Pusher/Puller Client/Server With Compression
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Remote(ip='*'), wait1=0.4,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Remote(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.1,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(), wait1=0.4,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.1,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPUSH', type1=Connection.SERVER, pattern1=Connection.PUSH, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                          name2='TestPULL', type2=Connection.CLIENT, pattern2=Connection.PULL, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    (TransmissionTestCase(name1='TestPUSH', pattern1=Sock.Pattern.pusher, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait1=0.5,
+                          name2='TestPULL', pattern2=Sock.Pattern.puller, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait2=0.1,
                           compression=True, data=DATA, )),
     # Pair Client/Server  No Compression
-    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.4,
-                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPAIR', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPAIR', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.1,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.4,
-                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPAIR', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPAIR', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.1,
                           compression=False, data=DATA, )),
-    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    (TransmissionTestCase(name1='TestPAIR', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait1=0.5,
+                          name2='TestPAIR', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait2=0.1,
                           compression=False, data=DATA, )),
     # Pair Client/Server  With Compression
-    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Remote(ip='*'), wait1=0.4,
-                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Remote(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPAIR', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPAIR', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.1,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(), wait1=0.4,
-                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(), wait2=0.2,
+    (TransmissionTestCase(name1='TestPAIR', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.5,
+                          name2='TestPAIR', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.1,
                           compression=True, data=DATA, )),
-    (TransmissionTestCase(name1='TestPAIR', type1=Connection.SERVER, pattern1=Connection.PAIR, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                          name2='TestPAIR', type2=Connection.CLIENT, pattern2=Connection.PAIR, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    (TransmissionTestCase(name1='TestPAIR', pattern1=Sock.Pattern.pair, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait1=0.5,
+                          name2='TestPAIR', pattern2=Sock.Pattern.pair, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait2=0.1,
                           compression=True, data=DATA, )),
 ]
 
@@ -222,7 +230,7 @@ TestCasesPubSubPushPullClientServer = [
 # Server/Client
 @pytest.mark.parametrize('test_case', TestCasesPubSubPushPullClientServer)
 def test_transmission_pub_sub_pull_push_client_server(test_case):
-    worker = [TransmissionConnectWorker(test_case), TransmissionBindWorker(test_case)]
+    worker = [TransmissionReceiveWorker(test_case), TransmissionSendWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[1].result
     assert worker[0].result == test_case.data
@@ -237,13 +245,13 @@ class TransmissionReplierWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
-        c.url = self.test_case.url1
-        c.open()
+        sock = Sock(self.test_case.name1, self.test_case.pattern1, logger_other=TEST_LOG)
+        sock.sock_urls = self.test_case.url1
+        sock.open()
         sleep(self.test_case.wait1)
-        req = Transmission.recv(c)
-        rep = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
-        c.close()
+        req = Transmission.recv(sock)
+        rep = Transmission.send(sock, self.test_case.data, compression=self.test_case.compression)
+        sock.close()
         self.result = {
             'req': req,
             'rep_result': rep
@@ -259,14 +267,14 @@ class TransmissionRequesterWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
-        c.url = self.test_case.url2
-        c.open()
+        sock = Sock(self.test_case.name2, self.test_case.pattern2, logger_other=TEST_LOG)
+        sock.sock_urls = self.test_case.url2
+        sock.open()
         sleep(self.test_case.wait2)
-        req_res = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
-        rep = Transmission.recv(c)
+        req_res = Transmission.send(sock, self.test_case.data, compression=self.test_case.compression)
+        rep = Transmission.recv(sock)
         sleep(self.test_case.wait2)
-        c.close()
+        sock.close()
         self.result = {
             'req_result': req_res,
             'rep': rep
@@ -274,23 +282,23 @@ class TransmissionRequesterWorker(Worker):
 
 
 TestCasesReqRepServerClient = [
-    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Remote(ip='*'), wait1=0.4,
-                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Remote(), wait2=0.2,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.4,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.2,
                          data=DATA, compression=False),
-    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(), wait1=0.4,
-                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.2,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.4,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.2,
                          data=DATA, compression=False),
-    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait1=0.4,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait2=0.2,
                          data=DATA, compression=False),
-    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Remote(ip='*'), wait1=0.4,
-                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Remote(), wait2=0.2,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait1=0.4,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait2=0.2,
                          data=DATA, compression=True),
-    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(), wait1=0.4,
-                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.2,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait1=0.4,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait2=0.2,
                          data=DATA, compression=True),
-    TransmissionTestCase(name1='TestREP', type1=Connection.SERVER, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.4,
-                         name2='TestREQ', type2=Connection.CLIENT, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.2,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait1=0.4,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait2=0.2,
                          data=DATA, compression=True),
 
 ]
@@ -313,23 +321,23 @@ def test_connections_req_rep_server_client(test_case):
 
 
 TestCasesReqRepClientServer = [
-    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Remote(), wait1=0.2,
-                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Remote(ip='*'), wait2=0.4,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.2,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.4,
                          data=DATA, compression=False),
-    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(), wait1=0.2,
-                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.4,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.2,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.4,
                          data=DATA, compression=False),
-    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.2,
-                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait1=0.2,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait2=0.4,
                          data=DATA, compression=False),
-    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Remote(), wait1=0.2,
-                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Remote(ip='*'), wait2=0.4,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), wait1=0.2,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), wait2=0.4,
                          data=DATA, compression=True),
-    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(), wait1=0.2,
-                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(), wait2=0.4,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), wait1=0.2,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER), wait2=0.4,
                          data=DATA, compression=True),
-    TransmissionTestCase(name1='TestREP', type1=Connection.CLIENT, pattern1=Connection.REP, url1=Url.Local(local_type=Url.IPC), wait1=0.2,
-                         name2='TestREQ', type2=Connection.SERVER, pattern2=Connection.REQ, url2=Url.Local(local_type=Url.IPC), wait2=0.4,
+    TransmissionTestCase(name1='TestREP', pattern1=Sock.Pattern.replier, url1=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), wait1=0.2,
+                         name2='TestREQ', pattern2=Sock.Pattern.requester, url2=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), wait2=0.4,
                          data=DATA, compression=True),
 
 ]

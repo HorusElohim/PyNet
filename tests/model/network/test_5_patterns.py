@@ -1,4 +1,5 @@
-from pynet.model.network.url import Url, BaseUrl
+from pynet.model import Logger
+from pynet.model.network import Sock
 from pynet.model.network.patterns import *
 from dataclassy import dataclass
 from .thread_runner import WorkerRunner, Worker
@@ -7,6 +8,8 @@ import pytest
 
 DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+TEST_LOG = Logger('test_5_patterns')
+
 
 @dataclass(unsafe_hash=True, slots=True)
 class PatternsTestCase:
@@ -14,8 +17,8 @@ class PatternsTestCase:
     pattern2: PatternBase
     wait1: float
     wait2: float
-    url1: BaseUrl
-    url2: BaseUrl
+    url1: Sock.SockUrl
+    url2: Sock.SockUrl
     data: object
     compression: bool
 
@@ -29,7 +32,7 @@ class PatternSendWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        self.test_case.pattern1.url = self.test_case.url1
+        self.test_case.pattern1.sock_urls = self.test_case.url1
         self.test_case.pattern1.open()
         sleep(self.test_case.wait1)
         self.result = self.test_case.pattern1.send(self.test_case.data, self.test_case.compression)
@@ -46,7 +49,7 @@ class PatternReceiveWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        self.test_case.pattern2.url = self.test_case.url2
+        self.test_case.pattern2.sock_urls = self.test_case.url2
         self.test_case.pattern2.open()
         sleep(self.test_case.wait2)
         self.result = self.test_case.pattern2.receive()
@@ -57,24 +60,24 @@ class PatternReceiveWorker(Worker):
 TestCasesPubSubPushPullServerClient = [
     # Publisher/Subscriber Server/Client
     # No Compression
-    PatternsTestCase(pattern1=Publisher('PUB', Connection.SERVER), wait1=0.4, url1=Url.Remote(ip='*'),
-                     pattern2=Subscriber('SUB', Connection.CLIENT), wait2=0.4, url2=Url.Remote(),
+    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'),
+                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT),
                      data=DATA, compression=False),
-    PatternsTestCase(pattern1=Publisher('PUB', Connection.SERVER), wait1=0.4, url1=Url.Local(),
-                     pattern2=Subscriber('SUB', Connection.CLIENT), wait2=0.4, url2=Url.Local(),
+    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER),
+                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT),
                      data=DATA, compression=False),
-    PatternsTestCase(pattern1=Publisher('PUB', Connection.SERVER), wait1=0.4, url1=Url.Local(local_type=Url.IPC),
-                     pattern2=Subscriber('SUB', Connection.CLIENT), wait2=0.4, url2=Url.Local(local_type=Url.IPC),
+    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
                      data=DATA, compression=False),
     # With Compression
-    PatternsTestCase(pattern1=Publisher('PUB', Connection.SERVER), wait1=0.4, url1=Url.Remote(ip='*'),
-                     pattern2=Subscriber('SUB', Connection.CLIENT), wait2=0.4, url2=Url.Remote(),
+    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'),
+                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT),
                      data=DATA, compression=True),
-    PatternsTestCase(pattern1=Publisher('PUB', Connection.SERVER), wait1=0.4, url1=Url.Local(),
-                     pattern2=Subscriber('SUB', Connection.CLIENT), wait2=0.4, url2=Url.Local(),
+    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER),
+                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT),
                      data=DATA, compression=True),
-    PatternsTestCase(pattern1=Publisher('PUB', Connection.SERVER), wait1=0.4, url1=Url.Local(local_type=Url.IPC),
-                     pattern2=Subscriber('SUB', Connection.CLIENT), wait2=0.4, url2=Url.Local(local_type=Url.IPC),
+    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
                      data=DATA, compression=True),
 ]
 
@@ -137,15 +140,17 @@ class PatternReceiveAutoWorker(Worker):
 TestCasesAutoPubSubServerClient = [
     # Publisher/Subscriber Server/Client
     # No Compression
-    PatternsAutoTestCase(pattern1=Publisher('PUB', Connection.SERVER, urls=Url.Remote(ip='*'), auto_open=False), wait1=0.4,
-                         pattern2=Subscriber('SUB', Connection.CLIENT, urls=Url.Remote(), auto_open=False), wait2=0.4,
+    PatternsAutoTestCase(pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+                         pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.4,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Publisher('PUB', Connection.SERVER, urls=Url.Local(), auto_open=False), wait1=0.4,
-                         pattern2=Subscriber('SUB', Connection.CLIENT, urls=Url.Local(), auto_open=False), wait2=0.4,
+    PatternsAutoTestCase(pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+                         pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.4,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Publisher('PUB', Connection.SERVER, urls=Url.Local(local_type=Url.IPC), auto_open=False), wait1=0.4,
-                         pattern2=Subscriber('SUB', Connection.CLIENT, urls=Url.Local(local_type=Url.IPC), auto_open=False), wait2=0.4,
-                         data=DATA, compression=False),
+    PatternsAutoTestCase(
+        pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+        pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+        wait2=0.4,
+        data=DATA, compression=False),
 ]
 
 
@@ -163,27 +168,34 @@ def test_transmission_auto_open_pub_sub_server_client(test_case):
 TestCasesAutoPushPullServerClient = [
     # Pusher/Puller Server/Client
     # No Compression
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', Connection.SERVER, urls=Url.Remote(ip='*'), auto_open=False), wait1=0.6,
-                         pattern2=Puller('PULL', Connection.CLIENT, urls=Url.Remote(), auto_open=False), wait2=0.2,
+    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
+                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', Connection.SERVER, urls=Url.Local(), auto_open=False), wait1=0.6,
-                         pattern2=Puller('PULL', Connection.CLIENT, urls=Url.Local(), auto_open=False), wait2=0.2,
+    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
+                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', Connection.SERVER, urls=Url.Local(local_type=Url.IPC), auto_open=False), wait1=0.6,
-                         pattern2=Puller('PULL', Connection.CLIENT, urls=Url.Local(local_type=Url.IPC), auto_open=False), wait2=0.1,
-                         data=DATA, compression=False),
+    PatternsAutoTestCase(
+        pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
+        pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait2=0.1,
+        data=DATA, compression=False),
     # With Compression
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', Connection.SERVER, urls=Url.Remote(ip='*', port=28129), auto_open=False), wait1=0.6,
-                         pattern2=Puller('PULL', Connection.CLIENT, urls=Url.Remote(port=28129), auto_open=False), wait2=0.2,
+    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=28129), auto_open=False, logger_other=TEST_LOG),
+                         wait1=0.6,
+                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=28129), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
                          data=DATA, compression=True),
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', Connection.SERVER, urls=Url.Local(path='/tmp/pynet_1'), auto_open=False), wait1=0.6,
-                         pattern2=Puller('PULL', Connection.CLIENT, urls=Url.Local(path='/tmp/pynet_1'), auto_open=False), wait2=0.2,
-                         data=DATA, compression=True),
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', Connection.SERVER, urls=Url.Local(path='/tmp/pynet_2', local_type=Url.IPC), auto_open=False),
-                         wait1=0.9,
-                         pattern2=Puller('PULL', Connection.CLIENT, urls=Url.Local(path='/tmp/pynet_2', local_type=Url.IPC), auto_open=False),
+    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+                         wait1=0.6,
+                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
                          wait2=0.2,
                          data=DATA, compression=True),
+    PatternsAutoTestCase(
+        pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                        logger_other=TEST_LOG),
+        wait1=0.9,
+        pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                        logger_other=TEST_LOG),
+        wait2=0.2,
+        data=DATA, compression=True),
 ]
 
 
@@ -201,15 +213,18 @@ def test_transmission_auto_open_push_pull_server_client(test_case):
 TestCasesAutoPairServerClient = [
     # Pair
     # No Compression
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', Connection.SERVER, urls=Url.Remote(ip='*'), auto_open=False), wait1=0.4,
-                         pattern2=Pair('PAIR2', Connection.CLIENT, urls=Url.Remote(), auto_open=False), wait2=0.3,
+    PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+                         pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.3,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', Connection.SERVER, urls=Url.Local(path='/tmp/pynet_1'), auto_open=False), wait1=0.4,
-                         pattern2=Pair('PAIR2', Connection.CLIENT, urls=Url.Local(path='/tmp/pynet_1'), auto_open=False), wait2=0.3,
+    PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+                         wait1=0.4,
+                         pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+                         wait2=0.3,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', Connection.SERVER, urls=Url.Local(local_type=Url.IPC), auto_open=False), wait1=0.4,
-                         pattern2=Pair('PAIR2', Connection.CLIENT, urls=Url.Local(local_type=Url.IPC), auto_open=False), wait2=0.3,
-                         data=DATA, compression=False),
+    PatternsAutoTestCase(
+        pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+        pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait2=0.3,
+        data=DATA, compression=False),
 ]
 
 
@@ -233,13 +248,13 @@ class PatternReplierWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.name1, self.test_case.type1, self.test_case.pattern1)
-        c.url = self.test_case.url1
-        c.open()
+        self.test_case.pattern1.open()
         sleep(self.test_case.wait1)
-        req = Transmission.recv(c)
-        rep = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
-        c.close()
+        req = self.test_case.pattern1.receive()
+        rep = self.test_case.pattern1.send(self.test_case.data, compression=self.test_case.compression)
+        sleep(self.test_case.wait1)
+        self.test_case.pattern1.close()
+
         self.result = {
             'req': req,
             'rep_result': rep
@@ -255,14 +270,13 @@ class PatternRequesterWorker(Worker):
         self.result = None
 
     def run(self) -> None:
-        c = Connection(self.test_case.name2, self.test_case.type2, self.test_case.pattern2)
-        c.url = self.test_case.url2
-        c.open()
-        sleep(self.test_case.wait2)
-        req_res = Transmission.send(c, self.test_case.data, compression=self.test_case.compression)
-        rep = Transmission.recv(c)
-        sleep(self.test_case.wait2)
-        c.close()
+        self.test_case.pattern1.open()
+        sleep(self.test_case.wait1)
+        req_res = self.test_case.pattern1.send(self.test_case.data, compression=self.test_case.compression)
+        rep = self.test_case.pattern1.receive()
+        sleep(self.test_case.wait1)
+        self.test_case.pattern1.close()
+
         self.result = {
             'req_result': req_res,
             'rep': rep
@@ -272,17 +286,22 @@ class PatternRequesterWorker(Worker):
 TestCasesAutoPairReqRep = [
     # Pair
     # No Compression
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', Connection.SERVER, urls=Url.Remote(ip='*'), auto_open=False), wait1=0.4,
-                         pattern2=Pair('PAIR2', Connection.CLIENT, urls=Url.Remote(), auto_open=False), wait2=0.3,
+    PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+                         pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.3,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', Connection.SERVER, urls=Url.Local(path='/tmp/pynet_1'), auto_open=False), wait1=0.4,
-                         pattern2=Pair('PAIR2', Connection.CLIENT, urls=Url.Local(path='/tmp/pynet_1'), auto_open=False), wait2=0.3,
-                         data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', Connection.SERVER, urls=Url.Local(path='/tmp/pynet_2', local_type=Url.IPC), auto_open=False),
+    PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
                          wait1=0.4,
-                         pattern2=Pair('PAIR2', Connection.CLIENT, urls=Url.Local(path='/tmp/pynet_2', local_type=Url.IPC), auto_open=False),
+                         pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
                          wait2=0.3,
                          data=DATA, compression=False),
+    PatternsAutoTestCase(
+        pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                      logger_other=TEST_LOG),
+        wait1=0.4,
+        pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                      logger_other=TEST_LOG),
+        wait2=0.3,
+        data=DATA, compression=False),
 ]
 
 

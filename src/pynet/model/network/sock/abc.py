@@ -20,12 +20,11 @@ from zmq import (
     SUBSCRIBE, LINGER, DONTWAIT, EAGAIN, NULL
 )
 from enum import IntEnum
-import traceback
 from ... import Size, AbcEntity
 from . import SockUrl
 from typing import Union, List, Tuple, Type
-
-RECV_ERROR = bytes(str('ERROR').encode())
+import logging
+import traceback
 
 
 class SockPatternType(IntEnum):
@@ -54,16 +53,19 @@ SOCK_DEFAULT_FLAGS = [
 ]
 
 
-class SockUrlNotSet(Exception):
-    pass
+class SockUrlNotSetError(Exception):
+    def __init__(self, log: logging.Logger, socks_urls: List[SockUrl.Abc]):
+        log.error(f'SockUrlNotSetError -> {socks_urls} ')
 
 
-class SockServerCannotHasMoreThenOneUrl(Exception):
-    pass
+class SockServerCannotHasMoreThenOneUrlError(Exception):
+    def __init__(self, log: logging.Logger, socks_urls: List[SockUrl.Abc]):
+        log.error(f'SockServerCannotHasMoreThenOneUrlError -> {socks_urls}')
 
 
-class SockCannotBeClientAndServer(Exception):
-    pass
+class SockCannotBeClientAndServerError(Exception):
+    def __init__(self, log: logging.Logger, socks_urls: List[SockUrl.Abc]):
+        log.error(f'SockCannotBeClientAndServerError -> {socks_urls}')
 
 
 class AbcSock(AbcEntity):
@@ -71,6 +73,7 @@ class AbcSock(AbcEntity):
     Pattern: Type[SockPatternType] = SockPatternType
     Flags: Type[SockFlags] = SockFlags
     ERROR: Type[ZMQError] = ZMQError
+    RECV_ERROR = bytes(str('ERROR').encode())
 
     """
         Sock Class
@@ -105,7 +108,7 @@ class AbcSock(AbcEntity):
     @property
     def sock_urls(self):
         if len(self._sock_urls) == 0:
-            raise SockUrlNotSet
+            raise SockUrlNotSetError(self.log, self._sock_urls)
         return self._sock_urls
 
     @sock_urls.setter
@@ -116,7 +119,7 @@ class AbcSock(AbcEntity):
             self._sock_urls += url
 
         if self.__has_multiple_server_sock_type():
-            raise SockServerCannotHasMoreThenOneUrl
+            raise SockServerCannotHasMoreThenOneUrlError(self.log, self._sock_urls)
         self.log.debug(f'{self} url updated')
 
     def __has_multiple_server_sock_type(self) -> bool:
@@ -138,7 +141,7 @@ class AbcSock(AbcEntity):
     @property
     def sock_type(self) -> SockUrl.SockType:
         if self.__has_different_sock_type():
-            raise SockCannotBeClientAndServer()
+            raise SockCannotBeClientAndServerError(self.log, self._sock_urls)
         return self.sock_urls[0].sock_type
 
     def _send(self, obj: bytes, flag: int = 0) -> bool:
@@ -159,7 +162,7 @@ class AbcSock(AbcEntity):
     def _recv(self, flag: int = 0) -> bytes:
         if not self.is_open:
             self.log.warning(f'{self} socket is not open')
-            return RECV_ERROR
+            return self.RECV_ERROR
         try:
             # Receive from the socket
             self.log.debug(f"{self} waiting...")
@@ -171,7 +174,10 @@ class AbcSock(AbcEntity):
                 self.log.warning(f"{self} resource not available. Error -> {ex}")
             else:
                 self.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
-            return RECV_ERROR
+            return self.RECV_ERROR
 
     def __repr__(self) -> str:
-        return f'{self._sock_name}:{self._sock_pattern_type.name}'
+        if len(self._sock_urls) > 0:
+            return f'{self._sock_name}:{self._sock_pattern_type.name}:{self.sock_type.name}'
+        else:
+            return f'{self._sock_name}:{self._sock_pattern_type.name}:-'

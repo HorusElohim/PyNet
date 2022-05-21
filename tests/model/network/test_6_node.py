@@ -1,15 +1,18 @@
 from pynet.model.network.node import *
 from .thread_runner import WorkerRunner, Worker
 from time import sleep
+from pynet.model import Logger
 import pytest
 
 DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+TEST_LOG = Logger('test_6_node')
+
 
 class NodePublisher(Node):
     def __init__(self):
-        super().__init__('NodePublisher')
-        self.pub = self.new_publisher(Url.Remote(ip='*'))
+        super().__init__('NodePublisher', logger_other=TEST_LOG)
+        self.pub = self.new_publisher(Node.SockUrl.Remote(Node.SERVER, ip='*'))
         sleep(0.3)
         self.result = self.pub.send(DATA)
         self.pub.close()
@@ -17,8 +20,8 @@ class NodePublisher(Node):
 
 class NodeSubscriber(Node):
     def __init__(self):
-        super().__init__('NodeSubscriber')
-        self.sub = self.new_subscriber(Url.Remote())
+        super().__init__('NodeSubscriber', logger_other=TEST_LOG)
+        self.sub = self.new_subscriber(Node.SockUrl.Remote(Node.CLIENT))
         sleep(0.3)
         self.result = self.sub.receive()
         self.sub.close()
@@ -54,8 +57,8 @@ def test_transmission_pub_sub():
 
 class NodePusher(Node):
     def __init__(self):
-        super().__init__('NodePusher')
-        self.pusher = self.new_publisher(Url.Remote(ip='*'))
+        super().__init__('NodePusher', logger_other=TEST_LOG)
+        self.pusher = self.new_publisher(Node.SockUrl.Remote(Node.SERVER, ip='*'))
         sleep(0.3)
         self.result = self.pusher.send(DATA)
         self.pusher.close()
@@ -63,8 +66,8 @@ class NodePusher(Node):
 
 class NodePuller(Node):
     def __init__(self):
-        super().__init__('NodePuller')
-        self.puller = self.new_subscriber(Url.Remote())
+        super().__init__('NodePuller', logger_other=TEST_LOG)
+        self.puller = self.new_subscriber(Node.SockUrl.Remote(Node.CLIENT))
         sleep(0.3)
         self.result = self.puller.receive()
         self.puller.close()
