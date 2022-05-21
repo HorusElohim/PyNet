@@ -1,3 +1,5 @@
+from .sock import SockUrl, Sock
+
 from .url import Url
 from .packet import Packet
 from .connection import Connection, RECV_ERROR

@@ -17,28 +17,20 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE, LINGER, NOBLOCK, EAGAIN
+    SUBSCRIBE, LINGER, DONTWAIT, EAGAIN, NULL
 )
-from enum import Enum
+from enum import IntEnum
 import traceback
-from ... import Logger, Size, AbcEntity
-from ..url import BaseUrl, Url
-from typing import Union, List, Tuple
-
-CONN_LOG = Logger('Connection')
-CONN_LOG.log.debug('Module Init')
+from ... import Size, AbcEntity
+from . import SockUrl
+from typing import Union, List, Tuple, Type
 
 RECV_ERROR = bytes(str('ERROR').encode())
 
 
-class ConnectionType(Enum):
-    Server = 0,
-    Client = 1
-
-
-class PatternType(Enum):
+class SockPatternType(IntEnum):
     """
-    Type of Connection
+    Type of Sock
     """
     subscriber = SUB
     publisher = PUB
@@ -49,41 +41,58 @@ class PatternType(Enum):
     pair = PAIR
 
 
-CONNECTION_DEFAULT_FLAGS = [
+class SockFlags(IntEnum):
+    null = NULL
+    linger = LINGER
+    dont_wait = DONTWAIT
+    eagain = EAGAIN
+    subscribe = SUBSCRIBE
+
+
+SOCK_DEFAULT_FLAGS = [
     (LINGER, 1),
 ]
 
 
-class ConnectionUrlNotSet(Exception):
+class SockUrlNotSet(Exception):
     pass
 
 
-class ConnectionServerCannotHasMoreThenOneUrl(Exception):
+class SockServerCannotHasMoreThenOneUrl(Exception):
     pass
 
 
-class ConnectionBase(AbcEntity):
+class SockCannotBeClientAndServer(Exception):
+    pass
+
+
+class AbcSock(AbcEntity):
+    SockUrl: Type[SockUrl] = SockUrl
+    Pattern: Type[SockPatternType] = SockPatternType
+    Flags: Type[SockFlags] = SockFlags
+    ERROR: Type[ZMQError] = ZMQError
+
     """
-        Connection Class
+        Sock Class
         Used to manage the zmq socket
 
     """
 
-    def __init__(self, name: str, connection_type: ConnectionType, pattern_type: PatternType, flags: Union[List[Tuple[int, int]], None] = None):
+    def __init__(self, name: str, pattern_type: SockPatternType, flags: Union[List[Tuple[int, int]], None] = None, **kwargs):
         """
 
-        :param pattern_type: Connection ZMQ Pattern Type
+        :param pattern_type: Sock ZMQ Pattern Type
 
         """
-        self._connection_name = name
-        self._connection_type = connection_type
-        self._connection_pattern_type = pattern_type
-        self._connection_urls = []
-        self._connection_flags = flags if flags else CONNECTION_DEFAULT_FLAGS
+        AbcEntity.__init__(self, name, **kwargs)
+        self._sock_name = f'{self.entity_name}.Sock'
+        self._sock_pattern_type = pattern_type
+        self._sock_urls: List[SockUrl.Abc] = []
+        self._sock_flags = flags if flags else SOCK_DEFAULT_FLAGS
         self.is_open = False
         # ZMQ Socket
-        self._socket = Context.instance().socket(self._connection_pattern_type.value)  # type: ignore[no-untyped-call]
-        CONN_LOG.log.debug(f'{self} init')
+        self._socket = Context.instance().socket(self._sock_pattern_type.value)  # type: ignore[no-untyped-call]
+        self.log.debug(f'{self} init')
 
     @abc.abstractmethod
     def open(self) -> bool:
@@ -94,58 +103,75 @@ class ConnectionBase(AbcEntity):
         pass
 
     @property
-    def url(self):
-        if len(self._connection_urls) == 0:
-            raise ConnectionUrlNotSet
+    def sock_urls(self):
+        if len(self._sock_urls) == 0:
+            raise SockUrlNotSet
+        return self._sock_urls
 
-        if self._connection_type == ConnectionType.Server and len(self._connection_urls) > 1:
-            raise ConnectionServerCannotHasMoreThenOneUrl
-
-        return self._connection_urls
-
-    @url.setter
-    def url(self, url: Union[BaseUrl, List[BaseUrl]]):
-        if isinstance(url, BaseUrl):
-            self._connection_urls.append(url)
+    @sock_urls.setter
+    def sock_urls(self, url: Union[SockUrl.Abc, List[SockUrl.Abc]]):
+        if isinstance(url, SockUrl.Abc):
+            self._sock_urls.append(url)
         elif isinstance(url, list):
-            self._connection_urls += url
-        CONN_LOG.log.debug(f'{self} url updated')
+            self._sock_urls += url
 
-    def __repr__(self) -> str:
-        return f'<{self._connection_name}:{self._connection_type.name}:{self._connection_pattern_type.name}>'
+        if self.__has_multiple_server_sock_type():
+            raise SockServerCannotHasMoreThenOneUrl
+        self.log.debug(f'{self} url updated')
 
-    def _send(self, obj: bytes) -> bool:
+    def __has_multiple_server_sock_type(self) -> bool:
+        count = 0
+        for url in self._sock_urls:
+            if url.sock_type == self.SockUrl.SERVER:
+                count += 1
+        return count > 1
+
+    def __has_different_sock_type(self) -> bool:
+        server = client = False
+        for url in self._sock_urls:
+            if url.sock_type == self.SockUrl.SERVER:
+                server = True
+            elif url.sock_type == self.SockUrl.CLIENT:
+                client = True
+        return server is True and client is True
+
+    @property
+    def sock_type(self) -> SockUrl.SockType:
+        if self.__has_different_sock_type():
+            raise SockCannotBeClientAndServer()
+        return self.sock_urls[0].sock_type
+
+    def _send(self, obj: bytes, flag: int = 0) -> bool:
         if not self.is_open:
-            CONN_LOG.log.warning(f'{self} socket is not open')
+            self.log.warning(f'{self} socket is not open')
             return False
         try:
-            self._socket.send(obj)
-            CONN_LOG.log.debug(f"{self} sent data with size {Size.pretty_obj_size(obj)}")
+            self._socket.send(obj, flag)
+            self.log.debug(f"{self} sent data with size {Size.pretty_obj_size(obj)}")
             return True
         except ZMQError as ex:
             if ex.errno == EAGAIN:
-                CONN_LOG.log.warning(f"{self} resource not available. Error -> {ex}")
+                self.log.warning(f"{self} resource not available. Sock msg: {ex}")
             else:
-                CONN_LOG.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
+                self.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
             return False
 
-    def _recv(self, wait=True) -> bytes:
+    def _recv(self, flag: int = 0) -> bytes:
         if not self.is_open:
-            CONN_LOG.log.warning(f'{self} socket is not open')
+            self.log.warning(f'{self} socket is not open')
             return RECV_ERROR
         try:
             # Receive from the socket
-            CONN_LOG.log.debug(f"{self} waiting...")
-            if wait:
-                obj = self._socket.recv()
-            else:
-                obj = self._socket.recv(NOBLOCK)
-            CONN_LOG.log.debug(f"{self} received data bytes, with size {Size.pretty_obj_size(obj)}")
+            self.log.debug(f"{self} waiting...")
+            obj = self._socket.recv(flag)
+            self.log.debug(f"{self} received data bytes, with size {Size.pretty_obj_size(obj)}")
             return bytes(obj)
         except ZMQError as ex:
             if ex.errno == EAGAIN:
-                CONN_LOG.log.warning(f"{self} resource not available. Error -> {ex}")
+                self.log.warning(f"{self} resource not available. Error -> {ex}")
             else:
-                CONN_LOG.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
+                self.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
             return RECV_ERROR
 
+    def __repr__(self) -> str:
+        return f'{self._sock_name}:{self._sock_pattern_type.name}'
