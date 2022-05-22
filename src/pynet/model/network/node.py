@@ -63,6 +63,14 @@ class Node(AbcEntity):
         self.log.debug(f'new replier on sock_urls: {sock_urls}')
         return Replier(self.node_name, sock_urls, flags=flags, logger_other=self)
 
+    def new_pusher(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pusher:
+        self.log.debug(f'new pusher on sock_urls: {sock_urls}')
+        return Pusher(self.node_name, sock_urls, flags=flags, logger_other=self)
+
+    def new_puller(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Puller:
+        self.log.debug(f'new puller on sock_urls: {sock_urls}')
+        return Puller(self.node_name, sock_urls, flags=flags, logger_other=self)
+
     def new_pair(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pair:
         self.log.debug(f'new pair on url: {sock_urls}')
         return Pair(self.node_name, sock_urls, flags=flags, logger_other=self)
