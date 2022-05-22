@@ -22,6 +22,7 @@ import sys
 class Node(AbcEntity):
     SERVER: Sock.SockUrl.SockType = Sock.SockUrl.SERVER
     CLIENT: Sock.SockUrl.SockType = Sock.SockUrl.CLIENT
+    Sock: Type[Sock] = Sock
     SockUrl: Sock.SockUrl = Sock.SockUrl
     Publisher: Type[Publisher] = Publisher
     Subscriber: Type[Subscriber] = Subscriber

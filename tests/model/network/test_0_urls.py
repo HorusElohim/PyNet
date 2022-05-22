@@ -11,7 +11,7 @@ def test_local_sock_url_default():
 
 
 def test_remote_sock_url_default():
-    rc = SockUrl.Remote(SockUrl.SERVER)
+    rc = SockSockUrl.Remote(SockUrl.CLIENT,SockUrl.SERVER)
     assert rc.sock_type == SockUrl.SERVER
     assert rc.ip == '127.0.0.1'
     assert rc.port == 28128

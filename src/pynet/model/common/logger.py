@@ -82,7 +82,7 @@ class Logger:
     """
 
     def __init__(self, name: str = '',
-                 logger_to_console=DEFAULT_CONSOLE_ACTIVE,
+                 logger_to_console: bool = DEFAULT_CONSOLE_ACTIVE,
                  logger_to_file: bool = DEFAULT_FILE_ACTIVE,
                  logger_root_path: Path = LOG_PATH,
                  logger_folder: Union[str, None] = None,
@@ -93,30 +93,43 @@ class Logger:
 
         # Attache to same Logger
         if logger_other:
-            if name:
-                self.__logger_name = name
-            else:
-                self.__logger_name = logger_other.logger_name
-            self.__logger_console_active: bool = logger_other.logger_console_active
-            self.__logger_console_level: LoggerLevel = logger_other.logger_console_level
-            self.__logger_file_active: bool = logger_other.logger_file_active
-            self.__logger_file_level: LoggerLevel = logger_other.logger_file_level
-            self.__logger_root_path: Path = logger_other.logger_root_path
-            self.__logger_file_path: Path = logger_other.logger_file_path
+            self._init_logger_from_other(name, logger_other)
         else:
-            if logger_folder:
-                root_path = logger_root_path / logger_folder
-                if not root_path.exists():
-                    mkdir(root_path)
+            self._init_new_logger(name, logger_to_console, logger_to_file, logger_root_path, logger_folder, logger_console_level, logger_file_level)
 
-            self.__logger_name = name if name else self.__class__.__name__
-            self.__logger_console_active: bool = logger_to_console
-            self.__logger_console_level: LoggerLevel = logger_console_level
-            self.__logger_file_active: bool = logger_to_file
-            self.__logger_file_level: LoggerLevel = logger_file_level
-            self.__logger_root_path: Path = logger_root_path
-            self.__logger_file_path: Path = self.__construct_file_path(self.__logger_name)
+    def _init_new_logger(self, name: str,
+                         logger_to_console: bool,
+                         logger_to_file: bool,
+                         logger_root_path: Path,
+                         logger_folder: Union[str, None],
+                         logger_console_level: LoggerLevel,
+                         logger_file_level: LoggerLevel):
+        if logger_folder:
+            logger_root_path = logger_root_path / logger_folder
 
+        if not logger_root_path.exists():
+            mkdir(logger_root_path)
+
+        self.__logger_name = name if name else self.__class__.__name__
+        self.__logger_console_active: bool = logger_to_console
+        self.__logger_console_level: LoggerLevel = logger_console_level
+        self.__logger_file_active: bool = logger_to_file
+        self.__logger_file_level: LoggerLevel = logger_file_level
+        self.__logger_root_path: Path = logger_root_path
+        self.__logger_file_path: Path = self.__construct_file_path(self.__logger_name)
+        self.__logger: Union[logging.Logger, None] = None
+
+    def _init_logger_from_other(self, name: str, logger_other: Logger):
+        if name:
+            self.__logger_name = name
+        else:
+            self.__logger_name = logger_other.logger_name
+        self.__logger_console_active: bool = logger_other.logger_console_active
+        self.__logger_console_level: LoggerLevel = logger_other.logger_console_level
+        self.__logger_file_active: bool = logger_other.logger_file_active
+        self.__logger_file_level: LoggerLevel = logger_other.logger_file_level
+        self.__logger_root_path: Path = logger_other.logger_root_path
+        self.__logger_file_path: Path = logger_other.logger_file_path
         self.__logger: Union[logging.Logger, None] = None
 
     def __reset_logger(self) -> None:
@@ -186,9 +199,11 @@ class Logger:
         assert isinstance(self.__logger, logging.Logger)
         return self.__logger
 
-    @property
-    def wandb(self) -> wandb:
-        return wandb.log
+    def wandb_log(self, *args, **kwargs):
+        try:
+            wandb.log(*args, **kwargs)
+        except wandb.errors.Error as ex:
+            self.log.warning('You must call wandb.init() before wandb.log()')
 
     @property
     def logger_name(self) -> str:

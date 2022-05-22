@@ -1,15 +1,15 @@
 from dataclassy import dataclass
-from .. import Url
+from .. import SockUrl
 from .. import DDict
 
 URLS = DDict(
     server=DDict(
-        demander=Url.Remote(ip='*', port=28128),
-        console=Url.Remote(ip='*', port=28129),
+        demander=SockUrl.Remote(SockUrl.SERVER, ip='*', port=28128),
+        console=SockUrl.Remote(SockUrl.SERVER, ip='*', port=28129),
     ),
     client=DDict(
-        demander=Url.Remote(port=28128),
-        console=Url.Remote(port=28129),
+        demander=SockUrl.Remote(SockUrl.CLIENT, port=28128),
+        console=SockUrl.Remote(SockUrl.CLIENT, port=28129),
     )
 )
 

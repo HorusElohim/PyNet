@@ -17,7 +17,7 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE, LINGER, DONTWAIT, EAGAIN, NULL
+    SUBSCRIBE, LINGER, DONTWAIT, EAGAIN, NULL, RCVTIMEO
 )
 from enum import IntEnum
 from ... import Size, AbcEntity
@@ -46,6 +46,7 @@ class SockFlags(IntEnum):
     dont_wait = DONTWAIT
     eagain = EAGAIN
     subscribe = SUBSCRIBE
+    rcv_timeout = RCVTIMEO
 
 
 SOCK_DEFAULT_FLAGS = [
