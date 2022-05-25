@@ -27,7 +27,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 # Formatter
-CONSOLE_FORMATTER = logging.Formatter(fmt="%(levelname)-8s %(asctime)s:%(funcName)s (%(name)s) %(message)s")
+CONSOLE_FORMATTER = logging.Formatter(fmt="%(levelname)-8s %(asctime)s (%(name)s) %(message)s")
 FILE_FORMATTER = logging.Formatter(
     fmt="%(levelname)-8s\t%(asctime)s.%(msecs)03d\t"
         "%(process)d|%(thread)d:%(threadName)s\t"

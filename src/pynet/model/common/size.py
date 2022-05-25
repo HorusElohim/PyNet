@@ -63,6 +63,9 @@ class Size:
             >>> 24
 
         """
+        if isinstance(obj, bytes):
+            return len(obj)
+
         return int(asizeof.asizeof(obj))
 
     @staticmethod

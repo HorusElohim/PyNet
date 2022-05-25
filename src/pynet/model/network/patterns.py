@@ -20,14 +20,11 @@ class PatternBase(Sock):
             if auto_open:
                 self.log.debug(f'{self} auto open ')
                 self.open()
-        self.log.debug(f'{self} done *')
 
     def send(self, data: Any, flag: int = 0, compression: bool = False) -> bool:
-        self.log.debug(f'{self} send')
         return Transmission.send(self, data, flag, compression=compression)
 
     def receive(self, flag: int = 0) -> Any:
-        self.log.debug(f'{self} receive')
         return Transmission.recv(self, flag)
 
 
@@ -37,7 +34,6 @@ class Publisher(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.publisher, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')
 
     def receive(self, flag: int = 0) -> Any:
         self.log.error(f'{self} receive')
@@ -50,7 +46,6 @@ class Subscriber(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.subscriber, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')
 
     def send(self, data: Any, flag: int = 0, compression: bool = False) -> bool:
         self.log.error(f'{self} send')
@@ -63,7 +58,6 @@ class Pusher(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.pusher, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')
 
     def receive(self, flag: int = 0) -> Any:
         self.log.error(f'{self} receive')
@@ -76,7 +70,6 @@ class Puller(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.puller, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')
 
     def send(self, data: Any, flag: int = 0, compression: bool = False) -> bool:
         self.log.error(f'{self} send')
@@ -89,7 +82,6 @@ class Requester(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.requester, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')
 
 
 class Replier(PatternBase):
@@ -98,7 +90,6 @@ class Replier(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.replier, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')
 
 
 class Pair(PatternBase):
@@ -107,4 +98,3 @@ class Pair(PatternBase):
                  flags: Union[List[Tuple[int, int]], None] = None,
                  **kwargs):
         PatternBase.__init__(self, name, Sock.Pattern.pair, sock_urls, auto_open, flags, **kwargs)
-        self.log.debug(f'{self} done *')

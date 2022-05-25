@@ -93,6 +93,8 @@ class AbcSock(AbcEntity):
         self._sock_pattern_type = pattern_type
         self._sock_urls: List[SockUrl.Abc] = []
         self._sock_flags = flags if flags else SOCK_DEFAULT_FLAGS
+        self._sock_bytes_sent = 0
+        self._sock_bytes_recv = 0
         self.is_open = False
         # ZMQ Socket
         self._socket = Context.instance().socket(self._sock_pattern_type.value)  # type: ignore[no-untyped-call]
@@ -105,6 +107,14 @@ class AbcSock(AbcEntity):
     @abc.abstractmethod
     def close(self):
         pass
+
+    @property
+    def byte_sent(self) -> int:
+        return self._sock_bytes_sent
+
+    @property
+    def byte_recv(self) -> int:
+        return self._sock_bytes_recv
 
     @property
     def sock_urls(self):
@@ -151,7 +161,9 @@ class AbcSock(AbcEntity):
             return False
         try:
             self._socket.send(obj, flag)
-            self.log.debug(f"{self} sent data with size {Size.pretty_obj_size(obj)}")
+            obj_size = Size.obj_size(obj)
+            self._sock_bytes_sent += obj_size
+            self.log.debug(f"{self} sent data with size {Size.pretty_size(obj_size)}")
             return True
         except ZMQError as ex:
             if ex.errno == EAGAIN:
@@ -168,7 +180,9 @@ class AbcSock(AbcEntity):
             # Receive from the socket
             self.log.debug(f"{self} waiting...")
             obj = self._socket.recv(flag)
-            self.log.debug(f"{self} received data bytes, with size {Size.pretty_obj_size(obj)}")
+            obj_size = Size.obj_size(obj)
+            self._sock_bytes_recv += obj_size
+            self.log.debug(f"{self} received data bytes, with size {Size.pretty_size(obj_size)}")
             return bytes(obj)
         except ZMQError as ex:
             if ex.errno == EAGAIN:
