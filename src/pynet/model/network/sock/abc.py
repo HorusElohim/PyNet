@@ -17,14 +17,15 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE, LINGER, DONTWAIT, EAGAIN, NULL, RCVTIMEO
-)
+    SUBSCRIBE, LINGER, DONTWAIT, NULL, RCVTIMEO,
+    EAGAIN
+)  # https://pyzmq.readthedocs.io/en/latest/api/zmq.html
+
 from enum import IntEnum
 from ... import Size, AbcEntity
 from . import SockUrl
 from typing import Union, List, Tuple, Type
 import logging
-import traceback
 
 
 class SockPatternType(IntEnum):
@@ -169,7 +170,7 @@ class AbcSock(AbcEntity):
             if ex.errno == EAGAIN:
                 self.log.warning(f"{self} resource not available. Sock msg: {ex}")
             else:
-                self.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
+                self.log.error(f"{self} failed. Error -> {ex} - Code:{ex.errno}")
             return False
 
     def _recv(self, flag: int = 0) -> bytes:
@@ -188,7 +189,7 @@ class AbcSock(AbcEntity):
             if ex.errno == EAGAIN:
                 self.log.warning(f"{self} resource not available. Error -> {ex}")
             else:
-                self.log.error(f"{self} failed. Error -> {ex} \n{traceback.format_exc()}")
+                self.log.error(f"{self} failed. Error -> {ex} - Code:{ex.errno}")
             return self.RECV_ERROR
 
     def __repr__(self) -> str:

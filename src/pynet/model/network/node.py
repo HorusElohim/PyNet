@@ -23,7 +23,9 @@ class Node(AbcEntity):
     SERVER: Sock.SockUrl.SockType = Sock.SockUrl.SERVER
     CLIENT: Sock.SockUrl.SockType = Sock.SockUrl.CLIENT
     Sock: Type[Sock] = Sock
-    SockUrl: Sock.SockUrl = Sock.SockUrl
+    Url: Sock.SockUrl = Sock.SockUrl
+    UrlLocal: Sock.SockUrl.Local = Sock.SockUrl.Local
+    UrlRemote: Sock.SockUrl.Remote = Sock.SockUrl.Remote
     Publisher: Type[Publisher] = Publisher
     Subscriber: Type[Subscriber] = Subscriber
     Pusher: Type[Pusher] = Pusher
@@ -47,31 +49,31 @@ class Node(AbcEntity):
         if enable_signal:
             signal.signal(signal.SIGINT, self._sigint_)
 
-    def new_publisher(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Publisher:
+    def new_publisher(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Publisher:
         self.log.debug(f'new publisher on channel: {sock_urls}')
         return Publisher(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_subscriber(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Subscriber:
+    def new_subscriber(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Subscriber:
         self.log.debug(f'new subscriber on sock_urls: {sock_urls}')
         return Subscriber(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_requester(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Requester:
+    def new_requester(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Requester:
         self.log.debug(f'new requester on sock_urls: {sock_urls}')
         return Requester(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_replier(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Replier:
+    def new_replier(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Replier:
         self.log.debug(f'new replier on sock_urls: {sock_urls}')
         return Replier(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_pusher(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pusher:
+    def new_pusher(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pusher:
         self.log.debug(f'new pusher on sock_urls: {sock_urls}')
         return Pusher(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_puller(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Puller:
+    def new_puller(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Puller:
         self.log.debug(f'new puller on sock_urls: {sock_urls}')
         return Puller(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_pair(self, sock_urls: Union[List[SockUrl.Abc], SockUrl.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pair:
+    def new_pair(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pair:
         self.log.debug(f'new pair on url: {sock_urls}')
         return Pair(self.node_name, sock_urls, flags=flags, logger_other=self)
 
