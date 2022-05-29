@@ -18,7 +18,6 @@ from threading import Lock
 from pathlib import Path
 from . import today
 from ... import LOG_PATH, mkdir
-import wandb
 
 SAFE_LOGGER_LOCK = Lock()
 
@@ -198,12 +197,6 @@ class Logger:
             raise LoggerCannotWorkIfBothConsoleAndFileAreDisabled()
         assert isinstance(self.__logger, logging.Logger)
         return self.__logger
-
-    def wandb_log(self, *args, **kwargs):
-        try:
-            wandb.log(*args, **kwargs)
-        except wandb.errors.Error as ex:
-            self.log.warning('You must call wandb.init() before wandb.log()')
 
     @property
     def logger_name(self) -> str:
