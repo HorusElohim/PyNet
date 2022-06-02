@@ -12,24 +12,25 @@
 
 
 from __future__ import annotations
-from dataclassy import dataclass
+from dataclasses import dataclass
 import time
 
 from ..common import Size
 
 
-@dataclass(unsafe_hash=True, slots=True)
+@dataclass(unsafe_hash=True)
 class PacketBase:
     """
         PacketBase Class
             Addition Packet Information
     """
+    __slots__ = ('sender', 'encoded', 'compressed', 'sequence_left', 'time')
 
     sender: str
-    encoded: bool = False
-    compressed: bool = False
-    sequence_left: int = 0
-    time: int = 0
+    encoded: bool
+    compressed: bool
+    sequence_left: int
+    time: int
 
     def __init__(self, sender: str, sequence_left: int = 0):
         """
@@ -58,13 +59,15 @@ class PacketBase:
 
 
 class Packet(PacketBase):
+    __slots__ = 'data'
     """
         Packet Class
             The data is encapsulated inside this class
             with additional information
 
     """
-    data: object = None
+
+    data: object
 
     def __init__(self, sender: str, data: object, sequence_left: int = 0):
         super().__init__(sender, sequence_left)

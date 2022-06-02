@@ -1,9 +1,6 @@
 wheel
-pyyaml
-GitPython
 rsa
 ipython
 pympler
-dataclassy
 pyzmq
 blosc2

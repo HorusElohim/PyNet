@@ -1,4 +1,4 @@
-from dataclassy import dataclass
+from dataclasses import dataclass
 from .. import SockUrl
 from .. import DDict
 
@@ -14,6 +14,7 @@ URLS = DDict(
 )
 
 
-@dataclass(unsafe_hash=True, slots=True, init=True, repr=True)
+@dataclass(unsafe_hash=True, init=True, repr=True)
 class Execute:
-    command: str = ''
+    __slots__ = 'command'
+    command: str

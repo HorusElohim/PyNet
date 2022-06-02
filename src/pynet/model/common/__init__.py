@@ -5,4 +5,3 @@ from .logger import Logger, LoggerLevel, LoggerCannotWorkIfBothConsoleAndFileAre
 from .size import Size
 from .profiler import profile
 from .process import Process
-from .wandb import new_wandb_project

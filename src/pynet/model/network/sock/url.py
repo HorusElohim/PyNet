@@ -14,7 +14,7 @@
 from pathlib import Path
 from typing import Union, Type
 from enum import Enum
-from dataclassy import dataclass
+from dataclasses import dataclass
 
 DEFAULT_LOCAL_IP = '127.0.0.1'
 DEFAULT_LOCAL_PORT = 28128
@@ -26,8 +26,9 @@ class SockType(Enum):
     Client = 1
 
 
-@dataclass(unsafe_hash=True, slots=True)
+@dataclass(unsafe_hash=True)
 class AbcSockUrl:
+    __slots__ = 'sock_type'
     sock_type: SockType
 
     """
@@ -65,6 +66,7 @@ class LocalSockUrl(AbcSockUrl):
     """
         Local Channel
     """
+    __slots__ = ('path', 'local_type')
     path: Path
     local_type: LocalSockType
 
@@ -85,6 +87,8 @@ class RemoteSockUrl(AbcSockUrl):
     """
         Remote Channel
     """
+    __slots__ = ('ip', 'port')
+
     ip: str
     port: int
 
