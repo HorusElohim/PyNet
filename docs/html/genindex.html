@@ -70,16 +70,19 @@
 
 <div class="genindex-jumpbox">
  <a href="#_"><strong>_</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
@@ -87,11 +90,29 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/model/common.html#pynet.model.common.Logger.__call__">__call__() (pynet.model.common.Logger method)</a>
+      <li><a href="api/model/common.html#pynet.model.common.Logger.__clean_logger">__clean_logger() (pynet.model.common.Logger method)</a>
 </li>
+      <li><a href="api/model/common.html#pynet.model.common.Logger.__construct_logger">__construct_logger() (pynet.model.common.Logger method)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.channel.BaseChannel.__init__">__init__() (pynet.model.network.core.channel.BaseChannel method)</a>
+
+      <ul>
+        <li><a href="api/model/network.html#pynet.model.network.core.channel.LocalChannel.__init__">(pynet.model.network.core.channel.LocalChannel method)</a>
+</li>
+        <li><a href="api/model/network.html#pynet.model.network.core.channel.RemoteChannel.__init__">(pynet.model.network.core.channel.RemoteChannel method)</a>
+</li>
+        <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.__init__">(pynet.model.network.core.connection.Connection method)</a>
+</li>
+        <li><a href="api/model/network.html#pynet.model.network.core.packet.Packet.__init__">(pynet.model.network.core.packet.Packet method)</a>
+</li>
+      </ul></li>
   </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/model/common.html#pynet.model.common.Logger.__init__">__init__() (pynet.model.common.Logger method)</a>
+      <li><a href="api/model/network.html#pynet.model.network.core.channel.BaseChannel">BaseChannel (class in pynet.model.network.core.channel)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -99,6 +120,16 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.close">close() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.compress">compress() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection">Connection (class in pynet.model.network.core.connection)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.create_packet">create_packet() (pynet.model.network.core.connection.Connection method)</a>
+</li>
       <li><a href="api/model/common.html#pynet.model.common.LoggerLevel.CRITICAL">CRITICAL (pynet.model.common.LoggerLevel attribute)</a>
 </li>
   </ul></td>
@@ -109,12 +140,26 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/model/common.html#pynet.model.common.LoggerLevel.DEBUG">DEBUG (pynet.model.common.LoggerLevel attribute)</a>
 </li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.decode">decode() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.decode_packet">decode_packet() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.decompress">decompress() (pynet.model.network.core.connection.Connection method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.encode">encode() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.encode_packet">encode_packet() (pynet.model.network.core.connection.Connection method)</a>
+</li>
       <li><a href="api/model/common.html#pynet.model.common.LoggerLevel.ERROR">ERROR (pynet.model.common.LoggerLevel attribute)</a>
 </li>
   </ul></td>
@@ -132,10 +177,30 @@
   </ul></td>
 </tr></table>
 
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.hashing">hashing() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.helper">helper (pynet.model.network.core.connection.Connection.Type attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/model/common.html#pynet.model.common.LoggerLevel.INFO">INFO (pynet.model.common.LoggerLevel attribute)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.channel.LocalChannelType.inproc">inproc (pynet.model.network.core.channel.LocalChannelType attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.channel.LocalChannelType.ipc">ipc (pynet.model.network.core.channel.LocalChannelType attribute)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.is_connection_open">is_connection_open() (pynet.model.network.core.connection.Connection method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -143,11 +208,13 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/model/common.html#pynet.model.common.Logger">Logger (class in pynet.model.common)</a>
+      <li><a href="api/model/network.html#pynet.model.network.core.channel.LocalChannel">LocalChannel (class in pynet.model.network.core.channel)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/model/common.html#pynet.model.common.LoggerNotInitialized">LoggerNotInitialized</a>
+      <li><a href="api/model/common.html#pynet.model.common.Logger">Logger (class in pynet.model.common)</a>
+</li>
+      <li><a href="api/model/common.html#pynet.model.common.LoggerCannotWorkIfBothConsoleAndFileAreDisabled">LoggerCannotWorkIfBothConsoleAndFileAreDisabled</a>
 </li>
   </ul></td>
 </tr></table>
@@ -184,15 +251,25 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.packet.Packet">Packet (class in pynet.model.network.core.packet)</a>
+</li>
       <li><a href="api/model/common.html#pynet.model.common.Size.pretty_file_size">pretty_file_size() (pynet.model.common.Size static method)</a>
 </li>
       <li><a href="api/model/common.html#pynet.model.common.Size.pretty_folder_size">pretty_folder_size() (pynet.model.common.Size static method)</a>
 </li>
       <li><a href="api/model/common.html#pynet.model.common.Size.pretty_obj_size">pretty_obj_size() (pynet.model.common.Size static method)</a>
 </li>
+      <li><a href="api/model/common.html#pynet.model.common.Size.pretty_size">pretty_size() (pynet.model.common.Size static method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/model/common.html#pynet.model.common.Size.pretty_size">pretty_size() (pynet.model.common.Size static method)</a>
+      <li><a href="api/model/common.html#pynet.model.common.profile">profile() (in module pynet.model.common)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.publisher">publisher (pynet.model.network.core.connection.Connection.Type attribute)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.puller">puller (pynet.model.network.core.connection.Connection.Type attribute)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.pusher">pusher (pynet.model.network.core.connection.Connection.Type attribute)</a>
 </li>
       <li>
     pynet.model.common
@@ -204,14 +281,36 @@
   </ul></td>
 </tr></table>
 
-<h2 id="S">S</h2>
+<h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/model/common.html#pynet.model.common.Singleton">Singleton (class in pynet.model.common)</a>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.receive">receive() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.channel.RemoteChannel">RemoteChannel (class in pynet.model.network.core.channel)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.replier">replier (pynet.model.network.core.connection.Connection.Type attribute)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.requester">requester (pynet.model.network.core.connection.Connection.Type attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.safe_check">safe_check() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.send">send() (pynet.model.network.core.connection.Connection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/model/common.html#pynet.model.common.Singleton">Singleton (class in pynet.model.common)</a>
+</li>
       <li><a href="api/model/common.html#pynet.model.common.Size">Size (class in pynet.model.common)</a>
+</li>
+      <li><a href="api/model/network.html#pynet.model.network.core.connection.Connection.Type.subscriber">subscriber (pynet.model.network.core.connection.Connection.Type attribute)</a>
 </li>
   </ul></td>
 </tr></table>

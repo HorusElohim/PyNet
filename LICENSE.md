@@ -187,9 +187,7 @@ IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY C
 
 If the disclaimer of warranty and limitation of liability provided above cannot be given local legal effect according to their terms, reviewing courts shall apply local law that most closely approximates an absolute waiver of all civil liability in connection with the Program, unless a warranty or assumption of liability accompanies a copy of the Program in return for a fee.
 
-END OF TERMS AND CONDITIONS
 
-    Base Python3 Package Template for GUI Application with QT6
     Copyright (C) 2022 HorusElohim
 
     This program is free software: you can redistribute it and/or modify
@@ -201,3 +199,5 @@ END OF TERMS AND CONDITIONS
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
+
+END OF TERMS AND CONDITIONS

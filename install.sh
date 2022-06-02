@@ -10,7 +10,7 @@ else
   ###  VENV NOT exists ###
   echo "$I Python Virtual Environment need to be installed ${DIR_ENV}. [NOK]"
   pushd scripts
-    . create_env.sh
+    . create_env.sh python3.8
   popd
 fi
 

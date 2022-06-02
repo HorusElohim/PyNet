@@ -2,8 +2,10 @@
 
 I='(create_env): '
 
-echo "$I Creating python environment"
-python3 -m venv ../venv
+py=$1
+
+echo "$I Creating python environment with: $py"
+$py -m venv ../venv
 echo "$I Environment created."
 
 

@@ -5,15 +5,15 @@ This is the common section.
 .. module:: pynet.model.common
 
 Singleton
-===============================
+_______________________________
 .. autoclass:: Singleton
     :members:
 
 
 Logger
-===============================
+_______________________________
 
-.. autoexception:: LoggerNotInitialized
+.. autoexception:: LoggerCannotWorkIfBothConsoleAndFileAreDisabled
 
 .. autoenum:: LoggerLevel
 
@@ -26,7 +26,7 @@ Logger
     :members:
 
 Size
-===============================
+_______________________________
 
 .. autoclass:: Size
     :special-members:
@@ -35,3 +35,8 @@ Size
     :private-members:
     :inherited-members:
     :members:
+
+Profiler Decorator
+_______________________________
+
+.. autofunction:: profile
