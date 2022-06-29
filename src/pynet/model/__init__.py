@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 
-def kwargs_control(var: Any, kwargs: Dict):
+def kwargs_control(var: Any, kwargs: Dict[str, Any]) -> Any:
     var_name = next(iter(locals()))
     if var_name in kwargs:
         return kwargs[var_name]

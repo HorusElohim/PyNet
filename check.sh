@@ -2,7 +2,7 @@
 
 source source.sh
 
-flake8 --ignore=F403 src
+flake8 --config setup.cfg src
 
 mypy src
 

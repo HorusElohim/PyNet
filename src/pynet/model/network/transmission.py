@@ -67,7 +67,7 @@ class Transmission:
         if raw == sock.RECV_ERROR:
             sock.log.error('failed')
             return sock.RECV_ERROR
-        pkt: Packet = decode(raw)  # type: ignore[arg-type]
+        pkt: Packet = decode(raw)  # type: ignore[arg-type, assignment]
         data = Transmission.from_packet(pkt)
         if data is not None:
             sock.log.debug('success')

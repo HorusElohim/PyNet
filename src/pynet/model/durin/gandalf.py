@@ -5,7 +5,6 @@ from . import Execute, URLS
 from .. import Node
 from typing import Any
 from threading import Thread
-from time import sleep
 
 
 class Console(Thread):

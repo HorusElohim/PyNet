@@ -10,9 +10,9 @@ class SockPatternUnsupportedOperation(Exception):
 class PatternBase(Sock):
     def __init__(self, name: str, pattern_type: Sock.Pattern,
                  sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         super(Sock, self).__init__(name, pattern_type=pattern_type, flags=flags, **kwargs)
         if sock_urls:
             self.log.debug(f'{self} input sock_urls: {sock_urls}')
@@ -30,9 +30,9 @@ class PatternBase(Sock):
 
 class Publisher(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.publisher, sock_urls, auto_open, flags, **kwargs)
 
     def receive(self, flag: int = 0) -> Any:
@@ -42,9 +42,9 @@ class Publisher(PatternBase):
 
 class Subscriber(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.subscriber, sock_urls, auto_open, flags, **kwargs)
 
     def send(self, data: Any, flag: int = 0, compression: bool = False) -> bool:
@@ -54,9 +54,9 @@ class Subscriber(PatternBase):
 
 class Pusher(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.pusher, sock_urls, auto_open, flags, **kwargs)
 
     def receive(self, flag: int = 0) -> Any:
@@ -66,9 +66,9 @@ class Pusher(PatternBase):
 
 class Puller(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.puller, sock_urls, auto_open, flags, **kwargs)
 
     def send(self, data: Any, flag: int = 0, compression: bool = False) -> bool:
@@ -78,23 +78,23 @@ class Puller(PatternBase):
 
 class Requester(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.requester, sock_urls, auto_open, flags, **kwargs)
 
 
 class Replier(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.replier, sock_urls, auto_open, flags, **kwargs)
 
 
 class Pair(PatternBase):
     def __init__(self, name: str, sock_urls: Union[Sock.SockUrl.Abc, List[Sock.SockUrl.Abc], None] = None,
-                 auto_open=True,
+                 auto_open: bool = True,
                  flags: Union[List[Tuple[int, int]], None] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         PatternBase.__init__(self, name, Sock.Pattern.pair, sock_urls, auto_open, flags, **kwargs)

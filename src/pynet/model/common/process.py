@@ -1,5 +1,5 @@
 import subprocess
-from typing import Callable, Union, Tuple
+from typing import Callable, Union, Tuple, Optional, Any
 
 from . import Logger
 
@@ -10,7 +10,7 @@ class Process(Logger):
         self.func = func
         self.log.debug('DONE')
 
-    def run(self, cmd: str, qt_parent=None) -> Union[int, Tuple[int, str]]:
+    def run(self, cmd: str) -> Union[int, Tuple[int, str]]:
         if self.func:
             return self.__run_stream(cmd)
         else:
@@ -21,7 +21,8 @@ class Process(Logger):
         for line in iter(proc.stdout.readline, b''):
             recv = line.decode().strip()
             self.log.debug(recv)
-            self.func(recv)
+            if self.func:
+                self.func(recv)
         proc.wait()
         return_stderr = proc.stderr.read().decode() if proc.stderr else None
         self.log.info(f'Command: {cmd}, Return-code:  {proc.returncode}')
@@ -29,7 +30,7 @@ class Process(Logger):
             self.log.error(f'Command: {cmd}, Return-code:  {proc.returncode}, StdErr: {return_stderr}')
         return proc.returncode
 
-    def __run_single_output(self, cmd: str):
+    def __run_single_output(self, cmd: str) -> Tuple[Union[int, Any], Optional[str]]:
         proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
         proc.wait()
         return_code = proc.returncode
