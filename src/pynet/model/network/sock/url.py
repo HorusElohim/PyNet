@@ -12,7 +12,7 @@
 
 
 from pathlib import Path
-from typing import Union, TypeAlias
+from typing import Union, Type
 from enum import Enum
 from dataclasses import dataclass
 
@@ -27,8 +27,8 @@ class SockType(Enum):
 
 
 class AbcSocketUrlException(Exception):
-    def __init__(self) -> None:
-        print("AbcSockUrl cannot be used directly.\nUse instead RemoteSockUrl or LocalSockUrl !")
+    def __init__(self):
+        print("AbcSockUrl cannot be used directly.\nUse instead RemoteSockUrl or LocalSockUrl!")
 
 
 @dataclass(unsafe_hash=True)
@@ -58,7 +58,7 @@ class AbcSockUrl:
         elif isinstance(self, LocalSockUrl):
             return f'{self.local_type.name}://{self.path}'
         else:
-            raise AbcSocketUrlException
+            raise
 
 
 class LocalSockType(Enum):
@@ -112,12 +112,12 @@ class RemoteSockUrl(AbcSockUrl):
 
 
 class SockUrl:
-    Abc: TypeAlias = AbcSockUrl
-    Remote: TypeAlias = RemoteSockUrl
-    Local: TypeAlias = LocalSockUrl
-    LocalType: TypeAlias = LocalSockType
-    SockType: TypeAlias = SockType
-    INPROC: LocalType = LocalSockType.inproc
-    IPC: LocalType = LocalSockType.ipc
+    Abc: Type[AbcSockUrl] = AbcSockUrl
+    Remote: Type[RemoteSockUrl] = RemoteSockUrl
+    Local: Type[LocalSockUrl] = LocalSockUrl
+    LocalType: Type[LocalSockType] = LocalSockType
+    INPROC: LocalType = LocalType.inproc
+    IPC: LocalType = LocalType.ipc
+    SockType: Type[SockType] = SockType
     SERVER: SockType = SockType.Server
     CLIENT: SockType = SockType.Client
