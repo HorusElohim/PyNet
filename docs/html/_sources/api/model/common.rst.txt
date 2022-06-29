@@ -8,6 +8,7 @@ Singleton
 _______________________________
 .. autoclass:: Singleton
     :members:
+    :undoc-members:
 
 
 Logger
@@ -18,25 +19,34 @@ _______________________________
 .. autoenum:: LoggerLevel
 
 .. autoclass:: Logger
-    :special-members:
     :exclude-members: __weakref__
     :member-order: bysource
     :private-members:
     :inherited-members:
     :members:
+    :undoc-members:
 
 Size
 _______________________________
 
 .. autoclass:: Size
-    :special-members:
     :exclude-members: __weakref__
     :member-order: bysource
-    :private-members:
     :inherited-members:
     :members:
+    :undoc-members:
 
 Profiler Decorator
 _______________________________
 
 .. autofunction:: profile
+
+
+Time Helpers
+_______________________________
+
+.. autofunction:: pynet.model.common.time.today
+
+.. autofunction:: pynet.model.common.time.now
+
+.. autofunction:: pynet.model.common.time.now_lite

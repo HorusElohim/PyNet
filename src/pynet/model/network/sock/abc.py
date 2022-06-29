@@ -83,10 +83,14 @@ class AbcSock(AbcEntity):
 
     """
 
-    def __init__(self, name: str, pattern_type: SockPatternType, flags: Union[List[Tuple[int, int]], None] = None, **kwargs):
+    def __init__(self, name: str, pattern_type: SockPatternType, flags: Union[List[Tuple[int, int]], None] = None,
+                 **kwargs):
         """
 
+        :param name: Sock Arbitrary name
         :param pattern_type: Sock ZMQ Pattern Type
+        :param flags: ZQM Flags
+        :param **kwargs arguments forwarding for base class argument
 
         """
         AbcEntity.__init__(self, name, **kwargs)
@@ -103,28 +107,46 @@ class AbcSock(AbcEntity):
 
     @abc.abstractmethod
     def open(self) -> bool:
+        """
+        open abstract method
+        """
         pass
 
     @abc.abstractmethod
     def close(self):
+        """
+        close abstract method
+        """
         pass
 
     @property
     def byte_sent(self) -> int:
+        """
+        byte_sent property
+        """
         return self._sock_bytes_sent
 
     @property
     def byte_recv(self) -> int:
+        """
+        byte_recv property
+        """
         return self._sock_bytes_recv
 
     @property
-    def sock_urls(self):
+    def sock_urls(self) -> List[SockUrl.Abc]:
+        """
+        sock_urls property.getter
+        """
         if len(self._sock_urls) == 0:
             raise SockUrlNotSetError(self.log, self._sock_urls)
         return self._sock_urls
 
     @sock_urls.setter
     def sock_urls(self, url: Union[SockUrl.Abc, List[SockUrl.Abc]]):
+        """
+        sock_urls property.setter
+        """
         if isinstance(url, SockUrl.Abc):
             self._sock_urls.append(url)
         elif isinstance(url, list):
@@ -152,6 +174,9 @@ class AbcSock(AbcEntity):
 
     @property
     def sock_type(self) -> SockUrl.SockType:
+        """
+        sock_type property.getter
+        """
         if self.__has_different_sock_type():
             raise SockCannotBeClientAndServerError(self.log, self._sock_urls)
         return self.sock_urls[0].sock_type

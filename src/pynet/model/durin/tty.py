@@ -82,7 +82,7 @@ class TTY:
         self.p.stdin.write(f'{cmd}\n'.encode('utf-8'))
         self.p.stdin.flush()
 
-    def crtl_c(self):
+    def ctrl_c(self):
         os.kill(self.p.pid, signal.SIGINT)
 
     def terminate(self):

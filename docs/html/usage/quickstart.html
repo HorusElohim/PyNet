@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick Start &mdash; PyNet 0.0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -39,7 +40,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#publisher">Publisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#subscriber">Subscriber</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../api/api.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About Us</a></li>
 </ul>
@@ -68,10 +73,91 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="quick-start">
+  <section id="quick-start">
 <h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h1>
-<p>To-Do</p>
+<p>Example Publisher / Subscriber using TCP connection:</p>
+<section id="publisher">
+<h2>Publisher<a class="headerlink" href="#publisher" title="Permalink to this headline"></a></h2>
+<p>Basic scripting example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pynet</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">sock_url</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">Url</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">SERVER</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5555</span><span class="p">)</span>
+
+<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="s1">&#39;MyNode&#39;</span><span class="p">)</span>
+<span class="n">pub</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">new_publisher</span><span class="p">(</span><span class="n">sock_url</span><span class="p">)</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># array([ 0.07293256,  0.13225427, -0.06779154,  0.08097599, -0.14389639,</span>
+<span class="c1">#        -0.09090942, -0.13478001, -0.03325298, -0.08833111, -0.02072214])</span>
+
+<span class="n">pub</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
 </div>
+<p>Class example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pynet</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">sock_url</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">Url</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">SERVER</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5555</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">NodePublisher</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;MyNode&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_publisher</span><span class="p">(</span><span class="n">sock_url</span><span class="p">)</span>
+
+<span class="n">my_pub</span> <span class="o">=</span> <span class="n">NodePublisher</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># array([ 0.07293256,  0.13225427, -0.06779154,  0.08097599, -0.14389639,</span>
+<span class="c1">#        -0.09090942, -0.13478001, -0.03325298, -0.08833111, -0.02072214])</span>
+
+<span class="n">my_pub</span><span class="o">.</span><span class="n">pub</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="subscriber">
+<h2>Subscriber<a class="headerlink" href="#subscriber" title="Permalink to this headline"></a></h2>
+<p>Basic scripting example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pynet</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">sock_url</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">Url</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">SERVER</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5555</span><span class="p">)</span>
+
+<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="s1">&#39;MyNode&#39;</span><span class="p">)</span>
+<span class="n">sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_publisher</span><span class="p">(</span><span class="n">sock_url</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">my_pub</span><span class="o">.</span><span class="n">sub</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># array([ 0.07293256,  0.13225427, -0.06779154,  0.08097599, -0.14389639,</span>
+<span class="c1">#        -0.09090942, -0.13478001, -0.03325298, -0.08833111, -0.02072214])</span>
+</pre></div>
+</div>
+<p>Class example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pynet</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">sock_url</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">Url</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">SERVER</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5555</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">NodeSubscriber</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;MyNode&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_publisher</span><span class="p">(</span><span class="n">sock_url</span><span class="p">)</span>
+
+<span class="n">my_pub</span> <span class="o">=</span> <span class="n">NodePublisher</span><span class="p">()</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">my_pub</span><span class="o">.</span><span class="n">sub</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># array([ 0.07293256,  0.13225427, -0.06779154,  0.08097599, -0.14389639,</span>
+<span class="c1">#        -0.09090942, -0.13478001, -0.03325298, -0.08833111, -0.02072214])</span>
+</pre></div>
+</div>
+</section>
+</section>
 
 
            </div>
