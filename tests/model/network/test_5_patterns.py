@@ -5,6 +5,7 @@ from dataclassy import dataclass
 from .thread_runner import WorkerRunner, Worker
 from time import sleep
 import pytest
+import os
 
 DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -57,27 +58,46 @@ class PatternReceiveWorker(Worker):
         self.test_case.pattern2.close()
 
 
-TestCasesPubSubPushPullServerClient = [
+if os.name != 'nt':
+    TestCasesPubSubPushPullServerClientLocal = [
+        # Publisher/Subscriber Server/Client
+        # No Compression
+        PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER),
+                         pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT),
+                         data=DATA, compression=False),
+        PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                         pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4,
+                         url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
+                         data=DATA, compression=False),
+        # With Compression
+        PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER),
+                         pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT),
+                         data=DATA, compression=True),
+        PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
+                         pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4,
+                         url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
+                         data=DATA, compression=True),
+    ]
+
+    # Test Publisher/Subscriber
+    # Test Pusher/Puller
+    # Server/Client
+    @pytest.mark.parametrize('test_case', TestCasesPubSubPushPullServerClientLocal)
+    def test_patterns_pub_sub_pull_push_server_client_local(test_case):
+        worker = [PatternSendWorker(test_case), PatternReceiveWorker(test_case)]
+        WorkerRunner.run(worker)
+        assert worker[0].result
+        assert worker[1].result == test_case.data
+
+TestCasesPubSubPushPullServerClientRemote = [
     # Publisher/Subscriber Server/Client
     # No Compression
     PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'),
                      pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT),
                      data=DATA, compression=False),
-    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER),
-                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT),
-                     data=DATA, compression=False),
-    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
-                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
-                     data=DATA, compression=False),
     # With Compression
     PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'),
                      pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT),
-                     data=DATA, compression=True),
-    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER),
-                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT),
-                     data=DATA, compression=True),
-    PatternsTestCase(pattern1=Publisher('PUB', logger_other=TEST_LOG), wait1=0.4, url1=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC),
-                     pattern2=Subscriber('SUB', logger_other=TEST_LOG), wait2=0.4, url2=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC),
                      data=DATA, compression=True),
 ]
 
@@ -85,15 +105,13 @@ TestCasesPubSubPushPullServerClient = [
 # Test Publisher/Subscriber
 # Test Pusher/Puller
 # Server/Client
-@pytest.mark.parametrize('test_case', TestCasesPubSubPushPullServerClient)
-def test_transmission_pub_sub_pull_push_server_client(test_case):
+@pytest.mark.parametrize('test_case', TestCasesPubSubPushPullServerClientRemote)
+def test_patterns_pub_sub_pull_push_server_client_remote(test_case):
     worker = [PatternSendWorker(test_case), PatternReceiveWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[0].result
     assert worker[1].result == test_case.data
 
-
-#
 
 @dataclass(unsafe_hash=True, slots=True)
 class PatternsAutoTestCase:
@@ -137,64 +155,103 @@ class PatternReceiveAutoWorker(Worker):
         self.test_case.pattern2.close()
 
 
-TestCasesAutoPubSubServerClient = [
-    # Publisher/Subscriber Server/Client
+if os.name != 'nt':
+    TestCasesAutoPubSubServerClientLocal = [
+        # Publisher/Subscriber Server/Client
+        # No Compression
+        PatternsAutoTestCase(pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+                             pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.4,
+                             data=DATA, compression=False),
+        PatternsAutoTestCase(
+            pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+            wait1=0.4,
+            pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+            wait2=0.4,
+            data=DATA, compression=False),
+    ]
+
+    # Test Publisher/Subscriber
+    # Test Pusher/Puller
+    # Server/Client
+    @pytest.mark.parametrize('test_case', TestCasesAutoPubSubServerClientLocal)
+    def test_patterns_auto_open_pub_sub_server_client_local(test_case):
+        worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
+        WorkerRunner.run(worker)
+        assert worker[0].result
+        assert worker[1].result == test_case.data
+
+TestCasesAutoPubSubServerClientRemote = [
+    # Publisher/Subscriber _remoteServer/Client
     # No Compression
-    PatternsAutoTestCase(pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
+    PatternsAutoTestCase(pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG),
+                         wait1=0.4,
                          pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.4,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
-                         pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.4,
-                         data=DATA, compression=False),
-    PatternsAutoTestCase(
-        pattern1=Publisher('PUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
-        pattern2=Subscriber('SUB', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
-        wait2=0.4,
-        data=DATA, compression=False),
 ]
 
 
 # Test Publisher/Subscriber
 # Test Pusher/Puller
 # Server/Client
-@pytest.mark.parametrize('test_case', TestCasesAutoPubSubServerClient)
-def test_transmission_auto_open_pub_sub_server_client(test_case):
+@pytest.mark.parametrize('test_case', TestCasesAutoPubSubServerClientRemote)
+def test_patterns_auto_open_pub_sub_server_client_remote(test_case):
     worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[0].result
     assert worker[1].result == test_case.data
 
 
-TestCasesAutoPushPullServerClient = [
+if os.name != 'nt':
+    TestCasesAutoPushPullServerClientLocal = [
+        # Pusher/Puller Server/Client
+        # No Compression
+        PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
+                             pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
+                             data=DATA, compression=False),
+        PatternsAutoTestCase(
+            pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+            wait1=0.6,
+            pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+            wait2=0.1,
+            data=DATA, compression=False),
+        # With Compression
+        PatternsAutoTestCase(
+            pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+            wait1=0.6,
+            pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+            wait2=0.2,
+            data=DATA, compression=True),
+        PatternsAutoTestCase(
+            pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                            logger_other=TEST_LOG),
+            wait1=0.9,
+            pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                            logger_other=TEST_LOG),
+            wait2=0.2,
+            data=DATA, compression=True),
+    ]
+
+    # Test Publisher/Subscriber
+    # Test Pusher/Puller
+    # Server/Client
+    @pytest.mark.parametrize('test_case', TestCasesAutoPushPullServerClientLocal)
+    def test_patterns_auto_open_push_pull_server_client_local(test_case):
+        worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
+        WorkerRunner.run(worker)
+        assert worker[0].result
+        assert worker[1].result == test_case.data
+
+TestCasesAutoPushPullServerClientRemote = [
     # Pusher/Puller Server/Client
     # No Compression
     PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
                          pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
-                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
-                         data=DATA, compression=False),
-    PatternsAutoTestCase(
-        pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait1=0.6,
-        pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait2=0.1,
-        data=DATA, compression=False),
     # With Compression
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=28129), auto_open=False, logger_other=TEST_LOG),
-                         wait1=0.6,
-                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=28129), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
-                         data=DATA, compression=True),
-    PatternsAutoTestCase(pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
-                         wait1=0.6,
-                         pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
-                         wait2=0.2,
-                         data=DATA, compression=True),
     PatternsAutoTestCase(
-        pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
-                        logger_other=TEST_LOG),
-        wait1=0.9,
-        pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
-                        logger_other=TEST_LOG),
-        wait2=0.2,
+        pattern1=Pusher('PUSH', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=28129), auto_open=False, logger_other=TEST_LOG),
+        wait1=0.6,
+        pattern2=Puller('PULL', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=28129), auto_open=False, logger_other=TEST_LOG), wait2=0.2,
         data=DATA, compression=True),
 ]
 
@@ -202,37 +259,56 @@ TestCasesAutoPushPullServerClient = [
 # Test Publisher/Subscriber
 # Test Pusher/Puller
 # Server/Client
-@pytest.mark.parametrize('test_case', TestCasesAutoPushPullServerClient)
-def test_transmission_auto_open_push_pull_server_client(test_case):
+@pytest.mark.parametrize('test_case', TestCasesAutoPushPullServerClientRemote)
+def test_patterns_auto_open_push_pull_server_client_remote(test_case):
     worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[0].result
     assert worker[1].result == test_case.data
 
 
-TestCasesAutoPairServerClient = [
+if os.name != 'nt':
+    TestCasesAutoPairServerClientLocal = [
+        # Pair
+        # No Compression
+        PatternsAutoTestCase(
+            pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+            wait1=0.4,
+            pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+            wait2=0.3,
+            data=DATA, compression=False),
+        PatternsAutoTestCase(
+            pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+            wait1=0.4,
+            pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG),
+            wait2=0.3,
+            data=DATA, compression=False),
+    ]
+
+    # Test Publisher/Subscriber
+    # Test Pusher/Puller
+    # Server/Client
+    @pytest.mark.parametrize('test_case', TestCasesAutoPairServerClientLocal)
+    def test_patterns_auto_open_pair_server_client_local(test_case):
+        worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
+        WorkerRunner.run(worker)
+        assert worker[0].result
+        assert worker[1].result == test_case.data
+
+TestCasesAutoPairServerClientRemote = [
     # Pair
     # No Compression
     PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
                          pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.3,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
-                         wait1=0.4,
-                         pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
-                         wait2=0.3,
-                         data=DATA, compression=False),
-    PatternsAutoTestCase(
-        pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
-        pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, local_type=Sock.SockUrl.IPC), auto_open=False, logger_other=TEST_LOG), wait2=0.3,
-        data=DATA, compression=False),
 ]
 
 
 # Test Publisher/Subscriber
 # Test Pusher/Puller
 # Server/Client
-@pytest.mark.parametrize('test_case', TestCasesAutoPairServerClient)
-def test_transmission_auto_open_pair_server_client(test_case):
+@pytest.mark.parametrize('test_case', TestCasesAutoPairServerClientRemote)
+def test_patterns_auto_open_pair_server_client_remote(test_case):
     worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[0].result
@@ -283,33 +359,50 @@ class PatternRequesterWorker(Worker):
         }
 
 
-TestCasesAutoPairReqRep = [
+if os.name != 'nt':
+    TestCasesAutoPairReqRepLocal = [
+        # Pair
+        # No Compression
+        PatternsAutoTestCase(
+            pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+            wait1=0.4,
+            pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
+            wait2=0.3,
+            data=DATA, compression=False),
+        PatternsAutoTestCase(
+            pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                          logger_other=TEST_LOG),
+            wait1=0.4,
+            pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
+                          logger_other=TEST_LOG),
+            wait2=0.3,
+            data=DATA, compression=False),
+    ]
+
+    # Test Publisher/Subscriber
+    # Test Pusher/Puller
+    # Server/Client
+    @pytest.mark.parametrize('test_case', TestCasesAutoPairReqRepLocal)
+    def test_patterns_auto_open_pair_server_client_local(test_case):
+        worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
+        WorkerRunner.run(worker)
+        assert worker[0].result
+        assert worker[1].result == test_case.data
+
+TestCasesAutoPairReqRepRemote = [
     # Pair
     # No Compression
     PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*'), auto_open=False, logger_other=TEST_LOG), wait1=0.4,
                          pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT), auto_open=False, logger_other=TEST_LOG), wait2=0.3,
                          data=DATA, compression=False),
-    PatternsAutoTestCase(pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
-                         wait1=0.4,
-                         pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_1'), auto_open=False, logger_other=TEST_LOG),
-                         wait2=0.3,
-                         data=DATA, compression=False),
-    PatternsAutoTestCase(
-        pattern1=Pair('PAIR1', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.SERVER, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
-                      logger_other=TEST_LOG),
-        wait1=0.4,
-        pattern2=Pair('PAIR2', sock_urls=Sock.SockUrl.Local(Sock.SockUrl.CLIENT, path='/tmp/pynet_2', local_type=Sock.SockUrl.IPC), auto_open=False,
-                      logger_other=TEST_LOG),
-        wait2=0.3,
-        data=DATA, compression=False),
 ]
 
 
 # Test Publisher/Subscriber
 # Test Pusher/Puller
 # Server/Client
-@pytest.mark.parametrize('test_case', TestCasesAutoPairReqRep)
-def test_transmission_auto_open_pair_server_client(test_case):
+@pytest.mark.parametrize('test_case', TestCasesAutoPairReqRepRemote)
+def test_patterns_auto_open_pair_server_client_remote(test_case):
     worker = [PatternSendAutoWorker(test_case), PatternReceiveAutoWorker(test_case)]
     WorkerRunner.run(worker)
     assert worker[0].result
