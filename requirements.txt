@@ -1,6 +1,5 @@
 wheel
 rsa
-ipython
 pympler
 pyzmq
 blosc2
