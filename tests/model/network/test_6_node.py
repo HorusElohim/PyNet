@@ -2,7 +2,7 @@ from pynet.model.network.node import *
 from .thread_runner import WorkerRunner, Worker
 from time import sleep
 from pynet.model import Logger
-import pytest
+
 
 DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
