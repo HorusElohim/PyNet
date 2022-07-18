@@ -16,4 +16,3 @@ PYNET_LOGGER = Logger('PyNet')
 
 from .network import *
 from .data import *
-
