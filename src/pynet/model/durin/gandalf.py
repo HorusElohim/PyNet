@@ -5,6 +5,7 @@ from . import Execute, URLS
 from .. import Node
 from typing import Any
 from threading import Thread
+import sys
 
 
 class Console(Thread):
@@ -21,7 +22,8 @@ class Console(Thread):
         self.active = True
         while self.active:
             self.last_recv = self.subscriber.receive()
-            print(self.last_recv)
+            sys.stdout.write(self.last_recv)
+            sys.stdout.flush()
 
     def stop(self):
         self.active = False
