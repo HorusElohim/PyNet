@@ -25,10 +25,10 @@ class Bucket:
     def __str__(self) -> str:
         return f'<Bucket:{self.pos}-{self.hash}/{self.size}>'
 
-    def dump(self) -> dict[str, int]:
+    def dump(self) -> dict:
         return dict(pos=self.pos, hash=self.hash, size=self.size)
 
-    def restore(self, data: DDict[str, int]) -> None:
+    def restore(self, data: DDict) -> None:
         self.pos = data.pos
         self.hash = data.hash
         self.size = data.size
@@ -53,7 +53,7 @@ class MapBucketInvalidOperationWithDifferentMapBucketTargetFile(Exception):
 class MapBuckets:
     __slots__ = 'buckets', 'filename'
 
-    def __init__(self, filename: str, buckets: Union[dict[int, Bucket], DDict] = None) -> None:
+    def __init__(self, filename: str, buckets: Union[dict, DDict] = None) -> None:
         if buckets:
             self.buckets: OrderedDict[int, Bucket] = OrderedDict(buckets)
         else:
