@@ -1,30 +1,7 @@
 from .packet import Packet
 from .sock import Sock
 from typing import Any
-import hashlib
-import blosc2
-import pickle
-
-
-def compress(byte: bytes) -> Any:
-    return blosc2.compress(byte, cname='zlib')
-
-
-def decompress(compress_byte: bytes) -> Any:
-    return blosc2.decompress(compress_byte)
-
-
-def hashing(bytes_obg: bytes) -> str:
-    md5 = hashlib.md5(bytes_obg)
-    return md5.hexdigest()
-
-
-def encode(obj: object) -> bytes:
-    return pickle.dumps(obj)
-
-
-def decode(compress_byte: bytes) -> object:
-    return pickle.loads(compress_byte)
+from .. import encode, decode, compress, decompress
 
 
 class Transmission:

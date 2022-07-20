@@ -1,5 +1,7 @@
 wheel
 rsa
-pympler
 pyzmq
 blosc2
+PyYAML
+setuptools
+pympler

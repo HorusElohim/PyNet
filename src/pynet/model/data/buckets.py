@@ -1,20 +1,18 @@
 from typing import Union, Tuple, Generator
 from collections import OrderedDict
+from .. import DDict, hexhashing
 
 
 class Bucket:
-    __slots__ = 'hash', 'size', 'done'
+    __slots__ = 'hash', 'size', 'pos'
 
-    def __init__(self, byte: bytes):
-        self.hash = hash(byte)
-        self.size = len(byte)
-        self.done: bool = False
+    def __init__(self, byte: bytes = b'', pos: int = 0):
+        self.pos: int = pos
+        self.hash: int = hexhashing(byte)
+        self.size: int = len(byte)
 
     def __hash__(self) -> int:
         return self.hash
-
-    def __bool__(self) -> bool:
-        return self.done
 
     def __len__(self) -> int:
         return self.size
@@ -22,13 +20,18 @@ class Bucket:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Bucket):
             return False
-        return hash(other) == hash(self)
+        return other.hash == self.hash and other.pos == self.pos and other.size == self.size
 
     def __str__(self) -> str:
-        return f'<Bucket:{hash(self)}/{len(self)}>'
+        return f'<Bucket:{self.pos}-{self.hash}/{self.size}>'
 
-    def set_done(self) -> None:
-        self.done = True
+    def dump(self) -> dict[str, int]:
+        return dict(pos=self.pos, hash=self.hash, size=self.size)
+
+    def restore(self, data: DDict[str, int]) -> None:
+        self.pos = data.pos
+        self.hash = data.hash
+        self.size = data.size
 
 
 class MapBucketInvalidInputFromBucketException(Exception):
@@ -50,22 +53,23 @@ class MapBucketInvalidOperationWithDifferentMapBucketTargetFile(Exception):
 class MapBuckets:
     __slots__ = 'buckets', 'filename'
 
-    def __init__(self, filename: str) -> None:
-        self.buckets: OrderedDict[int, Bucket] = OrderedDict()
+    def __init__(self, filename: str, buckets: Union[dict[int, Bucket], DDict] = None) -> None:
+        if buckets:
+            self.buckets: OrderedDict[int, Bucket] = OrderedDict(buckets)
+        else:
+            self.buckets = OrderedDict()
         self.filename: str = filename
 
     def __eq__(self, other: object) -> bool:
         return hash(other) == hash(self)
 
-    def __hash__(self) -> int:
-        return hash(self.buckets) + hash(self.filename)
-
-    def __bool__(self) -> bool:
-        return all(map(bool, list(self.__call__('bucket'))))
+    @property
+    def hash(self) -> int:
+        return hexhashing([*list(self.__call__('bucket')), *[self.filename]])
 
     def __add__(self, other: 'MapBuckets') -> 'MapBuckets':
         if not isinstance(other, MapBuckets):
-            raise MapBucketInvalidOperationWithOtherTypeDifferentThenMapBucketException
+            raise MapBucketInvalidOperationWithOtherTypeDifferentThenMapBucketException()
         if other.filename != self.filename:
             raise MapBucketInvalidOperationWithDifferentMapBucketTargetFile()
 
@@ -76,7 +80,7 @@ class MapBuckets:
 
     def __sub__(self, other: 'MapBuckets') -> 'MapBuckets':
         if not isinstance(other, MapBuckets):
-            raise MapBucketInvalidOperationWithOtherTypeDifferentThenMapBucketException
+            raise MapBucketInvalidOperationWithOtherTypeDifferentThenMapBucketException()
         if other.filename != self.filename:
             raise MapBucketInvalidOperationWithDifferentMapBucketTargetFile()
 
@@ -90,12 +94,6 @@ class MapBuckets:
 
     def __len__(self) -> int:
         return len(self.buckets)
-
-    def add(self, item: Union[bytes, Bucket]) -> None:
-        if isinstance(item, Bucket):
-            self._add_from_bucket(item)
-        elif isinstance(item, bytes):
-            self._add_from_bytes(item)
 
     def _add_from_bucket(self, bucket: Bucket) -> None:
         if not isinstance(bucket, Bucket):
@@ -120,4 +118,25 @@ class MapBuckets:
                 yield i, bucket
 
     def __str__(self) -> str:
-        return f'<MapBuckets:[{self.filename}/{[str(b) for b in self.__call__()]}]>'
+        return f'<MapBuckets:[{self.filename}/{[str(i) + ":" + str(b) for i, b in self.__call__()]}]>'
+
+    def add(self, item: Union[bytes, Bucket]) -> None:
+        if isinstance(item, Bucket):
+            self._add_from_bucket(item)
+        elif isinstance(item, bytes):
+            self._add_from_bytes(item)
+
+    def dump(self) -> dict:
+        buckets: dict = dict()
+        for i, b in self.__call__():
+            buckets.update({i: b.dump()})
+        return dict(buckets=buckets)
+
+    def restore(self, data: DDict) -> None:
+        if self.filename not in data:
+            raise ValueError
+
+        for index, bucket in data[self.filename].buckets.items():
+            b = Bucket()
+            b.restore(bucket)
+            self.add(b)
