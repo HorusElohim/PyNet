@@ -1,0 +1,1 @@
+start pyinstaller.exe   --onefile .\src\pynet\bin\pynet_gui --add-data "src/pynet/view/ui;pynet/view/ui" --windowed

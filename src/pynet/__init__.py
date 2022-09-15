@@ -1,4 +1,4 @@
-__version__ = '2.0.1'
+__version__ = '2.1.0'
 
 from os import mkdir
 from pathlib import Path
@@ -17,3 +17,4 @@ if not LOG_PATH.exists():
 from . import model
 from .model import SockUrl, Sock, Node, DDict, Logger
 from . import console
+from . import view
