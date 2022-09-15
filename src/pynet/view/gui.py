@@ -1,11 +1,11 @@
 import sys
 import os
-from pathlib import Path
+import pkg_resources
+from PySide6.QtCore import QObject
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from .backend import Backend
 from . import UI_LOGGER
-import pkg_resources
+from .controllers.clock import Clock
 
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
@@ -39,17 +39,19 @@ def construct_engine(app) -> QQmlApplicationEngine:
     return engine
 
 
-def construct_backend(engine) -> Backend:
-    backend = Backend()
-    engine.rootObjects()[0].setProperty('backend', backend)
-    UI_LOGGER.log.debug('backed associated to the engine')
-    return backend
+def construct_controllers(engine) -> {QObject}:
+    controllers = {
+        'clock': Clock()
+    }
+    engine.rootObjects()[0].setProperty('clock', controllers['clock'])
+    # Initial call to trigger first update. Must be after the setProperty to connect signals.
+    controllers['clock'].update_time()
+    UI_LOGGER.log.debug('controllers associated to the engine')
+    return controllers
 
 
 def run():
     app = construct_app()
     engine = construct_engine(app)
-    backend = construct_backend(engine)
-    # Initial call to trigger first update. Must be after the setProperty to connect signals.
-    backend.update_time()
+    controllers = construct_controllers(engine)
     sys.exit(app.exec())
