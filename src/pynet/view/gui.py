@@ -10,21 +10,11 @@ import pkg_resources
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    UI_LOGGER.log.debug(f'QML PyInstaller base-path : {base_path}')
-    UI_LOGGER.log.debug(f'QML PyInstaller content : {list(Path(base_path).iterdir())}')
-    return Path(Path(base_path) / relative_path).absolute()
-
-
 def get_qml_path() -> str:
-    # return str(Path(Path(__file__).parent / 'ui' / 'Main.qml').absolute())
     return pkg_resources.resource_filename('pynet', 'view/ui/Main.qml')
 
 
 UI_LOGGER.log.debug(f'QML path: {get_qml_path()}')
-UI_LOGGER.log.debug(f'QML PyInstaller path: {resource_path("ui/Main.qml")}')
 
 
 def construct_app() -> QGuiApplication:
