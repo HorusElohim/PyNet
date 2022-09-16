@@ -40,4 +40,9 @@ import QtQuick.Controls 2.15
                 Qt.callLater(Qt.quit)
             }
         }
+
+        Component.onCompleted: {
+            console.log("X-Btn Created")
+            console.log("X-Btn - Parent" + parent)
+        }
     }

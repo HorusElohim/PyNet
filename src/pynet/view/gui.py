@@ -1,11 +1,16 @@
+from __future__ import annotations
 import sys
 import os
 import time
 
 import pkg_resources
-from PySide6.QtCore import QObject
+from pathlib import Path
+from PySide6.QtCore import QObject, Property, Signal, Slot, QUrl
 from PySide6.QtGui import QGuiApplication, QSurfaceFormat
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQml import qmlRegisterType, QQmlComponent
+from PySide6.QtQuick import QQuickItem
+
 from . import UI_LOGGER
 from .controllers import Clock, Drop, LogMessage
 from .. import __version__
@@ -13,11 +18,43 @@ from .. import __version__
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
 
+class UINode(QQuickItem):
+    name_changed = Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._name = "Node"
+
+    @Property('QString', notify=name_changed)
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+        self.name_changed.emit()
+
+    @Slot(str, name="update_name")
+    def update_name(self, name):
+        UI_LOGGER.log.debug(f"UI-Node:update_name to {name}")
+        self._name = name
+
+
+qmlRegisterType(UINode, 'MyNode', 1, 0, 'UINode')
+
+
 def get_qml_path() -> str:
-    return pkg_resources.resource_filename('pynet', 'view/ui/Main.qml')
+    p = pkg_resources.resource_filename('pynet', 'view/ui/Main.qml')
+    UI_LOGGER.log.debug(f'QML path: {p}')
+    return p
 
 
-UI_LOGGER.log.debug(f'QML path: {get_qml_path()}')
+def get_qml_component_path(cmp: str) -> QUrl:
+    p = pkg_resources.resource_filename('pynet', f'view/ui/Components/{cmp}')
+    UI_LOGGER.log.debug(f'Component QML {cmp} path: {p}')
+    url = QUrl.fromLocalFile(p)
+    UI_LOGGER.log.debug(f'Component QML {cmp} QUrl: {url}')
+    return url
 
 
 def construct_app() -> QGuiApplication:
@@ -69,16 +106,43 @@ def construct_controllers(engine) -> {QObject}:
     # Initial call to trigger first update. Must be after the setProperty to connect signals.
     controllers['clock'].update_time()
     UI_LOGGER.log.debug('controllers associated to the engine')
-    return controllers
+    return controllers, root
+
+
+def construct_node(engine):
+    component = QQmlComponent(engine)
+    component.loadUrl(get_qml_component_path('Node.qml'))
+
+    for err in component.errors():
+        UI_LOGGER.log.error(f"Node component error: {err.toString()}")
+
+    itm = None
+    UI_LOGGER.log.debug(f'Component Status: {component.status()}')
+    # get root (ApplicationWindow cast to QQuickItem)
+    root_item = engine.rootObjects()[0].children()[0]
+    if root_item:
+        UI_LOGGER.log.debug(f'root has QQuickItem')
+        print("CTX: ", engine.rootContext())
+        itm = component.create(context=engine.rootContext())
+        if itm:
+            UI_LOGGER.log.debug(f'Node item created - parent: {itm.parent}')
+            itm.setParent(root_item)
+            UI_LOGGER.log.debug(f'Node assign parent: {itm.parent}, info: {itm.dumpObjectInfo()}')
+        else:
+            UI_LOGGER.log.error('Node qml not loaded')
+    else:
+        UI_LOGGER.log.error('Cannot get root has QQuickItem')
+    return component, itm
 
 
 def run():
     t_start = time.time_ns()
 
+    formatter = construct_formatter()
+
     app = construct_app()
     engine = construct_engine(app)
-    formatter = construct_formatter()
-    controllers = construct_controllers(engine)
-
-    controllers['log'].update_message(f'Ready in {int((time.time_ns() - t_start) * 1e-6) }ms')
+    controllers, root = construct_controllers(engine)
+    cmp, itm = construct_node(engine)
+    controllers['log'].update_message(f'Ready in {int((time.time_ns() - t_start) * 1e-6)} ms')
     sys.exit(app.exec())
