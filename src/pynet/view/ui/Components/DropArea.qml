@@ -16,7 +16,6 @@ import QtQuick.Controls 2.15
             backgroundComponent.opacity = 1
         }
         onExited: {
-            backgroundComponent.color = "white";
             backgroundComponent.opacity = 1
         }
     }

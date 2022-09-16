@@ -3,16 +3,22 @@ import QtQuick.Controls 2.15
 
 
      Button {
-        anchors.right: parent.right
-        anchors.top: parent.top
+
+        anchors {
+            right: parent.right
+            top: parent.top
+            rightMargin: 5
+        }
+
         id: exiter
-        width: 32
-        height: 32
+        width: 22
+        height: 22
         opacity: 0.5
+
 
         Image {
             id: cross
-            source: "../images/close-512.png"
+            source: "../images/close.png"
             fillMode: Image.Stretch
             anchors.fill: parent
         }
@@ -25,6 +31,7 @@ import QtQuick.Controls 2.15
         background: Rectangle {
             color: exiter.hovered ? 'darkgrey' : 'transparent'
             anchors.fill: parent
+            radius: 20
         }
 
         Connections {

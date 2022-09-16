@@ -7,6 +7,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from . import UI_LOGGER
 from .controllers.clock import Clock
 from .controllers.drop import Drop
+from .. import __version__
 
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
@@ -54,8 +55,11 @@ def construct_controllers(engine) -> {QObject}:
         'drop': Drop()
     }
     # Assign controller to the engine
-    engine.rootObjects()[0].setProperty('clockController', controllers['clock'])
-    engine.rootObjects()[0].setProperty('dropController', controllers['drop'])
+    root = engine.rootObjects()[0]
+    root.setProperty('clockController', controllers['clock'])
+    root.setProperty('dropController', controllers['drop'])
+    root.setProperty('appName', "PyNet")
+    root.setProperty('appVersion', __version__)
     # Initial call to trigger first update. Must be after the setProperty to connect signals.
     controllers['clock'].update_time()
     UI_LOGGER.log.debug('controllers associated to the engine')
