@@ -1,12 +1,13 @@
 import sys
 import os
+import time
+
 import pkg_resources
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QGuiApplication, QSurfaceFormat
 from PySide6.QtQml import QQmlApplicationEngine
 from . import UI_LOGGER
-from .controllers.clock import Clock
-from .controllers.drop import Drop
+from .controllers import Clock, Drop, LogMessage
 from .. import __version__
 
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
@@ -30,6 +31,7 @@ def construct_formatter() -> QSurfaceFormat:
     formatter.setSamples(8)
     QSurfaceFormat.setDefaultFormat(formatter)
     UI_LOGGER.log.debug('surface formatter set')
+    return formatter
 
 
 def construct_engine(app) -> QQmlApplicationEngine:
@@ -51,13 +53,17 @@ def construct_engine(app) -> QQmlApplicationEngine:
 
 def construct_controllers(engine) -> {QObject}:
     controllers = {
+        'log': LogMessage(),
         'clock': Clock(),
         'drop': Drop()
     }
     # Assign controller to the engine
     root = engine.rootObjects()[0]
+    # Set Controllers
+    root.setProperty('logController', controllers['log'])
     root.setProperty('clockController', controllers['clock'])
     root.setProperty('dropController', controllers['drop'])
+    # Set static Properties
     root.setProperty('appName', "PyNet")
     root.setProperty('appVersion', __version__)
     # Initial call to trigger first update. Must be after the setProperty to connect signals.
@@ -67,8 +73,10 @@ def construct_controllers(engine) -> {QObject}:
 
 
 def run():
+    t_start = time.time_ns()
     app = construct_app()
     engine = construct_engine(app)
     formatter = construct_formatter()
     controllers = construct_controllers(engine)
+    controllers['log'].update_message(f'Ready in {(time.time_ns() - t_start) * 1e-6 }')
     sys.exit(app.exec())

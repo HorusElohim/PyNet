@@ -5,6 +5,6 @@ import QtQuick.Controls 2.15
         id: backgroundRect
         color: "#3C096C"
         opacity: 0.8
-        radius: 20
+        radius: 10
         anchors.fill: parent
     }
