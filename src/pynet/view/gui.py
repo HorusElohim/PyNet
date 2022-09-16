@@ -74,9 +74,11 @@ def construct_controllers(engine) -> {QObject}:
 
 def run():
     t_start = time.time_ns()
+
     app = construct_app()
     engine = construct_engine(app)
     formatter = construct_formatter()
     controllers = construct_controllers(engine)
-    controllers['log'].update_message(f'Ready in {(time.time_ns() - t_start) * 1e-6 }')
+
+    controllers['log'].update_message(f'Ready in {int((time.time_ns() - t_start) * 1e-6) }ms')
     sys.exit(app.exec())
