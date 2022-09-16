@@ -9,16 +9,24 @@ ApplicationWindow {
     visible: true
     title: "PyNet"
     width: 400
-    height: 600
+    height: 400
     opacity: 0.85
 
-    flags: Qt.FramelessWindowHint | Qt.Window
+    flags: Qt.CustomizeWindowHint |  Qt.Window
 
-    property QtObject clock
+    property QtObject clockController
+    property QtObject dropController
+
     property string clockTime: "00:00:00"
 
+    Background {
+        id: backgroundComponent
+    }
+
+    DropArea {}
+
     MouvableWindow {}
-    Background {}
+
     Clock {}
 
 

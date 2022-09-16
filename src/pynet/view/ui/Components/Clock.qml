@@ -16,7 +16,7 @@ import QtQuick.Controls 2.15
         opacity: 1
 
         Connections {
-            target: clock
+            target: clockController
 
             function onUpdated(msg) {
                 clockTime = msg;
