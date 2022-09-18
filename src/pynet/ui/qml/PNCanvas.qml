@@ -6,7 +6,7 @@ import QtQuick.Controls 2.15
 
         anchors {
             top: routerBar.top
-            topMargin: 65
+            topMargin: 85
             bottom: parent.bottom
             bottomMargin: 45
             right: parent.right
