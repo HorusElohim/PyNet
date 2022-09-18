@@ -1,5 +1,5 @@
-from PySide6.QtCore import QObject, Slot, Signal, Property
-from .components import Clock, Info, LogMessage
+from PySide6.QtCore import QObject, Slot, Signal, Property, QThreadPool
+from .components import Clock, Info, LogMessage, UpnpClient
 from .. import LOG
 
 
@@ -8,10 +8,14 @@ class ViewModel(QObject):
 
     def __init__(self, parent=None):
         super(ViewModel, self).__init__(parent)
+        self._log = LogMessage()
         self._clock = Clock()
         self._info = Info()
-        self._log = LogMessage()
+        self._upnp_client = UpnpClient()
         self._log_message_sig.connect(self._log.update_message)
+        self._upnp_client.log_msg_sig.connect(self._log.update_message)
+        self._thread_pool = QThreadPool()
+
         LOG.log.debug("VM Constructed")
 
     @Property(QObject, constant=True)
@@ -25,6 +29,10 @@ class ViewModel(QObject):
     @Property(QObject, constant=True)
     def info(self):
         return self._info
+
+    @Property(QObject, constant=True)
+    def upnp(self):
+        return self._upnp_client
 
     def log_message(self, msg):
         self._log_message_sig.emit(msg)

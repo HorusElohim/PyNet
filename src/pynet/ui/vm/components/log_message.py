@@ -18,3 +18,4 @@ class LogMessage(QObject):
     def update_message(self, msg):
         self._message = msg
         self.message_changed.emit(self._message)
+        LOG.log.debug(f"logging: {msg}")

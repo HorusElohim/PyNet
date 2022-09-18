@@ -7,8 +7,8 @@ ApplicationWindow  {
     title: "PyNet"
     width: 400
     height: 400
-    minimumWidth: 250
-    minimumHeight: 250
+    minimumWidth: 350
+    minimumHeight: 350
     visible: true
 
     opacity: 0.85
@@ -22,16 +22,29 @@ ApplicationWindow  {
         id: backgroundComponent
     }
 
-    TopBar {}
-
-    DropArea {}
+    TopBar {
+        id: topBar
+    }
 
     MouvableWindow {}
+
+    Router {
+        id: routerBar
+    }
+
+//    DropArea {}
+
+    PNCanvas {
+        id: appCanvas
+        Node {}
+    }
 
     Clock {}
 
     LogMessage {}
 
     ExitButton {}
+
+
 
 }
