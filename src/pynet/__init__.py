@@ -17,4 +17,3 @@ if not LOG_PATH.exists():
 from . import model
 from .model import SockUrl, Sock, Node, DDict, Logger
 from . import console
-from . import view

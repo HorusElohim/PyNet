@@ -11,11 +11,10 @@ class Info(QObject):
         self._version = __version__
         LOG.log.debug("constructed")
 
-    def get_name(self):
+    @Property(str, constant=True)
+    def name(self):
         return self._name
 
-    def get_version(self):
+    @Property(str, constant=True)
+    def version(self):
         return self._version
-
-    name = Property(str, get_name)
-    version = Property(str, get_version)

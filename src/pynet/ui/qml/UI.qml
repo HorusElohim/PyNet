@@ -32,8 +32,6 @@ ApplicationWindow  {
 
     LogMessage {}
 
-//    Node{}
-
     ExitButton {}
 
 }

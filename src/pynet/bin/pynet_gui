@@ -1,6 +1,4 @@
-from pynet.view import gui
 from pynet.ui import app
 
 if __name__ == '__main__':
-    #gui.run()
     app.run()

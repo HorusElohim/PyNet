@@ -13,7 +13,7 @@ import QtQuick.Controls 2.15
 
         }
         font.family: "Cascadia Code Extralight"
-        text: logMessage  // used to be; text: "16:38:33"
+        text: appVm.log.message  // used to be; text: "16:38:33"
         font.pointSize: 11
         color: "white"
         opacity: 1

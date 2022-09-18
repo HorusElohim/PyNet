@@ -1,14 +1,20 @@
-from PySide6.QtCore import QTimer, QObject, Signal
+from PySide6.QtCore import QObject, Signal, Property, Slot
 from . import LOG
 
 
 class LogMessage(QObject):
-    updated = Signal(str, arguments=['logMessage'])
+    message_changed = Signal(str)
 
     def __init__(self):
         super(LogMessage, self).__init__()
+        self._message = "Ready"
         LOG.log.debug('LogMessage constructed')
 
-    def update_message(self, message: str):
-        self.updated.emit(message)
-        LOG.log.debug(f"log message: {message}")
+    @Property(str, notify=message_changed)
+    def message(self):
+        return self._message
+
+    @Slot(str)
+    def update_message(self, msg):
+        self._message = msg
+        self.message_changed.emit(self._message)
