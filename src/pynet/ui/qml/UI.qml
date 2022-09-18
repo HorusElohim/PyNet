@@ -28,8 +28,16 @@ ApplicationWindow  {
 
     MouvableWindow {}
 
-    Router {
-        id: routerBar
+    RouterCard {
+        anchors {
+            top:  topBar.bottom
+            topMargin: 10
+            right: parent.right
+            rightMargin: 10
+            left: parent.left
+            leftMargin: 10
+        }
+
     }
 
 //    DropArea {}
