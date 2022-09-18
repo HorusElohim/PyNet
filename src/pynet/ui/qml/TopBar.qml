@@ -4,21 +4,19 @@ import QtQuick.Controls 2.15
 
     Rectangle {
         id: topRectBanner
+        radius: 200
         color: "white"
 
+        property double ratio: 1
+
         anchors.top: parent.top
-        anchors.left: parent.left
+        anchors.horizontalCenter: parent.horizontalCenter
         height: 24
-        width: parent.width
+        width: Math.floor(parent.width * ratio)
         opacity: 1
 
         Text {
-            anchors {
-                bottom: parent.bottom
-                bottomMargin: 2
-                left: parent.left
-                leftMargin: 5
-            }
+            anchors.centerIn : parent
             font.family: "Cascadia Code Extralight"
             text: appVm.info.name + " " + appVm.info.version
             font.pointSize: 13

@@ -1,5 +1,6 @@
 from ... import LOG
 
+from .cache import Cache
 from .log_message import LogMessage
 from .info import Info
 from .clock import Clock

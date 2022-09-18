@@ -5,7 +5,7 @@ import QtQuick.Controls 2.15
         color: "transparent"
 
         anchors {
-            top: routerBar.top
+            top: routerCard.top
             topMargin: 85
             bottom: parent.bottom
             bottomMargin: 45

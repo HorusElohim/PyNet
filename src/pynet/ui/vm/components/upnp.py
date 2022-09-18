@@ -1,6 +1,7 @@
 from PySide6.QtCore import Property, QObject, Signal, QRunnable, Slot, QThreadPool
 import upnpclient
-from dataclasses import dataclass
+
+from . import Cache
 
 
 class Router(QObject):
@@ -12,11 +13,12 @@ class Router(QObject):
 
     def __init__(self):
         super(Router, self).__init__()
-        self._model: str = '-'
-        self._status: str = '-'
-        self._ip: str = '-'
-        self._nat: str = '-'
-        self._sip: str = '-'
+        self.cache = Cache('upnp.Router')
+        self.model: str = self.cache.get('model')
+        self.status: str = "Connection: 🔴"
+        self.ip: str = self.cache.get('ip')
+        self.nat: str = "Nat: 🔴"
+        self.sip: str = "Sip: 🔴"
 
     @Property(str, notify=model_sig)
     def model(self):
@@ -59,6 +61,11 @@ class Router(QObject):
     def sip(self, m):
         self._sip = m
 
+    def save(self):
+        self.cache.data = dict(model=self._model,
+                               ip=self._ip)
+        self.cache.save()
+
 
 class UpnpDiscoverySignals(QObject):
     log = Signal(str)
@@ -84,10 +91,10 @@ class UpnpDiscoveryWorker(QRunnable):
 
             status = d.WANIPConn1.GetStatusInfo()
             if 'NewConnectionStatus' in status:
-                self.router.status = f'Connection: {"🟢" if  status["NewConnectionStatus"] == "Connected" else "🔴"}'
+                self.router.status = f'Connection: {"🟢" if status["NewConnectionStatus"] == "Connected" else "🔴"}'
             status = d.WANIPConn1.GetNATRSIPStatus()
             if 'NewRSIPAvailable' in status:
-                self.router.sip = f'sip: {"🟢" if  status["NewRSIPAvailable"] else "🔴"}'
+                self.router.sip = f'sip: {"🟢" if status["NewRSIPAvailable"] else "🔴"}'
             if 'NewNATEnabled' in status:
                 self.router.nat = status['NewNATEnabled']
                 self.router.nat = f'Nat: {"🟢" if status["NewNATEnabled"] else "🔴"}'
@@ -103,6 +110,8 @@ class UpnpClient(QObject):
         super(UpnpClient, self).__init__(parent)
         self.devices = None
         self._router = Router()
+        self.cache = Cache('UpnpClient.Router')
+        # self.router
         self.worker = None
 
     @Property(QObject, notify=router_sig)
@@ -121,6 +130,7 @@ class UpnpClient(QObject):
     @Slot(QObject)
     def router_slot(self, r):
         self.router = r
+        self.router.save()
 
     def start_discovery(self):
         th_pool = QThreadPool.globalInstance()

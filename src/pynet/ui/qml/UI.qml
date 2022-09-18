@@ -6,7 +6,7 @@ ApplicationWindow  {
     id: appWindow
     title: "PyNet"
     width: 500
-    height: 400
+    height: 280
     minimumWidth: 350
     minimumHeight: 350
     visible: true
@@ -14,7 +14,8 @@ ApplicationWindow  {
     opacity: 0.85
     color: "transparent"
 
-    flags: Qt.CustomizeWindowHint |  Qt.Window
+//    flags: Qt.CustomizeWindowHint |  Qt.Window
+    flags: Qt.FramelessWindowHint |  Qt.Window
 
     property string logMessage: ""
 
@@ -22,13 +23,19 @@ ApplicationWindow  {
         id: backgroundComponent
     }
 
-    TopBar {
-        id: topBar
-    }
+
+
 
     MouvableWindow {}
+        TopBar {
+           id: topBar
+           ratio: 0.4
+           ExitButton {}
+    }
+
 
     RouterCard {
+        id : routerCard
         anchors {
             top:  topBar.bottom
             topMargin: 10
@@ -51,7 +58,7 @@ ApplicationWindow  {
 
     LogMessage {}
 
-    ExitButton {}
+
 
 
 
