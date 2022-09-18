@@ -8,8 +8,9 @@ from pathlib import Path
 from PySide6.QtCore import QObject, Property, Signal, Slot, QUrl
 from PySide6.QtGui import QGuiApplication, QSurfaceFormat
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtQml import qmlRegisterType, QQmlComponent
-from PySide6.QtQuick import QQuickItem
+from PySide6.QtQml import QQmlComponent
+from PySide6.QtQuick import QQuickView
+from PySide6.QtWidgets import QApplication
 
 from . import UI_LOGGER
 from .controllers import Clock, Drop, LogMessage
@@ -18,32 +19,7 @@ from .. import __version__
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
 
-class UINode(QQuickItem):
-    name_changed = Signal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._name = "Node"
-
-    @Property('QString', notify=name_changed)
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        self._name = name
-        self.name_changed.emit()
-
-    @Slot(str, name="update_name")
-    def update_name(self, name):
-        UI_LOGGER.log.debug(f"UI-Node:update_name to {name}")
-        self._name = name
-
-
-qmlRegisterType(UINode, 'MyNode', 1, 0, 'UINode')
-
-
-def get_qml_path() -> str:
+def get_root_qml_path() -> str:
     p = pkg_resources.resource_filename('pynet', 'view/ui/Main.qml')
     UI_LOGGER.log.debug(f'QML path: {p}')
     return p
@@ -76,7 +52,7 @@ def construct_engine(app) -> QQmlApplicationEngine:
     engine = QQmlApplicationEngine()
     UI_LOGGER.log.debug('engine constructed')
     engine.quit.connect(app.quit)
-    engine.load(get_qml_path())
+    engine.load(get_root_qml_path())
     UI_LOGGER.log.debug('engine qml loaded')
 
     if not engine.rootObjects():
