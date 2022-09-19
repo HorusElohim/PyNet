@@ -33,7 +33,9 @@ class Cache:
         return self
 
     def get(self, key):
-        if key in self.__dict__:
+        if key in self.data:
             LOG.log.debug(f'cache {key}: loaded')
-            return self.__dict__[key]
+            return self.data[key]
+        else:
+            LOG.log.warning(f'cache {key}: NOT loaded')
         return '-'

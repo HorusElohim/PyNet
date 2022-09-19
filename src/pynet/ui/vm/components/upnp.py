@@ -132,6 +132,9 @@ class UpnpClient(QObject):
         self.router = r
         self.router.save()
 
+    def update(self):
+        self.router.update()
+
     def start_discovery(self):
         th_pool = QThreadPool.globalInstance()
         self.worker = UpnpDiscoveryWorker()
