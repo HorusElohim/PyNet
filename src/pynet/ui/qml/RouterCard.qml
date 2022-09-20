@@ -13,11 +13,12 @@ import QtQuick.Controls 2.15
     ImageCircle {
             id: routerImageCircle
             imgSource: "./images/router.png"
+            border.color: appVm.router_card.color
         }
 
         PNText {
                 id: routerModelText
-                text: appVm.upnp.router.model
+                text: appVm.router_card.info.model
                 font.pointSize: 11
             anchors {
                 top:  parent.top
@@ -29,7 +30,7 @@ import QtQuick.Controls 2.15
 
         PNText {
                 id: routerStatusText
-                text: appVm.upnp.router.status
+                text: appVm.router_card.info.sip
                 font.pointSize: 11
             anchors {
                 top:  parent.top
@@ -41,7 +42,7 @@ import QtQuick.Controls 2.15
 
         PNText {
                 id: routerIpText
-                text: appVm.upnp.router.ip
+                text: appVm.router_card.info.ip
                 font.pointSize: 11
             anchors {
                 bottom:  parent.bottom
@@ -53,7 +54,7 @@ import QtQuick.Controls 2.15
 
         PNText {
                 id: routerNatText
-                text: appVm.upnp.router.nat
+                text: appVm.router_card.info.nat
                 font.pointSize: 11
             anchors {
                 bottom:  parent.bottom

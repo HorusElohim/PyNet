@@ -51,7 +51,7 @@ ApplicationWindow  {
 
     PNCanvas {
         id: appCanvas
-        Node {}
+//        Node {}
     }
 
     Clock {}

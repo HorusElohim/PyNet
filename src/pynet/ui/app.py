@@ -11,8 +11,8 @@ def run():
     pynet_engine.quit.connect(pynet_app.quit)
     engine.add_property(pynet_engine, 'appVm', pynet_vm)
     engine.load_qml(pynet_engine, qml.url('ui/qml/UI.qml'))
-    pynet_vm._upnp_client.start_discovery()
     pynet_vm.log_message(f'Ready in {int((time.time_ns() - t_start) * 1e-6)} ms')
+    pynet_vm.router_card.discover()
     sys.exit(pynet_app.exec())
 
 

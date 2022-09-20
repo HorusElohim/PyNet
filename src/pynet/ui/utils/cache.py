@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from PySide6.QtCore import QObject
-from pathlib import Path
-
 from pynet import RUN_PATH, DDict
 from pynet.model import Yml
 
-from dataclasses import dataclass
-
-from ... import LOG
+from .. import LOG
 
 
 class Cache:
@@ -28,14 +23,19 @@ class Cache:
         return False
 
     def save(self):
-        LOG.log.debug(f'cache save - {self.path} ')
-        Yml.save(self.path, self.data)
+        LOG.log.debug(f'saving cache to {self.path} : {self.data} ')
+        Yml.save(self.path, self.data.copy())
         return self
 
-    def get(self, key):
-        if key in self.data:
+    def get(self, key, default="-"):
+        if self.has(key):
             LOG.log.debug(f'cache {key}: loaded')
             return self.data[key]
         else:
             LOG.log.warning(f'cache {key}: NOT loaded')
-        return '-'
+        return default
+
+    def has(self, key):
+        if key in self.data:
+            return True
+        return False
