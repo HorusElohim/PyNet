@@ -1,20 +1,12 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
      Button {
-
-        anchors {
-            right: parent.right
-            top: parent.top
-            rightMargin: 5
-        }
-
+        Layout.preferredWidth: 22
+        Layout.preferredHeight: 22
         id: exiter
-        width: 22
-        height: 22
         opacity: 0.5
-
 
         Image {
             id: cross
@@ -39,10 +31,5 @@ import QtQuick.Controls 2.15
             function onClicked() {
                 Qt.callLater(Qt.quit)
             }
-        }
-
-        Component.onCompleted: {
-            console.log("X-Btn Created")
-            console.log("X-Btn - Parent" + parent)
         }
     }

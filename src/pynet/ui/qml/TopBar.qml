@@ -1,26 +1,35 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
     Rectangle {
         id: topRectBanner
         radius: 200
         color: "white"
-
-        property double ratio: 1
-
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 24
-        width: Math.floor(parent.width * ratio)
+        height: 30
         opacity: 1
+        Layout.minimumWidth: 170
+        Layout.minimumHeight: 25
 
-        Text {
-            anchors.centerIn : parent
-            font.family: "Cascadia Code Extralight"
-            text: appVm.info.name + " " + appVm.info.version
-            font.pointSize: 13
-            color: "#3C096C"
-            opacity: 1
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 5
+            Layout.alignment: Qt.AlignCenter
+
+            RowLayout {
+                Text {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    font.family: "Cascadia Code Extralight"
+                    text: appVm.info.name + " " + appVm.info.version
+                    font.pointSize: 13
+                    color: "#3C096C"
+                    opacity: 1
+                }
+                ExitButton {
+                }
+            }
         }
+
+
     }

@@ -2,61 +2,28 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 
-ApplicationWindow  {
+PyNetWindow {
     id: appWindow
-    title: "PyNet"
-    width: 500
-    height: 280
-    minimumWidth: 350
-    minimumHeight: 350
-    visible: true
 
-    opacity: 0.85
-    color: "transparent"
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 1
+        spacing: 10
 
-//    flags: Qt.CustomizeWindowHint |  Qt.Window
-    flags: Qt.FramelessWindowHint |  Qt.Window
-
-    property string logMessage: ""
-
-    Background {
-        id: backgroundComponent
-    }
-
-    MouvableWindow {}
-
-    TopBar {
+        TopBar {
            id: topBar
-           ratio: 0.4
-           ExitButton {}
-    }
+           Layout.alignment: Qt.AlignTop | Qt.AlignCenter
+        }
 
-    RouterCard {
-        id : routerCard
-        anchors {
-            top:  topBar.bottom
-            topMargin: 10
-            right: parent.right
-            rightMargin: 10
-            left: parent.left
-            leftMargin: 10
+        RouterCard {
+            id : routerCard
+            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+            Layout.fillWidth: true
+        }
+
+        BotBar {
+            id: botBar
         }
 
     }
-
-//    DropArea {}
-
-    PNCanvas {
-        id: appCanvas
-//        Node {}
-    }
-
-    Clock {}
-
-    LogMessage {}
-
-
-
-
-
 }

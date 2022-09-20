@@ -13,8 +13,6 @@ class ViewModel(QObject):
         self._info = Info()
         self._router_card = RouterCard()
         self._router_card.logger_sig.connect(self._log.update_message)
-        # self._upnp_client = UpnpClient()
-        # self._upnp_client.logger_signal.connect(self._log.update_message)
         self._log_message_sig.connect(self._log.update_message)
         LOG.log.debug("VM Constructed")
 
