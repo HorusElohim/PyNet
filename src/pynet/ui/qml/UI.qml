@@ -23,16 +23,13 @@ ApplicationWindow  {
         id: backgroundComponent
     }
 
-
-
-
     MouvableWindow {}
-        TopBar {
+
+    TopBar {
            id: topBar
            ratio: 0.4
            ExitButton {}
     }
-
 
     RouterCard {
         id : routerCard

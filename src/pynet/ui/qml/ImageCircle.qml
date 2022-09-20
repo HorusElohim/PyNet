@@ -4,7 +4,7 @@ import QtQuick.Controls 2.15
     Rectangle {
         property string imgSource: ""
 
-        color: "#776985"
+        color: "transparent"
         radius: 80
         width: 80
         height: 80
