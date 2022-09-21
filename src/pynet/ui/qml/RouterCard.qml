@@ -8,7 +8,7 @@ import QtQuick.Controls
         radius: 80
 
         Rectangle {
-            color: "#250542"
+            color: "black"
             width: parent.width
             height: parent.height
             radius: 80
@@ -61,13 +61,19 @@ import QtQuick.Controls
                         font.pointSize: 11
                     }
 
+                    PNText {
+                        id: routerUpnpText
+                        text: appVm.router_card.info.upnp
+                        font.pointSize: 11
+                    }
+
                 }
             }
         }
 
         ImageCircle {
                 id: routerImageCircle
-                imgSource: "./images/router2.png"
+                imgSource: "./images/pynet-7.png"
                 border.color: appVm.router_card.color
                 MouseArea {
                     id: area

@@ -66,6 +66,7 @@ class Upnp(AbcEntity):
     def new_port_mapping(self, ip, internal_port, external_port):
         if not self.device:
             raise UpnpDeviceIsNone(self)
+        self.delete_port_mapping(ip, external_port)
         self.log.debug(f"asking mapping: 0.0.0.0:{external_port} -> {ip}:{internal_port}")
         self.device.WANIPConn1.AddPortMapping(
             NewRemoteHost='0.0.0.0',

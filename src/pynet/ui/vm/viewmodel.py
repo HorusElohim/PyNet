@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Slot, Signal, Property, QThreadPool
-from .components import Clock, Info, LogMessage, RouterCard
+from .components import Clock, AppInfo, LogMessage, RouterCard, DNSCard
 from .. import LOG
 
 
@@ -10,9 +10,13 @@ class ViewModel(QObject):
         super(ViewModel, self).__init__(parent)
         self._log = LogMessage()
         self._clock = Clock()
-        self._info = Info()
+        self._info = AppInfo()
+        # Cards Components
         self._router_card = RouterCard()
-        self._router_card.logger_sig.connect(self._log.update_message)
+        self._router_card.logger_signal.connect(self._log.update_message)
+        self._dns_card = DNSCard()
+        self._dns_card.logger_signal.connect(self._log.update_message)
+
         self._log_message_sig.connect(self._log.update_message)
         LOG.log.debug("VM Constructed")
 
@@ -31,6 +35,10 @@ class ViewModel(QObject):
     @Property(QObject, constant=True)
     def router_card(self):
         return self._router_card
+
+    @Property(QObject, constant=True)
+    def dns_card(self):
+        return self._dns_card
 
     def log_message(self, msg):
         self._log_message_sig.emit(msg)

@@ -13,6 +13,7 @@ def run():
     engine.load_qml(pynet_engine, qml.url('ui/qml/UI.qml'))
     pynet_vm.log_message(f'Ready in {int((time.time_ns() - t_start) * 1e-6)} ms')
     pynet_vm.router_card.discover()
+    pynet_vm.dns_card.discover()
     sys.exit(pynet_app.exec())
 
 

@@ -6,6 +6,8 @@ from ...utils.property import PROPERTY_CACHE
 from ...utils import Property, PropertyMeta
 from . import Card
 
+MAPPED_PORT = 28128
+
 
 class RouterInfo(QObject, metaclass=PropertyMeta):
     model = Property('-', save=True)
@@ -14,6 +16,7 @@ class RouterInfo(QObject, metaclass=PropertyMeta):
     status = Property(False)
     nat = Property('NAT: 🔴')
     sip = Property('SIP: 🔴')
+    upnp = Property('MAP: 🔴')
 
 
 class UpnpBridge(Upnp):
@@ -30,6 +33,9 @@ class UpnpBridge(Upnp):
         nat, sip = self.get_nat_sip()
         self.info.nat = f'NAT: {"🟢" if nat else "🔴"}'
         self.info.sip = f'SIP: {"🟢" if sip else "🔴"}'
+        # Mapping
+        res = self.new_port_mapping(self.info.local_ip, MAPPED_PORT, MAPPED_PORT)
+        self.info.upnp = f'MAP: {"🟢" if res else "🔴"}'
         return self.info
 
 
@@ -53,28 +59,24 @@ class RouterCardWorker(QRunnable):
 
 class RouterCard(Card):
     info = Property(RouterInfo())
-    logger_sig = Signal(str)
 
     def __init__(self, parent=None):
         super(RouterCard, self).__init__(parent)
         self.worker = None
-        self.color = "yellow"
-
-    @Slot(str)
-    def log(self, msg):
-        self.logger_sig.emit(msg)
+        self.warning_state()
 
     @Slot(RouterInfo)
     def router_info_slot(self, ri: RouterInfo):
         self.info = ri
         if self.info.status:
-            self.color = "green"
+            self.success_state()
+        else:
+            self.error_state()
         PROPERTY_CACHE.save()
 
     def discover(self):
         th_pool = QThreadPool.globalInstance()
-        self.color = "yellow"
         self.worker = RouterCardWorker()
-        self.worker.signals.log.connect(self.log)
+        self.worker.signals.log.connect(self.log_message)
         self.worker.signals.info.connect(self.router_info_slot)
         th_pool.start(self.worker)

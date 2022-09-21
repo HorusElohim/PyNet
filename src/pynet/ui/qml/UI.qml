@@ -12,7 +12,7 @@ PyNetWindow {
 
         TopBar {
            id: topBar
-           Layout.alignment: Qt.AlignTop | Qt.AlignCenter
+           Layout.alignment: Qt.AlignTop | Qt.AlignLeft
         }
 
         RouterCard {
@@ -21,7 +21,16 @@ PyNetWindow {
             Layout.fillWidth: true
         }
 
+        DNSCard {
+            id : routerCard2
+            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+            Layout.fillWidth: true
+        }
+
         BotBar {
+            Layout.fillWidth: true
+             Layout.fillHeight: true
+            Layout.alignment: Qt.AlignBottom | Qt.AlignCenter
             id: botBar
         }
 

@@ -18,15 +18,17 @@ import QtQuick.Layouts
 
             RowLayout {
                 Text {
+                    Layout.alignment: Qt.AlignCenter
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    font.family: "Cascadia Code Extralight"
+                    font.family: "Cascadia Code light"
                     text: appVm.info.name + " " + appVm.info.version
-                    font.pointSize: 13
-                    color: "#3C096C"
+                    font.pointSize: 14
+                    color: "black"
                     opacity: 1
                 }
                 ExitButton {
+                    Layout.alignment: Qt.AlignRight
                 }
             }
         }
