@@ -4,9 +4,9 @@ import QtQuick.Controls
 
 ApplicationWindow  {
     title: "PyNet"
-    width: 400
+    width: 500
     height: 150
-    minimumWidth: 400
+    minimumWidth: 500
     minimumHeight: 150
     visible: true
 

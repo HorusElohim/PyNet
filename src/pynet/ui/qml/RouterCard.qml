@@ -1,5 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
 
     Rectangle {
         color: "transparent"
@@ -16,54 +17,52 @@ import QtQuick.Controls 2.15
                 color: "black"
             }
 
-            PNText {
-                id: routerModelText
-                text: appVm.router_card.info.model
-                font.pointSize: 11
-            anchors {
-                top:  parent.top
-                topMargin: 10
-                left: parent.left
-                leftMargin: 102
+            RowLayout{
+                anchors.left : parent.left
+                anchors.leftMargin: 90
+                anchors.top: parent.top
+                anchors.topMargin: 5
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 5
+                spacing: 10
+
+                ColumnLayout{
+                    Layout.alignment: Qt.AlignCenter | Qt.AlignLeft
+                    PNText {
+                            id: routerModelText
+                            text: "Router: " + appVm.router_card.info.model
+                            font.pointSize: 11
+                            }
+                    PNText {
+                            id: routerIpPubText
+                            text: "Public: " + appVm.router_card.info.public_ip
+                            font.pointSize: 11
+                    }
+                    PNText {
+                            id: routerIpLocalText
+                            text: "Local: " + appVm.router_card.info.local_ip
+                            font.pointSize: 11
+                    }
+                }
+                ColumnLayout{
+                    Layout.alignment: Qt.AlignCenter | Qt.AlignLeft
+                    Layout.fillHeight: true
+
+                    PNText {
+                        id: routerStatusText
+                        text: appVm.router_card.info.sip
+                        font.pointSize: 11
+                    }
+
+                    PNText {
+                        id: routerNatText
+                        text: appVm.router_card.info.nat
+                        font.pointSize: 11
+                    }
+
                 }
             }
-
-            PNText {
-                    id: routerStatusText
-                    text: appVm.router_card.info.sip
-                    font.pointSize: 11
-                anchors {
-                    top:  parent.top
-                    topMargin: 10
-                    right: parent.right
-                    rightMargin: 22
-                }
-            }
-
-            PNText {
-                    id: routerIpText
-                    text: appVm.router_card.info.public_ip
-                    font.pointSize: 11
-                anchors {
-                    bottom:  parent.bottom
-                    bottomMargin: 16
-                    left: parent.left
-                    leftMargin: 102
-                }
-            }
-
-            PNText {
-                    id: routerNatText
-                    text: appVm.router_card.info.nat
-                    font.pointSize: 11
-                anchors {
-                    bottom:  parent.bottom
-                    bottomMargin: 16
-                    right: parent.right
-                    rightMargin: 22
-                }
-            }
-
         }
 
         ImageCircle {
