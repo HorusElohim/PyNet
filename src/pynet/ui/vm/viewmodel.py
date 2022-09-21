@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Slot, Signal, Property, QThreadPool
-from .components import Clock, Info, LogMessage, UpnpClient, RouterCard
+from .components import Clock, Info, LogMessage, RouterCard
 from .. import LOG
 
 

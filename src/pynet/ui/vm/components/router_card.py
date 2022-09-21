@@ -1,6 +1,7 @@
 import upnpclient
 from PySide6.QtCore import QObject, Signal, QRunnable, Slot, QThreadPool, QCoreApplication
 
+from .... import Upnp
 from ...utils.property import PROPERTY_CACHE
 from ...utils import Property, PropertyMeta
 from . import Card
@@ -8,43 +9,28 @@ from . import Card
 
 class RouterInfo(QObject, metaclass=PropertyMeta):
     model = Property('-', save=True)
-    ip = Property('-', save=True)
+    local_ip = Property('-', save=True)
+    public_ip = Property('-', save=True)
     status = Property(False)
     nat = Property('NAT: 🔴')
     sip = Property('SIP: 🔴')
 
 
-class Upnp(object):
+class UpnpBridge(Upnp):
     def __init__(self):
-        self.device = None
+        Upnp.__init__(self, auto_discover=False)
         self.info = RouterInfo()
 
     def discover_router(self) -> RouterInfo:
-        devices = upnpclient.discover()
-        self.device = devices[0] if len(devices) > 0 else None
+        self.discover()
         self.info.model = self.device.model_name
-        self.info.ip = self.get_ip()
+        self.info.public_ip = self.get_public_ip()
+        self.info.local_ip = self.get_local_ip()
         self.info.status = self.get_status()
-        self.info.nat, self.info.sip = self.get_nat_sip()
+        nat, sip = self.get_nat_sip()
+        self.info.nat = f'NAT: {"🟢" if nat else "🔴"}'
+        self.info.sip = f'SIP: {"🟢" if sip else "🔴"}'
         return self.info
-
-    def get_ip(self):
-        return self.device.WANIPConn1.GetExternalIPAddress()['NewExternalIPAddress'] if self.device else ''
-
-    def get_status(self):
-        if self.device:
-            if 'Connected' in self.device.WANIPConn1.GetStatusInfo()["NewConnectionStatus"]:
-                return True
-        return False
-
-    def get_nat_sip(self):
-        if self.device:
-            status = self.device.WANIPConn1.GetNATRSIPStatus()
-            sip = f'SIP: {"🟢" if status["NewRSIPAvailable"] else "🔴"}'
-            nat = f'NAT: {"🟢" if status["NewNATEnabled"] else "🔴"}'
-            return nat, sip
-        else:
-            return "🔴", "🔴"
 
 
 class RouterCardWorkerSignals(QObject):
@@ -56,7 +42,7 @@ class RouterCardWorker(QRunnable):
     def __init__(self):
         super().__init__()
         self.signals = RouterCardWorkerSignals()
-        self.upnp = Upnp()
+        self.upnp = UpnpBridge()
 
     def run(self) -> None:
         self.signals.log.emit('Upnp router discovering ...')

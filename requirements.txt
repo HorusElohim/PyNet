@@ -5,3 +5,4 @@ blosc2
 PyYAML
 setuptools
 pympler
+upnpclient

@@ -11,6 +11,7 @@
 # GNU General Public License for more details.
 #
 from .. import AbcEntity
+from . import Upnp
 from .patterns import *
 from typing import Type
 from zmq import Context
@@ -33,6 +34,7 @@ class Node(AbcEntity):
     Requester: Type[Requester] = Requester
     Replier: Type[Replier] = Replier
     Pair: Type[Pair] = Pair
+    Upnp: Type[Upnp] = Upnp
 
     def _sigint_(self, sig: int, frame: object) -> None:
         self.log.info("CTRL-C Pressed. Cleaning resources.")
@@ -76,6 +78,9 @@ class Node(AbcEntity):
     def new_pair(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> Pair:
         self.log.debug(f'new pair on url: {sock_urls}')
         return Pair(self.node_name, sock_urls, flags=flags, logger_other=self)
+
+    def new_upnp(self):
+        return Upnp(logger_other=self)
 
     def clean_resources(self) -> None:
         pass

@@ -42,7 +42,7 @@ import QtQuick.Controls 2.15
 
             PNText {
                     id: routerIpText
-                    text: appVm.router_card.info.ip
+                    text: appVm.router_card.info.public_ip
                     font.pointSize: 11
                 anchors {
                     bottom:  parent.bottom
@@ -65,6 +65,7 @@ import QtQuick.Controls 2.15
             }
 
         }
+
         ImageCircle {
                 id: routerImageCircle
                 imgSource: "./images/router2.png"
