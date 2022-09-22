@@ -28,17 +28,19 @@ SERVER_INFO = ServerInfo(registration_port=REGISTRATION_PORT)
 
 
 class ClientInfo(object):
-    __slots__ = 'name', 'pub_ip', 'alive_port', 'data_ports', 'id'
+    __slots__ = 'name', 'pub_ip', 'local_ip', 'alive_port', 'data_ports', 'id'
 
     def __init__(self, name: str, alive_port: int, data_ports: [int]):
         self.name = name
         self.pub_ip = ''
+        self.local_ip = ''
         self.alive_port = alive_port
         self.data_ports = data_ports
         self.id = oneshot_str_hexhashing(self.name + str(self.pub_ip))
 
-    def update_public_ip(self):
+    def update_ip(self):
         self.pub_ip = UPNP.get_public_ip()
+        self.local_ip = UPNP.get_local_ip()
 
     @staticmethod
     def get_registration_url() -> SockUrl.Abc:

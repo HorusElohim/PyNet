@@ -13,23 +13,19 @@ PyNetWindow {
         spacing: 1
 
         TopBar {
-                id: topBar
                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
         }
-
 
         VerticalLine {}
 
         RouterCard {
-            id : routerCard
             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
             Layout.fillWidth: true
         }
 
         VerticalLine {}
 
-        DNSCard {
-            id : routerCard2
+        PynetCard {
             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
             Layout.fillWidth: true
         }
@@ -38,7 +34,6 @@ PyNetWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignBottom | Qt.AlignCenter
-            id: botBar
         }
 
     }

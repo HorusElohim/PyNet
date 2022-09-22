@@ -61,12 +61,6 @@ import QtQuick.Controls
                         font.pointSize: 11
                     }
 
-                    PNText {
-                        id: routerUpnpText
-                        text: appVm.router_card.info.upnp
-                        font.pointSize: 11
-                    }
-
                 }
             }
         }

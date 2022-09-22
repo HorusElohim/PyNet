@@ -12,7 +12,8 @@ import QtQuick.Controls
             width: parent.width
             height: parent.height
             radius: 80
-            visible: appVm.dns_card.visible_body
+            visible: appVm.pynet_card.visible_body
+
             border {
                 color: "black"
             }
@@ -30,14 +31,14 @@ import QtQuick.Controls
                 ColumnLayout{
                     Layout.alignment: Qt.AlignCenter | Qt.AlignLeft
                     Layout.fillWidth: true
+
                     PNText {
-                            id: dnsModelText
-                            text: "Port: " + appVm.dns_card.info.mapped_port
-                            font.pointSize: 11
-                            }
+                        text: "Users: " + appVm.pynet_card.info.n_clients
+                        font.pointSize: 11
+                    }
+
                     PNText {
-                        id: dnsNatText
-                        text: "Users: " + appVm.dns_card.info.n_clients
+                        text: "Updated: " + appVm.pynet_card.info.last_update
                         font.pointSize: 11
                     }
                 }
@@ -46,13 +47,19 @@ import QtQuick.Controls
                     Layout.fillHeight: true
 
                     PNText {
-                        id: dnsStatusText
-                        text: "DNS: " + appVm.dns_card.info.dns_server
+                        text: "Registration: " + appVm.pynet_card.info.requester_status
                         font.pointSize: 11
                     }
 
+                    PNText {
+                        text: "Server: " + appVm.pynet_card.info.server_status
+                        font.pointSize: 11
+                    }
 
-
+                    PNText {
+                        text: "Alive: " + appVm.pynet_card.info.alive_status
+                        font.pointSize: 11
+                    }
                 }
             }
         }
@@ -60,14 +67,14 @@ import QtQuick.Controls
         ImageCircle {
                 id: dnsImageCircle
                 imgSource: "./images/pynet-5.png"
-                border.color: appVm.dns_card.color
+                border.color: appVm.pynet_card.color
                 MouseArea {
                     id: area
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                       appVm.dns_card.visible_body = !appVm.dns_card.visible_body
+                       appVm.pynet_card.visible_body = !appVm.pynet_card.visible_body
                     }
                 }
         }
