@@ -11,6 +11,7 @@
 # GNU General Public License for more details.
 #
 from .. import AbcEntity
+from . import UPNP
 from . import Upnp
 from .patterns import *
 from typing import Type
@@ -79,8 +80,9 @@ class Node(AbcEntity):
         self.log.debug(f'new pair on url: {sock_urls}')
         return Pair(self.node_name, sock_urls, flags=flags, logger_other=self)
 
-    def new_upnp(self):
-        return Upnp(logger_other=self)
+    @staticmethod
+    def get_upnp():
+        return UPNP
 
     def clean_resources(self) -> None:
         pass

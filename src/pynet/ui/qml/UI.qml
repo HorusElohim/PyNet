@@ -7,19 +7,26 @@ PyNetWindow {
 
     ColumnLayout {
         anchors.fill: parent
+        Layout.fillHeight: true
         anchors.margins: 1
-        spacing: 10
+        anchors.leftMargin: 40
+        spacing: 1
 
         TopBar {
-           id: topBar
-           Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                id: topBar
+                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
         }
+
+
+        VerticalLine {}
 
         RouterCard {
             id : routerCard
             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
             Layout.fillWidth: true
         }
+
+        VerticalLine {}
 
         DNSCard {
             id : routerCard2
@@ -29,7 +36,7 @@ PyNetWindow {
 
         BotBar {
             Layout.fillWidth: true
-             Layout.fillHeight: true
+            Layout.fillHeight: true
             Layout.alignment: Qt.AlignBottom | Qt.AlignCenter
             id: botBar
         }

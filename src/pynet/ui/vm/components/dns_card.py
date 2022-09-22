@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal, QRunnable, Slot, QThreadPool, QCoreA
 
 from ...utils import Property, PropertyMeta
 from . import Card
-from pynet.model.network.dns import DNSClient
+from pynet.model.network.dns import Client
 
 
 class DNSInfo(QObject, metaclass=PropertyMeta):
@@ -22,7 +22,7 @@ class DNSCardWorker(QRunnable):
         super().__init__()
         self.signals = DNSCardWorkerSignals()
         self.dns_info = DNSInfo()
-        self.dns_client = DNSClient('UI-DNSC')
+        self.dns_client = Client('Pynet.Client')
 
     def run(self):
         self.signals.log.emit('DNS client registration ...')
@@ -32,7 +32,7 @@ class DNSCardWorker(QRunnable):
             self.dns_info.clients = self.dns_client.clients
             self.dns_info.dns_server = "🟢"
             self.dns_info.mapped_port = 28128
-            self.dns_info.n_clients = len(self.dns_client.clients)
+            self.dns_info.n_clients = self.dns_client.clients.count
         self.signals.info.emit(self.dns_info)
 
 

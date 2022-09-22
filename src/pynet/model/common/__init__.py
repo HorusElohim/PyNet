@@ -36,6 +36,10 @@ def oneshot_hexhashing(obj: bytes | object) -> int:
     return int(md5.hexdigest(), 16)
 
 
+def oneshot_str_hexhashing(txt: str) -> int:
+    return oneshot_hexhashing(txt.encode('utf-8'))
+
+
 def incremental_hexhashing(sequence: list[object]) -> int:
     md5 = hashlib.md5()
     for x in sequence:

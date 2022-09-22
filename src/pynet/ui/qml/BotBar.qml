@@ -12,11 +12,13 @@ import QtQuick.Layouts
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 anchors.left: parent.left
+                anchors.bottom: parent.bottom
             }
 
             LogMessage {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 anchors.right: parent.right
+                anchors.bottom: parent.bottom
             }
     }

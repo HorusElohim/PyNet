@@ -1,24 +1,28 @@
 from __future__ import annotations
 
-from .. import Node, Sock
-from . import DNS_CLIENT_URL, DNSRecord, DNSRequest, DNSReply
+from .. import Node, Sock, UPNP
+from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered
 
 
-class DNSClient(Node):
-    requester: Node.Requester
+class Client(Node):
+    requester_registration: Node.Requester
+    replier_alive: Node.Replier
 
     def __init__(self, name: str):
         Node.__init__(self, name)
-        self.requester = self.new_requester(DNS_CLIENT_URL, flags=[(Sock.Flags.rcv_timeout, 1000), ])
-        self.clients = {str: DNSRecord}
+        self.info = ClientInfo(name, 28128, data_ports=[])
+        self.requester_registration = self.new_requester(self.info.get_registration_url(), flags=[(Sock.Flags.rcv_timeout, 1000), ])
+        self.clients = ClientsRegistered()
 
     def register(self) -> bool:
-        self.requester.send(DNSRequest(self.entity_name, self.requester.sock_urls[0]))
-        reply = self.requester.receive()
-        if isinstance(reply, DNSReply):
+        self.info.update_public_ip()
+        self.requester_registration.send(ClientRequestRegistration(self.info))
+        reply = self.requester_registration.receive()
+        self.log.debug(f"received: {reply}")
+        if isinstance(reply, ClientReplyRegistration):
             self.clients = reply.clients
-            self.log.debug(f"received correctly list of dns clients: {self.clients}")
+            self.log.debug(f"received correctly list of clients: {self.clients}")
             return True
         else:
-            self.log.error(f"dns reply error: {reply}")
+            self.log.error(f"pynet-server reply error: {reply}")
             return False

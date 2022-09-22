@@ -14,11 +14,24 @@ class ViewModel(QObject):
         # Cards Components
         self._router_card = RouterCard()
         self._router_card.logger_signal.connect(self._log.update_message)
+        self._router_card.completed_signal.connect(self.router_completed_slot)
         self._dns_card = DNSCard()
         self._dns_card.logger_signal.connect(self._log.update_message)
-
+        ##################
         self._log_message_sig.connect(self._log.update_message)
         LOG.log.debug("VM Constructed")
+
+    def start(self):
+        self._router_card.visible_body = True
+        self._router_card.discover()
+
+    @Slot(bool)
+    def router_completed_slot(self, val):
+        if val:
+            self._dns_card.visible_body = True
+            self._dns_card.discover()
+        else:
+            self._dns_card.visible_body = False
 
     @Property(QObject, constant=True)
     def clock(self):

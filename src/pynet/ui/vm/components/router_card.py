@@ -1,7 +1,6 @@
-import upnpclient
 from PySide6.QtCore import QObject, Signal, QRunnable, Slot, QThreadPool, QCoreApplication
 
-from .... import Upnp
+from ....model import UPNP
 from ...utils.property import PROPERTY_CACHE
 from ...utils import Property, PropertyMeta
 from . import Card
@@ -19,22 +18,22 @@ class RouterInfo(QObject, metaclass=PropertyMeta):
     upnp = Property('MAP: 🔴')
 
 
-class UpnpBridge(Upnp):
+class UpnpBridge:
     def __init__(self):
-        Upnp.__init__(self, auto_discover=False)
         self.info = RouterInfo()
 
     def discover_router(self) -> RouterInfo:
-        self.discover()
-        self.info.model = self.device.model_name
-        self.info.public_ip = self.get_public_ip()
-        self.info.local_ip = self.get_local_ip()
-        self.info.status = self.get_status()
-        nat, sip = self.get_nat_sip()
+        if UPNP.device is None:
+            UPNP.discover()
+        self.info.model = UPNP.device.model_name
+        self.info.public_ip = UPNP.get_public_ip()
+        self.info.local_ip = UPNP.get_local_ip()
+        self.info.status = UPNP.get_status()
+        nat, sip = UPNP.get_nat_sip()
         self.info.nat = f'NAT: {"🟢" if nat else "🔴"}'
         self.info.sip = f'SIP: {"🟢" if sip else "🔴"}'
         # Mapping
-        res = self.new_port_mapping(self.info.local_ip, MAPPED_PORT, MAPPED_PORT)
+        res = UPNP.new_port_mapping(self.info.local_ip, MAPPED_PORT, MAPPED_PORT)
         self.info.upnp = f'MAP: {"🟢" if res else "🔴"}'
         return self.info
 

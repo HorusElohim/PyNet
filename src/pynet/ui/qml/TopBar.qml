@@ -32,6 +32,4 @@ import QtQuick.Layouts
                 }
             }
         }
-
-
     }
