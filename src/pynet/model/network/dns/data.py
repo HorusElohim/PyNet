@@ -48,7 +48,7 @@ class ClientInfo(object):
 
     @staticmethod
     def get_registration_url() -> SockUrl.Abc:
-        return SockUrl.Remote(sock_type=SockUrl.CLIENT, ip=SERVER_INFO.local_ip, port=SERVER_INFO.registration_port)
+        return SockUrl.Remote(sock_type=SockUrl.CLIENT, ip=SERVER_INFO.pub_ip, port=SERVER_INFO.registration_port)
 
     def get_alive_url_for_client(self) -> SockUrl.Abc:
         return SockUrl.Remote(sock_type=SockUrl.SERVER, ip="*", port=self.alive_port)
