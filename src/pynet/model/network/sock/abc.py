@@ -52,7 +52,7 @@ class SockFlags(IntEnum):
 
 
 SOCK_DEFAULT_FLAGS = [
-    (LINGER, -1),
+    (LINGER, 1),
 ]
 
 

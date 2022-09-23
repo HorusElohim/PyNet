@@ -45,6 +45,7 @@ class Server(Node):
                 self.log.debug("keep-alive request")
                 for c_id, req in self.requesters_alive.items():
                     status = req.send(KeepAliveRequest(clients=self.registered_clients))
+                    time.sleep(0.3)
                     if status:
                         reply = req.receive()
                         if isinstance(reply, KeepAliveReply):
