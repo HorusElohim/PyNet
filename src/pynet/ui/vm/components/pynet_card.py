@@ -89,8 +89,8 @@ class PynetCardWorker(QRunnable):
                 msg = self.pynet_client.replier_alive.receive()
                 if msg == self.pynet_client.Sock.RECV_ERROR:
                     error_counter += 1
+                    self.pynet_info.failed()
                     if error_counter == 3:
-                        self.pynet_info.failed()
                         self.registration_required = True
                         error_counter = 0
                 else:
