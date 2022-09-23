@@ -38,9 +38,16 @@ import QtQuick.Controls
                     }
 
                     PNText {
+                        text: "Response: " + appVm.pynet_card.info.delta_ms + " ms"
+                        font.pointSize: 11
+                    }
+
+                    PNText {
                         text: "Updated: " + appVm.pynet_card.info.last_update
                         font.pointSize: 11
                     }
+
+
                 }
                 ColumnLayout{
                     Layout.alignment: Qt.AlignCenter | Qt.AlignRight

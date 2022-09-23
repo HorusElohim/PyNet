@@ -126,7 +126,7 @@ class KeepAliveRequest:
         self.time_ns = time_ns()
 
     def delta_time_ms(self):
-        return f'{time_ns() - self.time_ns}'
+        return f'{(time_ns() - self.time_ns) * 1e-6}'
 
 
 class KeepAliveReply:

@@ -5,8 +5,9 @@ from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, Cl
 import traceback
 import threading
 import time
+from zmq import EFSM
 
-SLEEP_KEEP_ALIVE_SEC = 3
+SLEEP_KEEP_ALIVE_SEC = 1
 
 
 class Server(Node):
@@ -36,18 +37,32 @@ class Server(Node):
     def _keep_alive_callback_loop(self):
         self.log.debug("alive_callback_loop callback has started")
         while self.active:
+            client_disconnected = []
             time.sleep(SLEEP_KEEP_ALIVE_SEC)
+            notify_no_clients = True
             if len(self.requesters_alive) > 0:
+                notify_no_clients = True
                 self.log.debug("keep-alive request")
                 for c_id, req in self.requesters_alive.items():
-                    req.send(KeepAliveRequest(clients=self.registered_clients))
-                    reply = req.receive()
-                    if isinstance(reply, KeepAliveReply):
-                        self.log.debug(f"keep-alive from {c_id}: OK")
+                    status = req.send(KeepAliveRequest(clients=self.registered_clients))
+                    if status:
+                        reply = req.receive()
+                        if isinstance(reply, KeepAliveReply):
+                            self.log.debug(f"keep-alive from {c_id}: OK")
+                        else:
+                            self.log.error(f"keep-alive from {c_id}: ERROR")
                     else:
-                        self.log.error(f"keep-alive from {c_id}: ERROR")
+                        self.log.error(f"keep-alive from {c_id}: disconnected")
+                        client_disconnected.append(c_id)
+                # Remove disconnected clients
+                for c_id in client_disconnected:
+                    self.log.debug(f"keep-alive removing -> {c_id}")
+                    self.requesters_alive.pop(c_id)
+                    self.registered_clients.remove(c_id)
             else:
-                self.log.debug("keep-alive - no clients yet")
+                if notify_no_clients:
+                    self.log.debug("keep-alive - no clients yet")
+                    notify_no_clients = False
 
     def start_registration_loop(self):
         self.reg_thread = threading.Thread(target=self.registration_loop)
@@ -55,7 +70,7 @@ class Server(Node):
 
     def new_alive_requester(self, client_info: ClientInfo):
         self.log.debug(f'new_alive_requester: {client_info}')
-        self.requesters_alive.update({client_info.id: self.new_requester(client_info.get_alive_url_for_server())})
+        self.requesters_alive.update({client_info.id: self.new_requester(client_info.get_alive_url_for_server(), flags=[(self.Sock.Flags.rcv_timeout, 500)])})
 
     def registration_loop(self):
         self.log.debug('starting registration loop ...')

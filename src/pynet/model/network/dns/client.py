@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from .. import Node, Sock, UPNP
 from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, KeepAliveReply, KeepAliveRequest
-
+from time import sleep
 
 class Client(Node):
     requester_registration: Node.Requester
@@ -14,7 +14,7 @@ class Client(Node):
         self.requester_registration = self.new_requester(self.info.get_registration_url(), flags=[(Sock.Flags.rcv_timeout, 1000), ])
         self.clients = ClientsRegistered()
         self.requester_status = self.requester_registration.is_open
-        self.replier_alive = self.new_replier(self.info.get_alive_url_for_client())
+        self.replier_alive = self.new_replier(self.info.get_alive_url_for_client(), flags=[(self.Sock.Flags.rcv_timeout, 1000)])
         self.alive = True
 
     def update_ip(self):
@@ -39,8 +39,13 @@ class Client(Node):
         self.log.debug("starting keep_alive loop")
         while self.alive:
             msg = self.replier_alive.receive()
+            if msg == self.Sock.RECV_ERROR:
+                self.log.error('keep_alive client receive ERROR')
             if isinstance(msg, KeepAliveRequest):
                 self.clients = msg.clients
-                self.replier_alive.send(KeepAliveReply())
+                res = self.replier_alive.send(KeepAliveReply())
+                if not res:
+                    self.log.error('keep_alive client sent ERROR')
             else:
                 self.log.error('keep_alive server sent something wrong')
+
