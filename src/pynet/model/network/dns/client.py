@@ -4,6 +4,7 @@ from .. import Node, Sock, UPNP
 from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, KeepAliveReply, KeepAliveRequest
 from time import sleep
 
+
 class Client(Node):
     requester_registration: Node.Requester
     replier_alive: Node.Replier
@@ -13,7 +14,6 @@ class Client(Node):
         self.info = ClientInfo(name=name, alive_port=28128, data_ports=[])
         self.requester_registration = self.new_requester(self.info.get_registration_url(), flags=[(Sock.Flags.rcv_timeout, 1000), ])
         self.clients = ClientsRegistered()
-        self.requester_status = self.requester_registration.is_open
         self.replier_alive = self.new_replier(self.info.get_alive_url_for_client(), flags=[(self.Sock.Flags.rcv_timeout, 1000)])
         self.alive = True
 
@@ -48,4 +48,3 @@ class Client(Node):
                     self.log.error('keep_alive client sent ERROR')
             else:
                 self.log.error('keep_alive server sent something wrong')
-

@@ -17,7 +17,6 @@ PYNET_CLIENT = PynetClient('Pynet.Client')
 class PynetInfo(QObject, metaclass=PropertyMeta):
     alive_port = Property('')
     data_port = Property('')
-    requester_status = Property('🔴')
     alive_status = Property('🔴')
     server_status = Property('🔴')
     client_status = Property('🔴')
@@ -25,6 +24,11 @@ class PynetInfo(QObject, metaclass=PropertyMeta):
     delta_ms = Property(0)
     n_clients = Property(0)
     clients = Property(dict())
+
+    def failed(self):
+        self.server_status = "🔴"
+        self.alive_status = "🔴"
+        self.requester_status = "🔴"
 
 
 class PynetCardWorkerSignals(QObject):
@@ -39,42 +43,63 @@ class PynetCardWorker(QRunnable):
         self.pynet_info = PynetInfo()
         self.pynet_client = PYNET_CLIENT
         self.alive = True
+        self.registration_required = True
 
     def run(self):
         self.signals.log.emit('Pynet client registration ...')
         self.pynet_client.update_ip()
+        self.upnp_map_alive_port()
+        self.pynet_client_registration()
+        self.signals.info.emit(self.pynet_info)
+        self.keep_alive_loop()
+
+    def upnp_map_alive_port(self):
         res = self.pynet_client.upnp_map_alive_port()
+        self.pynet_info.data_port = ','.join(self.pynet_client.info.data_ports)
         if res:
             self.pynet_info.alive_port = str(self.pynet_client.info.alive_port) + " 🟢"
         else:
             self.pynet_info.alive_port = "🔴"
-        self.pynet_info.requester_status = "🟢" if self.pynet_client.requester_status else "🔴"
-        self.pynet_info.data_port = ','.join(self.pynet_client.info.data_ports)
+
+    def pynet_client_registration(self):
         res = self.pynet_client.register()
-        self.signals.log.emit(f'Pynet client: {res}')
+        self.signals.log.emit(f'Pynet Server: {"Online" if res else "Offline"}')
         if res:
             self.pynet_info.clients = self.pynet_client.clients
             self.pynet_info.server_status = "🟢"
             self.pynet_info.n_clients = self.pynet_client.clients.count
             self.pynet_info.last_update = strftime("%H:%M:%S", localtime())
-        self.signals.info.emit(self.pynet_info)
+            self.registration_required = False
+        else:
+            self.pynet_info.failed()
+            self.registration_required = True
 
-        self.keep_alive_loop()
+        self.signals.info.emit(self.pynet_info)
 
     def keep_alive_loop(self):
         self.signals.log.emit('Starting keep_alive loop ...')
+
         while self.alive:
-            msg = self.pynet_client.replier_alive.receive()
-            if isinstance(msg, KeepAliveRequest):
-                self.pynet_info.clients = msg.clients
-                self.pynet_info.last_update = strftime("%H:%M:%S", localtime())
-                self.pynet_info.delta_ms = msg.delta_time_ms()
-                res = self.pynet_client.replier_alive.send(KeepAliveReply())
-                self.pynet_info.alive_status = "🟢"
+            sleep(0.200)
+            if self.registration_required:
+                sleep(1)
+                self.signals.log.emit('Recontacting the PyNet Server')
+                self.pynet_client_registration()
             else:
-                self.signals.log.emit('keep_alive server sent something wrong')
-                self.pynet_info.alive_status = "🔴"
-            sleep(0.100)
+                msg = self.pynet_client.replier_alive.receive()
+                if msg == self.pynet_client.Sock.RECV_ERROR:
+                    self.pynet_info.failed()
+                    self.registration_required = True
+                else:
+                    if isinstance(msg, KeepAliveRequest):
+                        self.pynet_info.clients = msg.clients
+                        self.pynet_info.last_update = strftime("%H:%M:%S", localtime())
+                        self.pynet_info.delta_ms = msg.delta_time_ms()
+                        res = self.pynet_client.replier_alive.send(KeepAliveReply())
+                        self.pynet_info.alive_status = "🟢"
+                    else:
+                        self.signals.log.emit('keep_alive server sent something wrong')
+                        self.pynet_info.failed()
 
 
 class PynetCard(Card):

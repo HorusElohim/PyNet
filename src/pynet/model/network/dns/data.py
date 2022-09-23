@@ -105,9 +105,16 @@ class ClientsRegistered(object):
         # self.cache.save()
         return res
 
-    def remove(self, client: ClientInfo) -> bool:
-        if self.has(client.id):
-            self.clients.pop(client.id)
+    def remove(self, client: ClientInfo | int) -> bool:
+        if isinstance(client, int):
+            client_id = client
+        elif isinstance(client, ClientInfo):
+            client_id = client.id
+        else:
+            raise 'arg passed to remove not recognized '
+
+        if self.has(client_id):
+            self.clients.pop(client_id)
             # self.cache.data = self.clients
             # self.cache.save()
             return True

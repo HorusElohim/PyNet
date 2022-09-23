@@ -54,11 +54,6 @@ import QtQuick.Controls
                     Layout.fillHeight: true
 
                     PNText {
-                        text: "Registration: " + appVm.pynet_card.info.requester_status
-                        font.pointSize: 11
-                    }
-
-                    PNText {
                         text: "Server: " + appVm.pynet_card.info.server_status
                         font.pointSize: 11
                     }
