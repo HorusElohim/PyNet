@@ -1,4 +1,5 @@
 from __future__ import annotations
+import time
 
 from .. import Node, Sock, UPNP
 from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, KeepAliveReply, KeepAliveRequest
@@ -6,15 +7,21 @@ from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, Cl
 
 class Client(Node):
     requester_registration: Node.Requester
-    replier_alive: Node.Replier
+    replier_alive: Node.Replier | None
 
     def __init__(self, name: str):
         Node.__init__(self, name)
         self.info = ClientInfo(name=name, alive_port=28128, data_ports=[])
         self.requester_registration = self.new_requester(self.info.get_registration_url(), flags=[(Sock.Flags.rcv_timeout, 3000), ])
         self.clients = ClientsRegistered()
-        self.replier_alive = self.new_replier(self.info.get_alive_url_for_client(), flags=[(self.Sock.Flags.rcv_timeout, 3000)])
+        self.replier_alive = None
         self.alive = True
+
+    def create_keep_alive_rep(self):
+        if self.replier_alive:
+            self.replier_alive.close()
+        time.sleep(0.1)
+        self.replier_alive = self.new_replier(self.info.get_alive_url_for_client(), flags=[(self.Sock.Flags.rcv_timeout, 3000)])
 
     def update_ip(self):
         self.info.update_ip()

@@ -6,7 +6,7 @@ from . import UPNP
 from .. import SockUrl
 from ...common import oneshot_str_hexhashing
 
-SERVER_PUB_IP = '192.168.1.21'
+SERVER_PUB_IP = '192.168.1.14'
 
 
 class ServerInfo(object):

@@ -79,12 +79,14 @@ class PynetCardWorker(QRunnable):
     def keep_alive_loop(self):
         self.signals.log.emit('Starting keep_alive loop ...')
         error_counter = 0
+        self.pynet_client.create_keep_alive_rep()
+
         while self.alive:
             if self.registration_required:
                 sleep(1)
                 self.signals.log.emit('Recontacting the PyNet Server')
                 self.pynet_client_registration()
-                sleep(0.500)
+                sleep(0.1)
             else:
                 msg = self.pynet_client.replier_alive.receive()
                 if msg == self.pynet_client.Sock.RECV_ERROR:
