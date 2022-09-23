@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from .. import Node
-from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, SERVER_INFO
+from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, SERVER_INFO, KeepAliveRequest, KeepAliveReply
 import traceback
 import threading
 import time
+
+SLEEP_KEEP_ALIVE_SEC = 3
 
 
 class Server(Node):
@@ -22,35 +24,41 @@ class Server(Node):
         self.registered_clients = ClientsRegistered()
         self.requesters_alive: {str: Node.Requester} = {}
         self.active = False
-        self.threads = []
-        self.timer_thread = None
+        self.reg_thread = None
+        self.alive_thread = None
         self.log.debug('done *')
 
-    def start_keep_alive_timer(self):
-        self.log.debug("starting keep_alive timer callback")
-        self.timer_thread = threading.Thread(target=self._alive_callback_loop)
-        self.timer_thread.start()
+    def start_keep_alive_thread(self):
+        self.log.debug("starting keep_alive thread")
+        self.alive_thread = threading.Thread(target=self._keep_alive_callback_loop)
+        self.alive_thread.start()
 
-    def _alive_callback_loop(self):
+    def _keep_alive_callback_loop(self):
         self.log.debug("alive_callback_loop callback has started")
         while self.active:
-            time.sleep(1)
-            self.log.debug("keep-alive request")
-            for c_id, req in self.requesters_alive.items():
-                req.send("OK")
-                recv = req.receive()
-                self.log.debug(f"keep-alive recv: {recv}")
+            time.sleep(SLEEP_KEEP_ALIVE_SEC)
+            if len(self.requesters_alive) > 0:
+                self.log.debug("keep-alive request")
+                for c_id, req in self.requesters_alive.items():
+                    req.send(KeepAliveRequest(clients=self.registered_clients))
+                    reply = req.receive()
+                    if isinstance(reply, KeepAliveReply):
+                        self.log.debug(f"keep-alive from {c_id}: OK")
+                    else:
+                        self.log.error(f"keep-alive from {c_id}: ERROR")
+            else:
+                self.log.debug("keep-alive - no clients yet")
 
     def start_registration_loop(self):
-        self.threads.append(threading.Thread(target=self.registration_loop))
-        self.threads[-1].start()
+        self.reg_thread = threading.Thread(target=self.registration_loop)
+        self.reg_thread.start()
 
     def new_alive_requester(self, client_info: ClientInfo):
         self.log.debug(f'new_alive_requester: {client_info}')
         self.requesters_alive.update({client_info.id: self.new_requester(client_info.get_alive_url_for_server())})
 
     def registration_loop(self):
-        self.log.debug('starting...')
+        self.log.debug('starting registration loop ...')
         self.active = True
         while self.active:
             recv_msg = self.replier_registration.receive()
@@ -65,6 +73,8 @@ class Server(Node):
                 res = self.registered_clients.add(msg.client)
                 reply = ClientReplyRegistration(result=res, clients=self.registered_clients)
                 self.new_alive_requester(msg.client)
+                if self.alive_thread is None:
+                    self.start_keep_alive_thread()
             else:
                 reply = "Unable to be process"
         except Exception as ex:
@@ -74,5 +84,5 @@ class Server(Node):
         return reply
 
     def join(self):
-        for t in self.threads:
-            t.join()
+        self.reg_thread.join()
+        self.alive_thread.join()

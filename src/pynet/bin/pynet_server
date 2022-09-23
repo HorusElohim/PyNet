@@ -3,5 +3,4 @@ from pynet.model.network.dns import Server
 if __name__ == '__main__':
     s = Server()
     s.start_registration_loop()
-    s.start_keep_alive_timer()
     s.join()

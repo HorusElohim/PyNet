@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import IntEnum
+from time import time_ns
 
 from . import UPNP
 from .. import SockUrl
@@ -115,3 +116,18 @@ class ClientsRegistered(object):
     @property
     def count(self):
         return len(self.clients)
+
+
+class KeepAliveRequest:
+    __slots__ = 'clients', 'time_ns'
+
+    def __init__(self, clients: ClientsRegistered):
+        self.clients = clients
+        self.time_ns = time_ns()
+
+    def delta_time_ms(self):
+        return f'{time_ns() - self.time_ns}'
+
+
+class KeepAliveReply:
+    pass

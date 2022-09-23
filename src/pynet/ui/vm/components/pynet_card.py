@@ -2,8 +2,16 @@ from PySide6.QtCore import QObject, Signal, QRunnable, Slot, QThreadPool, QCoreA
 
 from ...utils import Property, PropertyMeta
 from . import Card
-from pynet.model.network.dns import Client
-from time import strftime, localtime
+from pynet.model.network.dns import Client, KeepAliveRequest, KeepAliveReply
+from time import strftime, localtime, sleep
+from pynet.model import Singleton
+
+
+class PynetClient(Client, metaclass=Singleton):
+    pass
+
+
+PYNET_CLIENT = PynetClient('Pynet.Client')
 
 
 class PynetInfo(QObject, metaclass=PropertyMeta):
@@ -14,6 +22,7 @@ class PynetInfo(QObject, metaclass=PropertyMeta):
     server_status = Property('🔴')
     client_status = Property('🔴')
     last_update = Property("00:00:00")
+    delta_ms = Property(0)
     n_clients = Property(0)
     clients = Property(dict())
 
@@ -28,13 +37,8 @@ class PynetCardWorker(QRunnable):
         super().__init__()
         self.signals = PynetCardWorkerSignals()
         self.pynet_info = PynetInfo()
-        self.pynet_client = Client('Pynet.Client')
+        self.pynet_client = PYNET_CLIENT
         self.alive = True
-
-    def keep_alive_loop(self):
-        while self.alive:
-            msg = self.pynet_client.replier_alive.receive()
-            self.pynet_client.replier_alive.send(msg)
 
     def run(self):
         self.signals.log.emit('Pynet client registration ...')
@@ -57,6 +61,18 @@ class PynetCardWorker(QRunnable):
 
         self.keep_alive_loop()
 
+    def keep_alive_loop(self):
+        self.signals.log.emit('Starting keep_alive loop ...')
+        while self.alive:
+            msg = self.pynet_client.replier_alive.receive()
+            if isinstance(msg, KeepAliveRequest):
+                self.pynet_info.clients = msg.clients
+                self.pynet_info.last_update = strftime("%H:%M:%S", localtime())
+                self.pynet_info.delta_ms = msg.delta_time_ms()
+                self.pynet_client.replier_alive.send(KeepAliveReply())
+            else:
+                self.signals.log.emit('keep_alive server sent something wrong')
+
 
 class PynetCard(Card):
     info = Property(PynetInfo())
@@ -65,6 +81,7 @@ class PynetCard(Card):
         Card.__init__(self, parent=parent)
         self.warning_state()
         self.worker = PynetCardWorker()
+        self.already_started = False
 
     @Slot(PynetInfo)
     def pynet_info_slot(self, pynet_info: PynetInfo):
@@ -75,9 +92,15 @@ class PynetCard(Card):
             self.error_state()
 
     def discover(self):
-        th_pool = QThreadPool.globalInstance()
-        self.worker = PynetCardWorker()
-        self.worker.signals.log.connect(self.log_message)
-        self.worker.signals.info.connect(self.pynet_info_slot)
-        th_pool.start(self.worker)
-        self.logger_signal.emit('Pynet client registration ...')
+        if not self.already_started:
+            th_pool = QThreadPool.globalInstance()
+            self.worker = PynetCardWorker()
+            self.worker.signals.log.connect(self.log_message)
+            self.worker.signals.info.connect(self.pynet_info_slot)
+            th_pool.start(self.worker)
+            self.logger_signal.emit('Pynet client registration ...')
+            self.already_started = True
+
+    def __del__(self):
+        self.worker.alive = False
+        super(PynetCard, self).__del__()

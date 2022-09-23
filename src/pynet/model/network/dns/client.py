@@ -1,8 +1,7 @@
 from __future__ import annotations
-import threading
 
 from .. import Node, Sock, UPNP
-from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered
+from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, KeepAliveReply, KeepAliveRequest
 
 
 class Client(Node):
@@ -36,8 +35,12 @@ class Client(Node):
     def upnp_map_alive_port(self):
         return self.get_upnp().new_port_mapping(self.info.local_ip, self.info.alive_port, self.info.alive_port)
 
-    def keep_alive_loop(self):
+    def _keep_alive_loop(self):
         self.log.debug("starting keep_alive loop")
         while self.alive:
             msg = self.replier_alive.receive()
-            self.replier_alive.send(msg)
+            if isinstance(msg, KeepAliveRequest):
+                self.clients = msg.clients
+                self.replier_alive.send(KeepAliveReply())
+            else:
+                self.log.error('keep_alive server sent something wrong')
