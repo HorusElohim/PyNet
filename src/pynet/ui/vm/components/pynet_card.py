@@ -97,7 +97,7 @@ class PynetCardWorker(QRunnable):
                     if isinstance(msg, KeepAliveRequest):
                         self.pynet_info.clients = msg.clients
                         self.pynet_info.last_update = strftime("%H:%M:%S", localtime())
-                        self.pynet_info.delta_ms = msg.delta_time_ms()
+                        self.pynet_info.delta_ms = msg.delta_ms()
                         res = self.pynet_client.replier_alive.send(KeepAliveReply())
                         self.pynet_info.alive_status = "🟢"
                     else:

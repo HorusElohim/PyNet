@@ -38,7 +38,7 @@ import QtQuick.Controls
                     }
 
                     PNText {
-                        text: "Response: " + appVm.pynet_card.info.delta_ms + " ms"
+                        text: "Ping: " + appVm.pynet_card.info.delta_ms + " ms"
                         font.pointSize: 11
                     }
 
@@ -59,7 +59,7 @@ import QtQuick.Controls
                     }
 
                     PNText {
-                        text: "Alive: " + appVm.pynet_card.info.alive_status
+                        text: "Hearbeat: " + appVm.pynet_card.info.alive_status
                         font.pointSize: 11
                     }
                 }

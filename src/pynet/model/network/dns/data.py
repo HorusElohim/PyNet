@@ -6,6 +6,8 @@ from . import UPNP
 from .. import SockUrl
 from ...common import oneshot_str_hexhashing
 
+SERVER_PUB_IP = '192.168.1.21'
+
 
 class ServerInfo(object):
     __slots__ = 'name', 'pub_ip', 'local_ip', 'registration_port'
@@ -14,7 +16,7 @@ class ServerInfo(object):
         self.name = 'Pynet.Server'
         self.registration_port = registration_port
         self.local_ip = ''
-        self.pub_ip = '192.168.1.14'
+        self.pub_ip = SERVER_PUB_IP
 
     def update_local_ip(self):
         self.local_ip = UPNP.get_local_ip()
@@ -135,8 +137,8 @@ class KeepAliveRequest:
         self.clients = clients
         self.time_ns = time_ns()
 
-    def delta_time_ms(self):
-        return f'{(time_ns() - self.time_ns) * 1e-6}'
+    def delta_ms(self):
+        return (time_ns() - self.time_ns) * 1e-6
 
 
 class KeepAliveReply:

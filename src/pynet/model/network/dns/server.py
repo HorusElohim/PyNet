@@ -71,7 +71,7 @@ class Server(Node):
 
     def new_alive_requester(self, client_info: ClientInfo):
         self.log.debug(f'new_alive_requester: {client_info}')
-        self.requesters_alive.update({client_info.id: self.new_requester(client_info.get_alive_url_for_server(), flags=[(self.Sock.Flags.rcv_timeout, 2000)])})
+        self.requesters_alive.update({client_info.id: self.new_requester(client_info.get_alive_url_for_server(), flags=[(self.Sock.Flags.rcv_timeout, 3000)])})
 
     def registration_loop(self):
         self.log.debug('starting registration loop ...')
