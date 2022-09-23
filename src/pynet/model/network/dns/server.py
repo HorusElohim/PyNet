@@ -5,7 +5,6 @@ from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, Cl
 import traceback
 import threading
 import time
-from zmq import EFSM
 
 SLEEP_KEEP_ALIVE_SEC = 1
 
@@ -20,6 +19,7 @@ class Server(Node):
     def __init__(self):
         Node.__init__(self, SERVER_INFO.name)
         self.upnp = self.get_upnp()
+        SERVER_INFO.update_local_ip()
         self.upnp.new_port_mapping(SERVER_INFO.local_ip, SERVER_INFO.registration_port, SERVER_INFO.registration_port)
         self.replier_registration = self.new_replier(SERVER_INFO.get_registration_url())
         self.registered_clients = ClientsRegistered()
