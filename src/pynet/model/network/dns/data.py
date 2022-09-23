@@ -13,8 +13,8 @@ class ServerInfo(object):
     def __init__(self, registration_port: int):
         self.name = 'Pynet.Server'
         self.registration_port = registration_port
-        self.local_ip = '192.168.1.21'
-        self.pub_ip = '176.136.251.178'
+        self.local_ip = ''
+        self.pub_ip = '192.168.1.14'
 
     def update_local_ip(self):
         self.local_ip = UPNP.get_local_ip()
