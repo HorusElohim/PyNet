@@ -43,11 +43,11 @@ class Upnp(AbcEntity):
     def get_local_ip(self):
         ip = '127.0.0.1'
         try:
-            # Use Google Public DNS server to determine own IP
-            hostname = socket.getfqdn()
-            ip = socket.gethostbyname_ex(hostname)[2][1]
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
         except Exception as ex:
-            self.log.error("Error get_local_ip: {ex}")
+            self.log.error(f"Error get_local_ip: {ex}")
         return ip
 
     def get_status(self):
