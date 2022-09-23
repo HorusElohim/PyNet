@@ -16,7 +16,7 @@ class UpnpDeviceIsNone(Exception):
 
 class Upnp(AbcEntity):
     def __init__(self, auto_discover=False, **kwargs):
-        AbcEntity.__init__(self, entity_name='Upnp', **kwargs)
+        AbcEntity.__init__(self, entity_name='Pynet.Upnp', **kwargs)
         self.devices = []
         self.device = None
         if auto_discover:

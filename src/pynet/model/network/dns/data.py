@@ -46,8 +46,11 @@ class ClientInfo(object):
     def get_registration_url() -> SockUrl.Abc:
         return SockUrl.Remote(sock_type=SockUrl.CLIENT, ip=SERVER_INFO.local_ip, port=SERVER_INFO.registration_port)
 
-    def get_alive_url(self) -> SockUrl.Abc:
+    def get_alive_url_for_client(self) -> SockUrl.Abc:
         return SockUrl.Remote(sock_type=SockUrl.SERVER, ip="*", port=self.alive_port)
+
+    def get_alive_url_for_server(self) -> SockUrl.Abc:
+        return SockUrl.Remote(sock_type=SockUrl.CLIENT, ip=self.local_ip, port=self.alive_port)
 
     def __str__(self):
         return f'ClientInfo({self.id},{self.name},{self.pub_ip},{self.alive_port},{self.data_ports})'

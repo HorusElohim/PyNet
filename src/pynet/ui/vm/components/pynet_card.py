@@ -29,6 +29,12 @@ class PynetCardWorker(QRunnable):
         self.signals = PynetCardWorkerSignals()
         self.pynet_info = PynetInfo()
         self.pynet_client = Client('Pynet.Client')
+        self.alive = True
+
+    def keep_alive_loop(self):
+        while self.alive:
+            msg = self.pynet_client.replier_alive.receive()
+            self.pynet_client.replier_alive.send(msg)
 
     def run(self):
         self.signals.log.emit('Pynet client registration ...')
@@ -48,6 +54,8 @@ class PynetCardWorker(QRunnable):
             self.pynet_info.n_clients = self.pynet_client.clients.count
             self.pynet_info.last_update = strftime("%H:%M:%S", localtime())
         self.signals.info.emit(self.pynet_info)
+
+        self.keep_alive_loop()
 
 
 class PynetCard(Card):

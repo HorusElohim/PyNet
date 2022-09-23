@@ -18,7 +18,7 @@ from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
     SUBSCRIBE, LINGER, DONTWAIT, NULL, RCVTIMEO,
-    EAGAIN
+    EAGAIN, NOBLOCK
 )  # https://pyzmq.readthedocs.io/en/latest/api/zmq.html
 
 from enum import IntEnum
@@ -48,6 +48,7 @@ class SockFlags(IntEnum):
     eagain = EAGAIN
     subscribe = SUBSCRIBE
     rcv_timeout = RCVTIMEO
+    no_block = NOBLOCK
 
 
 SOCK_DEFAULT_FLAGS = [
