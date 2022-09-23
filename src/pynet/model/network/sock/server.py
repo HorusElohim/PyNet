@@ -25,6 +25,7 @@ class SockServer(AbcSock):
             self.log.error(f"{self} Error opening socket for sock_url {self.sock_urls}:\nException -> {ex}")
             self.is_open = False
         finally:
+            self.log.debug(f'{self} socket open: {self.is_open}')
             self.log.debug(f'{self} done *')
             return self.is_open
 

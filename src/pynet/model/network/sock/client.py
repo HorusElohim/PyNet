@@ -26,6 +26,7 @@ class SockClient(AbcSock):
             self.log.error(f"{self} Error opening socket for url {current_url}:\nException -> {ex}  \n{traceback.format_exc()}")
             self.is_open = False
         finally:
+            self.log.debug(f'{self} socket open: {self.is_open}')
             self.log.debug(f'{self} done *')
             return self.is_open
 
