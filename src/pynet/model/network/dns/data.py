@@ -54,10 +54,10 @@ class ClientInfo(object):
         return SockUrl.Remote(sock_type=SockUrl.SERVER, ip="*", port=self.alive_port)
 
     def get_alive_url_for_server(self) -> SockUrl.Abc:
-        return SockUrl.Remote(sock_type=SockUrl.CLIENT, ip=self.pub_ip, port=self.alive_port)
+        return SockUrl.Remote(sock_type=SockUrl.CLIENT, ip=self.local_ip, port=self.alive_port)
 
     def __str__(self):
-        return f'ClientInfo({self.id},{self.name},{self.pub_ip},{self.alive_port},{self.data_ports})'
+        return f'ClientInfo({self.id},{self.name},{self.local_ip},{self.pub_ip},{self.alive_port},{self.data_ports})'
 
 
 class ClientRequestRegistration(object):
