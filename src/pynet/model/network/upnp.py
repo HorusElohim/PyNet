@@ -19,9 +19,25 @@ class Upnp(AbcEntity):
         AbcEntity.__init__(self, entity_name='Pynet.Upnp', **kwargs)
         self.devices = []
         self.device = None
+        self._pub_ip = ''
+        self._local_ip = ''
         if auto_discover:
             self.discover()
         self.log.debug("done *")
+
+    @property
+    def local_ip(self):
+        if not self._local_ip:
+            self.safe_check_discovery_needed()
+            self._local_ip = self.get_local_ip()
+        return self._local_ip
+
+    @property
+    def pub_ip(self):
+        if not self._pub_ip:
+            self.safe_check_discovery_needed()
+            self._pub_ip = self.get_public_ip()
+        return self._pub_ip
 
     def safe_check_discovery_needed(self):
         if not self.device:

@@ -21,7 +21,7 @@ class SockServer(AbcSock):
                 self.log.debug(f'{self} subscribe set-sockopt')
             # Now is open
             self.is_open = True
-        except self.ERROR as ex:
+        except self.Errors as ex:
             self.log.error(f"{self} Error opening socket for sock_url {self.sock_urls}:\nException -> {ex}")
             self.is_open = False
         finally:

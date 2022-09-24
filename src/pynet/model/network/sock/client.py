@@ -22,7 +22,7 @@ class SockClient(AbcSock):
                 self._socket.setsockopt(self.Flags.subscribe, b'')
                 self.log.debug(f'{self} subscribe set-sockopt')
             self.is_open = True
-        except self.ERROR and TypeError as ex:
+        except self.Errors and TypeError as ex:
             self.log.error(f"{self} Error opening socket for url {current_url}:\nException -> {ex}  \n{traceback.format_exc()}")
             self.is_open = False
         finally:

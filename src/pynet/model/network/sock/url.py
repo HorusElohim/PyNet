@@ -10,6 +10,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Union, Type
@@ -24,6 +25,12 @@ DEFAULT_LOCAL_SOCKET = '/tmp/pynet_0'
 class SockType(Enum):
     Server = 0,
     Client = 1
+
+    @staticmethod
+    def opposite(sock_type: SockType) -> SockType:
+        if sock_type == SockType.Server:
+            return SockType.Client
+        return SockType.Server
 
 
 class AbcSocketUrlException(Exception):

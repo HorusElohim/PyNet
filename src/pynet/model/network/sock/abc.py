@@ -18,9 +18,9 @@ from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
     SUBSCRIBE, LINGER, DONTWAIT, NULL, RCVTIMEO,
-    EAGAIN, NOBLOCK
+    EAGAIN, NOBLOCK,
+    ENOTSUP, ENOTSUP, EFSM, ETERM, ENOTSOCK, EFAULT
 )  # https://pyzmq.readthedocs.io/en/latest/api/zmq.html
-
 from enum import IntEnum
 from ... import Size, AbcEntity
 from . import SockUrl
@@ -45,10 +45,18 @@ class SockFlags(IntEnum):
     null = NULL
     linger = LINGER
     dont_wait = DONTWAIT
-    eagain = EAGAIN
     subscribe = SUBSCRIBE
     rcv_timeout = RCVTIMEO
+
     no_block = NOBLOCK
+
+
+class SockError(IntEnum):
+    no_data = EAGAIN
+    operation_not_supported = ENOTSUP
+    state_error = EFSM
+    context_term = ETERM
+    invalid_msg = EFAULT
 
 
 SOCK_DEFAULT_FLAGS = [
@@ -75,8 +83,7 @@ class AbcSock(AbcEntity):
     SockUrl: Type[SockUrl] = SockUrl
     Pattern: Type[SockPatternType] = SockPatternType
     Flags: Type[SockFlags] = SockFlags
-    ERROR: Type[ZMQError] = ZMQError
-    RECV_ERROR = bytes(str('ERROR').encode())
+    Errors: Type[SockError] = SockError
 
     """
         Sock Class
@@ -182,6 +189,12 @@ class AbcSock(AbcEntity):
             raise SockCannotBeClientAndServerError(self.log, self._sock_urls)
         return self.sock_urls[0].sock_type
 
+    def __error_checking(self, err: ZMQError):
+        if err == SockError.no_data:
+            self.log.warning(f"{self}: {SockError(err)}")
+        else:
+            self.log.error(f"{self}: {SockError(err)}")
+
     def _send(self, obj: bytes, flag: int = 0) -> bool:
         if not self.is_open:
             self.log.warning(f'{self} socket is not open')
@@ -193,16 +206,13 @@ class AbcSock(AbcEntity):
             self.log.debug(f"{self} sent data with size {Size.pretty_size(obj_size)}")
             return True
         except ZMQError as ex:
-            if ex.errno == EAGAIN:
-                self.log.warning(f"{self} resource not available. Sock msg: {ex}")
-            else:
-                self.log.error(f"{self} failed. Error -> {ex} - Code:{ex.errno}")
+            self.__error_checking(ex)
             return False
 
     def _recv(self, flag: int = 0) -> bytes:
         if not self.is_open:
             self.log.warning(f'{self} socket is not open')
-            return self.RECV_ERROR
+            return bytes(self.Errors.state_error)
         try:
             # Receive from the socket
             self.log.debug(f"{self} waiting...")
@@ -212,11 +222,8 @@ class AbcSock(AbcEntity):
             self.log.debug(f"{self} received data bytes, with size {Size.pretty_size(obj_size)}")
             return bytes(obj)
         except ZMQError as ex:
-            if ex.errno == EAGAIN:
-                self.log.warning(f"{self} resource not available. Error -> {ex}")
-            else:
-                self.log.error(f"{self} failed. Error -> {ex} - Code:{ex.errno}")
-            return self.RECV_ERROR
+            self.__error_checking(ex)
+            return bytes(self.Errors(ex))
 
     def __repr__(self) -> str:
         if len(self._sock_urls) > 0:
