@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 from enum import Enum
 from time import time_ns
+from collections import deque
 
 from ... import oneshot_str_hexhashing
 
@@ -39,7 +40,7 @@ class SteadyNodeBase(Node):
         self._socket_pair = self.new_pair(url)
         self._url = url
         self.nodes = Nodes()
-        self.output_buffer = []
+        self.output_buffer = deque()
 
     class Info:
 
@@ -146,8 +147,8 @@ class SteadyNodeBase(Node):
             # Custom Message Processing
             else:
                 self.output_buffer.append(self.process_message(msg))
-                # Send all msg in the buffer
-                for msg in self.output_buffer:
-                    self._socket_pair.send(msg)
-                # Reset the output buffer
-                self.output_buffer = []
+
+            # Output Messages processing
+            # Send all msg in the buffer and clear it
+            for _ in range(len(self.output_buffer)):
+                self._socket_pair.send(self.output_buffer.popleft())

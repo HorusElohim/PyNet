@@ -216,7 +216,7 @@ class AbcSock(AbcEntity):
     def _recv(self, flag: int = 0) -> bytes:
         if not self.is_open:
             self.log.warning(f'{self} socket is not open')
-            return bytes(self.Errors.state_error)
+            return self.RECV_ERROR
         try:
             # Receive from the socket
             self.log.debug(f"{self} waiting...")
