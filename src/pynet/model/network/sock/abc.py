@@ -193,7 +193,7 @@ class AbcSock(AbcEntity):
 
     def __error_checking(self, err: ZMQError):
         error = SockError(err.errno)
-        if err == SockError.no_data:
+        if error == SockError.no_data:
             self.log.warning(f"{self}: {error}")
         else:
             self.log.error(f"{self}: {error}")
