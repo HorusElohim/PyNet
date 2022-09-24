@@ -128,7 +128,7 @@ class SteadyNodeBase(Node):
         # Add to the output buffer a registration message
         self.output_buffer.append(self.registration_request_message)
 
-    def process_communications(self):
+    def _process_income(self):
         while True:
             msg = self._socket_pair.receive(flag=self.Sock.Flags.no_block)
 
@@ -148,7 +148,12 @@ class SteadyNodeBase(Node):
             else:
                 self.output_buffer.append(self.process_message(msg))
 
-            # Output Messages processing
-            # Send all msg in the buffer and clear it
-            for _ in range(len(self.output_buffer)):
-                self._socket_pair.send(self.output_buffer.popleft())
+    def _process_outcomes(self):
+        # Output Messages processing
+        # Send all msg in the buffer and clear it
+        for _ in range(len(self.output_buffer)):
+            self._socket_pair.send(self.output_buffer.popleft())
+
+    def process_communications(self):
+        self._process_income()
+        self._process_outcomes()
