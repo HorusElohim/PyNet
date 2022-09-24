@@ -84,6 +84,8 @@ class AbcSock(AbcEntity):
     Pattern: Type[SockPatternType] = SockPatternType
     Flags: Type[SockFlags] = SockFlags
     Errors: Type[SockError] = SockError
+    RECV_ERROR = bytes(str('ERROR').encode())
+
 
     """
         Sock Class
@@ -190,10 +192,12 @@ class AbcSock(AbcEntity):
         return self.sock_urls[0].sock_type
 
     def __error_checking(self, err: ZMQError):
+        error = SockError(err.errno)
         if err == SockError.no_data:
-            self.log.warning(f"{self}: {SockError(err.errno)}")
+            self.log.warning(f"{self}: {error}")
         else:
-            self.log.error(f"{self}: {SockError(err.errno)}")
+            self.log.error(f"{self}: {error}")
+        return self.RECV_ERROR
 
     def _send(self, obj: bytes, flag: int = 0) -> bool:
         if not self.is_open:
@@ -222,8 +226,7 @@ class AbcSock(AbcEntity):
             self.log.debug(f"{self} received data bytes, with size {Size.pretty_size(obj_size)}")
             return bytes(obj)
         except ZMQError as ex:
-            self.__error_checking(ex)
-            return bytes(self.Errors(ex))
+            return self.__error_checking(ex)
 
     def __repr__(self) -> str:
         if len(self._sock_urls) > 0:

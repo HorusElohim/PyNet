@@ -132,7 +132,7 @@ class SteadyNodeBase(Node):
             msg = self._socket_pair.receive(flag=self.Sock.Flags.no_block)
 
             # No new message exit
-            if msg in self.Sock.Errors:
+            if msg == self.Sock.RECV_ERROR:
                 return
 
             # Process new Node Registration
