@@ -56,10 +56,13 @@ class SteadyNodeData(Node):
             self.local_ip = local_ip
             self.url = url
             self.status = self.Status.disconnected
-            self.heartbeat_stamp = ''
+            self.heartbeat_stamp = 0
 
         def __str__(self):
             return f'Node.Info({self.status}| {self.name}, {self.pub_ip}, {self.local_ip}, {self.id}, {self.url})'
+
+        def touch_heartbeat(self):
+            self.heartbeat_stamp = time_ns()
 
         @property
         def id(self):
