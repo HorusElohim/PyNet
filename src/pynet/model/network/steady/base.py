@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import abc
 from enum import Enum
 from time import time_ns
@@ -10,40 +9,37 @@ from ... import oneshot_str_hexhashing
 from .. import Node, UPNP
 
 
-class Nodes:
-    __slots__ = '_nodes'
-
-    def __init__(self):
-        self._nodes: {int, SteadyNodeBase.Info} = {}
-
-    def __len__(self):
-        return len(self._nodes)
-
-    def __getitem__(self, node_id: int) -> SteadyNodeBase.info:
-        return self._nodes[node_id]
-
-    def __setitem__(self, node_id: int, node_info: SteadyNodeBase.Info):
-        self._nodes[node_id] = node_info
-
-    def __delitem__(self, node_id):
-        del self._nodes[node_id]
-
-    def __iter__(self):
-        return iter(self._nodes)
-
-
-class SteadyNodeBase(Node):
-    _socket_pair: Node.Pair | None
+class SteadyNodeData(Node):
+    __slots__ = 'nodes, _socket_pair'
 
     def __init__(self, name: str, url: Node.Url.Remote):
         super().__init__(name)
         self._socket_pair = self.new_pair(url)
         self._url = url
-        self.nodes = Nodes()
-        self.output_buffer = deque()
+        self.nodes = self.Nodes()
+
+    class Nodes:
+        __slots__ = '_nodes'
+
+        def __init__(self):
+            self._nodes: {int, SteadyNodeBase.Info} = {}
+
+        def __len__(self):
+            return len(self._nodes)
+
+        def __getitem__(self, node_id: int) -> SteadyNodeBase.info:
+            return self._nodes[node_id]
+
+        def __setitem__(self, node_id: int, node_info: SteadyNodeBase.Info):
+            self._nodes[node_id] = node_info
+
+        def __delitem__(self, node_id):
+            del self._nodes[node_id]
+
+        def __iter__(self):
+            return iter(self._nodes)
 
     class Info:
-
         class Status(Enum):
             disconnected = 0
             connected = 1
@@ -71,13 +67,16 @@ class SteadyNodeBase(Node):
         def disconnect(self):
             self.status = self.Status.disconnected
 
-        def touch_heartbeat(self):
-            self.heartbeat = SteadyNodeBase.HeartBeat(self.id)
-
     class RegistrationRequest:
         __slots__ = 'info'
 
-    class HeartBeat:
+    class HeartBeatRequest:
+        __slots__ = 'nodes'
+
+        def __init__(self, nodes: SteadyNodeData.Nodes):
+            self.nodes = nodes
+
+    class HeartBeatReply:
         __slots__ = 'id', 'stamp'
 
         def __init__(self, node_id: int):
@@ -98,20 +97,34 @@ class SteadyNodeBase(Node):
         msg.info = self.info
         return msg
 
+    @property
+    def heartbeat_reply_message(self):
+        return self.HeartBeatReply(self.info.id)
+
+    @property
+    def heartbeat_request_message(self):
+        return self.HeartBeatRequest(self.nodes)
+
+
+class SteadyNodeBase(SteadyNodeData):
+
+    def send(self, msg):
+        self._socket_pair.send(msg)
+
+    def recv(self, no_block=True):
+        flag = 0
+        if no_block:
+            flag = self.Sock.Flags.no_block
+        return self._socket_pair.receive(flag=self.Sock.Flags.no_block)
+
+    def registration(self):
+        self.send(self.registration_request_message)
+
     @abc.abstractmethod
-    def process_message(self, in_msg) -> object:
+    def process_new_message(self, in_msg) -> object:
         pass
 
-    def _process_heartbeat(self, msg: HeartBeat):
-        # Check heartbeat between thresholds
-        last = self.nodes[msg.id].heartbeat
-        stamp_diff = (msg.stamp - last.stamp) * 1e-9
-        self.nodes[msg.id].heartbeat = msg
-        # delta diff too high
-        if stamp_diff > 1.5:
-            self.log.warning(f'Heartbeat from: {msg.id} too high {stamp_diff}')
-
-    def _process_registration(self, msg: RegistrationRequest):
+    def _process_registration_msg(self, msg: SteadyNodeData.RegistrationRequest):
         if msg.info.id in self.nodes:
             self.log.debug('received node registration of already connected node')
         else:
@@ -123,37 +136,3 @@ class SteadyNodeBase(Node):
         msg.info.touch_heartbeat()
         # Update the connected nodes
         self.nodes[msg.info.id] = msg.info
-
-    def registration(self):
-        # Add to the output buffer a registration message
-        self.output_buffer.append(self.registration_request_message)
-
-    def _process_income(self):
-        while True:
-            msg = self._socket_pair.receive(flag=self.Sock.Flags.no_block)
-
-            # No new message exit
-            if msg == self.Sock.RECV_ERROR:
-                return
-
-            # Process new Node Registration
-            if isinstance(msg, self.RegistrationRequest):
-                self._process_registration(msg)
-
-            # Process Heartbeat
-            elif isinstance(msg, self.HeartBeat):
-                self._process_heartbeat(msg)
-
-            # Custom Message Processing
-            else:
-                self.output_buffer.append(self.process_message(msg))
-
-    def _process_outcomes(self):
-        # Output Messages processing
-        # Send all msg in the buffer and clear it
-        for _ in range(len(self.output_buffer)):
-            self._socket_pair.send(self.output_buffer.popleft())
-
-    def process_communications(self):
-        self._process_income()
-        self._process_outcomes()

@@ -194,9 +194,9 @@ class AbcSock(AbcEntity):
     def __error_checking(self, err: ZMQError):
         error = SockError(err.errno)
         if error == SockError.no_data:
-            self.log.warning(f"{self}: {error}")
+            self.log.warning(f"{self}: {error.name}")
         else:
-            self.log.error(f"{self}: {error}")
+            self.log.error(f"{self}: {error.name}")
         return self.RECV_ERROR
 
     def _send(self, obj: bytes, flag: int = 0) -> bool:
