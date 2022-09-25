@@ -39,6 +39,10 @@ class SteadyNodeData(Node):
         def __iter__(self):
             return iter(self._nodes)
 
+        def __str__(self):
+            r = "\n"
+            return f'Nodes (\n{f"{r}".join([str(self._nodes[n_id]) for n_id in self.__iter__()])}\n)'
+
     class Info:
         class Status(Enum):
             disconnected = 0
@@ -117,22 +121,6 @@ class SteadyNodeBase(SteadyNodeData):
             flag = self.Sock.Flags.no_block
         return self._socket_pair.receive(flag=self.Sock.Flags.no_block)
 
-    def registration(self):
-        self.send(self.registration_request_message)
-
     @abc.abstractmethod
     def process_new_message(self, in_msg) -> object:
         pass
-
-    def _process_registration_msg(self, msg: SteadyNodeData.RegistrationRequest):
-        if msg.info.id in self.nodes:
-            self.log.debug('received node registration of already connected node')
-        else:
-            self.log.debug(f'new node request registration: {msg.info}')
-            # Reply with a registration request
-            self.registration()
-        # Update to connected and update heartbeat
-        msg.info.connect()
-        msg.info.touch_heartbeat()
-        # Update the connected nodes
-        self.nodes[msg.info.id] = msg.info

@@ -11,6 +11,17 @@ class SteadyServerNode(SteadyNodeBase):
     def process_new_message(self, in_msg) -> object:
         return "custom-processing"
 
+    def _process_registration_request_msg(self, msg: SteadyNodeBase.RegistrationRequest):
+        if msg.info.id in self.nodes:
+            self.log.debug('received node registration of already connected node')
+        else:
+            self.log.debug(f'new node request registration: {msg.info}')
+        # Update to connected and update heartbeat
+        msg.info.connect()
+        msg.info.touch_heartbeat()
+        # Update the connected nodes
+        self.nodes[msg.info.id] = msg.info
+
     def _process_heartbeat_reply(self, msg: SteadyNodeBase.HeartBeatReply):
         # Check heartbeat between thresholds
         last = self.nodes[msg.id].heartbeat_stamp
@@ -27,6 +38,10 @@ class SteadyServerNode(SteadyNodeBase):
             # No new message exit
             if msg == self.Sock.RECV_ERROR:
                 return
+
+            # Process Registration request
+            elif isinstance(msg, self.RegistrationRequest):
+                self._process_registration_request_msg(msg)
 
             # Process Heartbeat Reply
             elif isinstance(msg, self.HeartBeatReply):

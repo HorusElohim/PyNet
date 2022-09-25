@@ -6,7 +6,11 @@ from . import SteadyNodeBase
 class SteadyClientNode(SteadyNodeBase):
     def __init__(self, name: str, ip: str, port: int):
         super().__init__(name, self.Url.Remote(self.Url.SockType.Client, ip, port))
+        self.registered = False
         self.registration()
+
+    def registration(self):
+        self.send(self.registration_request_message)
 
     def process_new_message(self, in_msg) -> object:
         return "custom-processing"
