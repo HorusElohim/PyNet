@@ -10,7 +10,7 @@ from .. import Node, UPNP
 
 
 class SteadyNodeData(Node):
-    __slots__ = 'nodes, _socket_pair'
+    __slots__ = 'nodes', '_socket_pair'
 
     def __init__(self, name: str, url: Node.Url.Remote):
         super().__init__(name)
