@@ -10,12 +10,14 @@ class SteadyClientNode(SteadyNodeBase):
         self.registration()
 
     def registration(self):
+        self.log.info(f"Node Registration to: {self.url}")
         self.send(self.registration_request_message)
 
     def process_new_message(self, in_msg) -> object:
         return "custom-processing"
 
     def _process_heartbeat_request(self, msg: SteadyNodeBase.HeartBeatRequest):
+        self.log.info(f"Heartbeat: {msg}")
         # Save updated nodes
         self.nodes = msg.nodes
         # Send heartbeat reply
@@ -38,3 +40,6 @@ class SteadyClientNode(SteadyNodeBase):
                 msg = self.process_new_message(msg)
                 if msg:
                     self.send(msg)
+
+    def _respawn_check_(self):
+        pass

@@ -42,7 +42,7 @@ class Transmission:
     def recv(sock: Sock, flag: int = 0) -> Any:  # type: ignore[misc]
         raw = sock._recv(flag)
         if raw == sock.RECV_ERROR:
-            sock.log.warning('no-recv')
+            sock.log.debug('no-recv')
             return sock.RECV_ERROR
         pkt: Packet = decode(raw)  # type: ignore[arg-type, assignment]
         data = Transmission.from_packet(pkt)
