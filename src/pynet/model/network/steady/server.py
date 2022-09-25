@@ -13,9 +13,9 @@ class SteadyServerNode(SteadyNodeBase):
 
     def _process_heartbeat_reply(self, msg: SteadyNodeBase.HeartBeatReply):
         # Check heartbeat between thresholds
-        last = self.nodes[msg.id].heartbeat
-        stamp_diff = (msg.stamp - last.stamp) * 1e-9
-        self.nodes[msg.id].heartbeat = msg
+        last = self.nodes[msg.id].heartbeat_stamp
+        stamp_diff = (msg.stamp - last) * 1e-9
+        self.nodes[msg.id].heartbeat_stamp = msg.stamp
         # delta diff too high
         if stamp_diff > self.heartbeat_interval + 0.5:
             self.log.warning(f'Heartbeat from: {msg.id} too high {stamp_diff} on {self.heartbeat_interval + 0.5}')

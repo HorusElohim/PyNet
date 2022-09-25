@@ -44,7 +44,7 @@ class SteadyNodeData(Node):
             disconnected = 0
             connected = 1
 
-        __slots__ = 'name', 'pub_ip', 'local_ip', 'url', '_id', 'status', 'heartbeat'
+        __slots__ = 'name', 'pub_ip', 'local_ip', 'url', '_id', 'status', 'heartbeat_stamp'
 
         def __init__(self, name, pub_ip, local_ip, url):
             self.name = name
@@ -52,7 +52,7 @@ class SteadyNodeData(Node):
             self.local_ip = local_ip
             self.url = url
             self.status = self.Status.disconnected
-            self.heartbeat = SteadyNodeBase.HeartBeat(self.id)
+            self.heartbeat_stamp = ''
 
         def __str__(self):
             return f'Node.Info({self.status}| {self.name}, {self.pub_ip}, {self.local_ip}, {self.id}, {self.url})'
