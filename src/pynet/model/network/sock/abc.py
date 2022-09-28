@@ -21,8 +21,9 @@ from zmq import (
     EAGAIN, NOBLOCK,
     ENOTSUP, ENOTSUP, EFSM, ETERM, ENOTSOCK, EFAULT
 )  # https://pyzmq.readthedocs.io/en/latest/api/zmq.html
+from time import time_ns
 from enum import IntEnum
-from ... import Size, AbcEntity
+from ... import Size, AbcEntity, DDict
 from . import SockUrl
 from typing import Union, List, Tuple, Type
 import logging
@@ -86,7 +87,6 @@ class AbcSock(AbcEntity):
     Errors: Type[SockError] = SockError
     RECV_ERROR = bytes(str('ERROR').encode())
 
-
     """
         Sock Class
         Used to manage the zmq socket
@@ -114,6 +114,19 @@ class AbcSock(AbcEntity):
         # ZMQ Socket
         self._socket = Context.instance().socket(self._sock_pattern_type.value)  # type: ignore[no-untyped-call]
         self.log.debug(f'{self} init')
+
+    @property
+    def info(self) -> DDict:
+        return DDict(
+            name=self._sock_name,
+            type=self._sock_pattern_type.name,
+            urls=self._sock_urls,
+            flags=self._sock_flags,
+            bytes_sent=self._sock_bytes_sent,
+            bytes_recv=self._sock_bytes_recv,
+            is_open=self.is_open,
+            stamp=time_ns()
+        )
 
     @abc.abstractmethod
     def open(self) -> bool:
@@ -229,7 +242,4 @@ class AbcSock(AbcEntity):
             return self.__error_checking(ex)
 
     def __repr__(self) -> str:
-        if len(self._sock_urls) > 0:
-            return f'{self._sock_name}:{self._sock_pattern_type.name}:{self.sock_type.name}'
-        else:
-            return f'{self._sock_name}:{self._sock_pattern_type.name}:-'
+        return f'Sock({str(self.info)})'

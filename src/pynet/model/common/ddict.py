@@ -19,3 +19,10 @@ class DDict(dict):
             if hasattr(value, 'keys'):
                 value = DDict(value)
             self[key] = value
+
+    def __getstate__(self):
+        return self
+
+    def __setstate__(self, state):
+        self.update(state)
+        self.__dict__ = self

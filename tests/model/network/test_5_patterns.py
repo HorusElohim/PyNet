@@ -79,6 +79,7 @@ if os.name != 'nt':
                          data=DATA, compression=True),
     ]
 
+
     # Test Publisher/Subscriber
     # Test Pusher/Puller
     # Server/Client
@@ -170,6 +171,7 @@ if os.name != 'nt':
             data=DATA, compression=False),
     ]
 
+
     # Test Publisher/Subscriber
     # Test Pusher/Puller
     # Server/Client
@@ -231,6 +233,7 @@ if os.name != 'nt':
             data=DATA, compression=True),
     ]
 
+
     # Test Publisher/Subscriber
     # Test Pusher/Puller
     # Server/Client
@@ -284,6 +287,7 @@ if os.name != 'nt':
             wait2=0.3,
             data=DATA, compression=False),
     ]
+
 
     # Test Publisher/Subscriber
     # Test Pusher/Puller
@@ -379,6 +383,7 @@ if os.name != 'nt':
             data=DATA, compression=False),
     ]
 
+
     # Test Publisher/Subscriber
     # Test Pusher/Puller
     # Server/Client
@@ -407,3 +412,26 @@ def test_patterns_auto_open_pair_server_client_remote(test_case):
     WorkerRunner.run(worker)
     assert worker[0].result
     assert worker[1].result == test_case.data
+
+
+# Test Heartbeat REQ/REP
+def test_patterns_heartbeat_requester_replier():
+    hb_rep = HeartbeatReplier(name='TestHeartbeatReplier', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=33132))
+    hb_req = HeartbeatRequester(name='TestHeartbeatRequester', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=33132))
+    sleep(1)
+    assert hb_req.alive
+    assert len(hb_rep.connections) == 1
+    assert hb_rep.connections['TestHeartbeatRequester.Sock'].status == 'connected'
+    del hb_rep
+    del hb_req
+
+
+def test_patterns_heartbeat_requester_replier_req_disconnection():
+    hb_rep = HeartbeatReplier(name='TestHeartbeatReplier', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=33133))
+    hb_req = HeartbeatRequester(name='TestHeartbeatRequester', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=33133))
+    sleep(1)
+    hb_req.close()
+    assert len(hb_rep.connections) == 1
+    sleep(3)
+    assert hb_rep.connections['TestHeartbeatRequester.Sock'].status == 'disconnected'
+    del hb_rep

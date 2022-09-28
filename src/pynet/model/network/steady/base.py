@@ -1,109 +1,25 @@
 from __future__ import annotations
-import abc
-from enum import Enum
-from time import time_ns
+from typing import Callable, Any, Dict
+from time import time_ns, sleep
 
-from ... import oneshot_str_hexhashing, Cache
-
+from ... import Cache
 from .. import Node, UPNP
+from . import Nodes, NodeInfo
 
 
-class SteadyNodeData(Node):
-    __slots__ = 'nodes', '_socket_pair', 'cache'
+class SteadyNodeBase(Node):
+    __slots__ = 'nodes', '_socket_pair', 'cache', '_callbacks', 'active', 'spin_interval'
 
-    def __init__(self, name: str, url: Node.Url.Remote):
-        super().__init__(name)
+    def __init__(self, name: str, url: Node.Url.Remote, spin_interval=1, *args, **kwarg):
+        super().__init__(name, *args, **kwarg)
         self._socket_pair = self.new_pair(url)
-        self._url = url
+        self.url = url
         self.cache = Cache(self.node_name)
-        self.nodes = self.Nodes()
-
-    class Info:
-        class Status(Enum):
-            disconnected = 0
-            connected = 1
-
-        __slots__ = 'name', 'pub_ip', 'local_ip', 'url', '_id', 'status', 'heartbeat_stamp', 'cache'
-
-        def __init__(self, name, pub_ip, local_ip, url):
-            self.name = name
-            self.pub_ip = pub_ip
-            self.local_ip = local_ip
-            self.url = url
-            self.status = self.Status.disconnected
-            self.heartbeat_stamp = 0
-
-        def __str__(self):
-            return f'Node.Info({self.status}| {self.name}, {self.pub_ip}, {self.local_ip}, {self.id}, {self.url})'
-
-        def touch_heartbeat(self):
-            self.heartbeat_stamp = time_ns()
-
-        @property
-        def id(self):
-            return oneshot_str_hexhashing(self.name + str(self.pub_ip))
-
-        def connect(self):
-            self.status = self.Status.connected
-
-        def disconnect(self):
-            self.status = self.Status.disconnected
-
-    class Nodes(dict):
-        __init__: {int: SteadyNodeData.Info}
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-
-        def __str__(self):
-            return f'Nodes({self.__dict__})'
-
-    class RegistrationRequest:
-        __slots__ = 'info'
-
-        def __str__(self):
-            return f'RegistrationRequest({self.info})'
-
-    class HeartBeatRequest:
-        __slots__ = 'nodes'
-
-        def __init__(self, nodes: SteadyNodeData.Nodes):
-            self.nodes = nodes
-
-        def __str__(self):
-            return f'HeartBeatRequest({str(self.nodes)})'
-
-    class HeartBeatReply:
-        __slots__ = 'id', 'stamp'
-
-        def __init__(self, node_id: int):
-            self.id = node_id
-            self.stamp = time_ns()
-
-    @property
-    def url(self):
-        return self.Url.Remote(self.Url.SockType.opposite(self._url.sock_type), UPNP.get_local_ip(), self._url.port)
-
-    @property
-    def info(self):
-        return self.Info(self.node_name, UPNP.pub_ip, UPNP.local_ip, self.url)
-
-    @property
-    def registration_request_message(self):
-        msg = self.RegistrationRequest()
-        msg.info = self.info
-        return msg
-
-    @property
-    def heartbeat_reply_message(self):
-        return self.HeartBeatReply(self.info.id)
-
-    @property
-    def heartbeat_request_message(self):
-        return self.HeartBeatRequest(self.nodes)
-
-
-class SteadyNodeBase(SteadyNodeData):
+        self.nodes: Nodes = dict()
+        self._callbacks: {type: Callable} = {}
+        self.active = False
+        self.spin_interval = spin_interval
+        self.node_info = NodeInfo(name=self.node_name, pub_ip=UPNP.pub_ip, local_ip=UPNP.local_ip, url=self.url)
 
     def send(self, msg):
         self._socket_pair.send(msg)
@@ -112,8 +28,28 @@ class SteadyNodeBase(SteadyNodeData):
         flag = 0
         if no_block:
             flag = self.Sock.Flags.no_block
-        return self._socket_pair.receive(flag=self.Sock.Flags.no_block)
+        return self._socket_pair.receive(flag=flag)
 
-    @abc.abstractmethod
-    def process_new_message(self, in_msg) -> object:
-        pass
+    def register_callback(self, msg_type: Any, func: Callable):
+        self.log.debug(f'registering callback: {{ {msg_type} : {func.__name__} }}')
+        self._callbacks[msg_type] = func
+
+    def process_callbacks(self, msg):
+        # No new message exit
+        if msg == self.Sock.RECV_ERROR:
+            return
+        # Handle new message calling the processing clb
+        if type(msg) in self._callbacks:
+            self.log.info(f'handled msg type : {type(msg)}')
+            self._callbacks[type(msg)](msg)
+        else:
+            self.log.warning(f'unknown msg type : {msg}')
+
+    def spin(self, no_block=True):
+        self.active = True
+        while self.active:
+            self.spin_once(no_block)
+            sleep(self.spin_interval)
+
+    def spin_once(self, no_block=True):
+        self.process_callbacks(self.recv(no_block))

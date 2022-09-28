@@ -1,45 +1,25 @@
 from __future__ import annotations
 
-from . import SteadyNodeBase
+from . import SteadyNodeBase, NodeHeartbeatServer, NodeHeartbeatClient, NodeRegistration
 
 
 class SteadyClientNode(SteadyNodeBase):
-    def __init__(self, name: str, ip: str, port: int):
-        super().__init__(name, self.Url.Remote(self.Url.SockType.Client, ip, port))
+    def __init__(self, name: str, ip: str, port: int, *args, **kwarg):
+        super().__init__(name, self.Url.Remote(self.Url.SockType.Client, ip, port), *args, **kwarg)
         self.registered = False
-        self.registration()
+        self.register_callback(NodeHeartbeatServer, self._process_heartbeat_request)
+        self.node_registration()
 
-    def registration(self):
-        self.log.info(f"Node Registration to: {self.url}")
-        self.send(self.registration_request_message)
+    def node_registration(self):
+        self.log.info(f"Node registration to: {self.url}")
+        self.send(NodeRegistration(info=self.node_info))
 
-    def process_new_message(self, in_msg) -> object:
-        return "custom-processing"
-
-    def _process_heartbeat_request(self, msg: SteadyNodeBase.HeartBeatRequest):
-        self.log.info(f"Heartbeat: {msg}")
+    def _process_heartbeat_request(self, msg: NodeHeartbeatServer):
+        self.log.info(f"Heartbeat: {str(msg)}")
         # Save updated nodes
         self.nodes = msg.nodes
         # Send heartbeat reply
-        self.send(self.heartbeat_reply_message)
-
-    def process_communications(self):
-        while True:
-            msg = self.recv()
-
-            # No new message exit
-            if msg == self.Sock.RECV_ERROR:
-                return
-
-            # Process Heartbeat Request
-            elif isinstance(msg, self.HeartBeatRequest):
-                self._process_heartbeat_request(msg)
-
-            # Custom Message Processing
-            else:
-                msg = self.process_new_message(msg)
-                if msg:
-                    self.send(msg)
+        self.send(NodeHeartbeatClient(identifier=self.node_info.identifier))
 
     def _respawn_check_(self):
         pass

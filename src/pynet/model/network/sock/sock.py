@@ -10,7 +10,8 @@ class Sock(SockServer, SockClient):
 
     def close(self):
         self.log.debug(f'{self} {self.sock_urls}')
-        self._call_parent_method('close')
+        if self.is_open:
+            self._call_parent_method('close')
 
     def _call_parent_method(self, method: str):
         if self.sock_type == self.SockUrl.SERVER:
