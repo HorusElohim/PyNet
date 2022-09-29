@@ -7,11 +7,11 @@ DNS_PORT = 33100
 
 URLS = DDict(
     server=DDict(
-        dns=Node.Url.Remote(sock_type=Node.Url.SERVER, ip='*', port=HEARTBEAT_PORT),
+        dns=Node.Url.Remote(sock_type=Node.Url.SERVER, ip='*', port=DNS_PORT),
         heartbeat=Node.Url.Remote(sock_type=Node.Url.SERVER, ip='*', port=HEARTBEAT_PORT)
     ),
     client=DDict(
-        dns=Node.Url.Remote(sock_type=Node.Url.CLIENT, ip=SERVER_IP, port=HEARTBEAT_PORT),
+        dns=Node.Url.Remote(sock_type=Node.Url.CLIENT, ip=SERVER_IP, port=DNS_PORT),
         heartbeat=Node.Url.Remote(sock_type=Node.Url.CLIENT, ip=SERVER_IP, port=HEARTBEAT_PORT)
     )
 )

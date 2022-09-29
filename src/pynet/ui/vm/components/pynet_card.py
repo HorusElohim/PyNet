@@ -5,22 +5,26 @@ from . import Card
 from pynet.model.network import dns
 from time import strftime, localtime, sleep
 
+SUCCESS = "🟢"
+FAILED = "🔴"
+STATUS = lambda x: SUCCESS if x else FAILED
+
 
 class DNSInfo(QObject, metaclass=PropertyMeta):
     alive_port = Property('')
     data_port = Property('')
-    alive_status = Property('🔴')
-    server_status = Property('🔴')
-    client_status = Property('🔴')
+    heartbeat_status = Property(FAILED)
+    server_status = Property(FAILED)
+    client_status = Property(FAILED)
     last_update = Property("00:00:00")
-    delta_ms = Property(0)
+    ping_ms = Property(0)
     n_clients = Property(0)
     clients = Property(dict())
 
     def failed(self):
-        self.server_status = "🔴"
-        self.alive_status = "🔴"
-        self.alive_status = "🔴"
+        self.server_status = FAILED
+        self.heartbeat_status = FAILED
+        self.client_status = FAILED
 
 
 class PynetCardWorkerSignals(QObject):
@@ -33,54 +37,39 @@ class PynetCardWorker(QRunnable):
         super().__init__()
         self.signals = PynetCardWorkerSignals()
         self.dns_info = DNSInfo()
-        self.dns_client = dns.Client('Pynet-DNS-Client')
-        self.registration_required = True
+        self.dns_client = dns.Client(node_name='Pynet-DNS-Client')
+        self.active = True
 
     def run(self):
-        self.signals.log.emit('Pynet client registration ...')
+        self.signals.log.emit('Pynet DNS registration ...')
         self.signals.info.emit(self.dns_info)
         sleep(1)
-        self.keep_alive_loop()
+        self.loop()
 
-    def upnp_map_alive_port(self):
-        res = self.pynet_client.upnp_map_alive_port()
-        self.dns_info.data_port = ','.join(self.pynet_client.dns_info.data_ports)
-        if res:
-            self.dns_info.alive_port = str(self.pynet_client.dns_info.alive_port) + " 🟢"
-        else:
-            self.dns_info.alive_port = "🔴"
-
-    def keep_alive_loop(self):
+    def loop(self):
         self.signals.log.emit('Starting client dns loop ...')
-        error_counter = 0
 
-        while self.dns_client.connected:
-            # Ask all nodes connected
-            self.dns_client.update_nodes()
-
-            if self.registration_required:
-
-                self.signals.log.emit('Recontacting the PyNet Server')
-                self.pynet_client_registration()
-                sleep(0.1)
+        while self.active:
+            sleep(1)
+            # Todo Set Warning state
+            # Todo Add signal/slot for state and remove Info
+            # Ask for all the nodes connected
+            if self.dns_client.update_nodes():
+                # Ping
+                self.dns_info.ping_ms = self.dns_client.ping
+                # Update Last update
+                self.dns_info.server_status = SUCCESS
+                self.dns_info.last_update = strftime("%H:%M:%S", localtime())
+                # Ping time
+                # DNS Status
+                self.dns_info.server_status = SUCCESS
+                # Nodes
+                self.dns_info.nodes = self.dns_client.nodes
+                self.dns_info.n_clients = len(self.dns_client.nodes)
             else:
-                msg = self.pynet_client.replier_alive.receive()
-                if msg == self.pynet_client.Sock.RECV_ERROR:
-                    error_counter += 1
-                    self.dns_info.failed()
-                    if error_counter == 3:
-                        self.registration_required = True
-                        error_counter = 0
-                else:
-                    if isinstance(msg, KeepAliveRequest):
-                        self.dns_info.clients = msg.clients
-                        self.dns_info.last_update = strftime("%H:%M:%S", localtime())
-                        self.dns_info.delta_ms = msg.delta_ms()
-                        res = self.pynet_client.replier_alive.send(KeepAliveReply())
-                        self.dns_info.alive_status = "🟢"
-                    else:
-                        self.signals.log.emit('keep_alive server sent something wrong')
-                        self.dns_info.failed()
+                self.dns_info.server_status = FAILED
+
+            self.signals.info.emit(self.dns_info)
 
 
 class PynetCard(Card):
@@ -95,7 +84,7 @@ class PynetCard(Card):
     @Slot(DNSInfo)
     def info_slot(self, info: DNSInfo):
         self.info = info
-        if self.info.server_status == "🟢":
+        if self.info.server_status == SUCCESS:
             self.success_state()
         else:
             self.error_state()
@@ -111,5 +100,4 @@ class PynetCard(Card):
             self.already_started = True
 
     def __del__(self):
-        self.worker.alive = False
-        super(PynetCard, self).__del__()
+        self.worker.active = False

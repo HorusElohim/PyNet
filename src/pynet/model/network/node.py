@@ -14,9 +14,8 @@ from __future__ import annotations
 from .. import AbcEntity, oneshot_str_hexhashing
 from . import UPNP
 from . import Upnp
-from dataclasses import dataclass
 from .patterns import *
-from typing import Type
+from typing import Type, TypedDict
 from zmq import Context
 import time
 import signal
@@ -24,6 +23,7 @@ import sys
 
 
 class Node(AbcEntity):
+
     @dataclass
     class Info:
         id: int
@@ -101,16 +101,16 @@ class Node(AbcEntity):
 
     def new_heartbeat_requester(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> HeartbeatRequester:
         self.log.debug(f'new heartbeat requester on url: {sock_urls}')
-        self._socks.append(HeartbeatRequester(self.node_name, sock_urls, flags=flags, logger_other=self))
+        self._socks.append(HeartbeatRequester(name=self.node_name, sock_urls=sock_urls, flags=flags, logger_other=self))
         return self._socks[-1]
 
     def new_heartbeat_replier(self, sock_urls: Union[List[Url.Abc], Url.Abc], flags: Union[List[Tuple[int, int]], None] = None) -> HeartbeatReplier:
         self.log.debug(f'new heartbeat replier on url: {sock_urls}')
-        self._socks.append(HeartbeatReplier(self.node_name, sock_urls, flags=flags, logger_other=self))
+        self._socks.append(HeartbeatReplier(name=self.node_name, sock_urls=sock_urls, flags=flags, logger_other=self))
         return self._socks[-1]
 
     @property
-    def info(self) -> Info:
+    def info(self) -> Node.Info:
         return self.Info(id=oneshot_str_hexhashing(self.node_name + str(self.start_time)),
                          name=self.node_name,
                          start_time=self.start_time,

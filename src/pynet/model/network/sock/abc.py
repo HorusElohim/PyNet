@@ -17,7 +17,7 @@ import abc
 from zmq import (
     Context, ZMQError,
     SUB, PUB, REQ, REP, PUSH, PULL, PAIR,
-    SUBSCRIBE, LINGER, DONTWAIT, NULL, RCVTIMEO,
+    SUBSCRIBE, LINGER, DONTWAIT, NULL, RCVTIMEO, SNDTIMEO,
     EAGAIN, NOBLOCK,
     ENOTSUP, ENOTSUP, EFSM, ETERM, ENOTSOCK, EFAULT
 )  # https://pyzmq.readthedocs.io/en/latest/api/zmq.html
@@ -50,7 +50,7 @@ class SockFlags(IntEnum):
     dont_wait = DONTWAIT
     subscribe = SUBSCRIBE
     rcv_timeout = RCVTIMEO
-
+    snd_timeout = SNDTIMEO
     no_block = NOBLOCK
 
 

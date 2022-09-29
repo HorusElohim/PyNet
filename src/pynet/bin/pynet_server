@@ -1,6 +1,6 @@
 from pynet.model.network.dns import Server
+import time
 
 if __name__ == '__main__':
-    s = Server()
-    s.start_registration_loop()
-    s.join()
+    s = Server(node_name='Pynet.DNS.Server')
+    s.loop()

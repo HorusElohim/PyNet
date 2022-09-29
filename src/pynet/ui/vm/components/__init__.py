@@ -6,4 +6,4 @@ from .appinfo import AppInfo
 from .clock import Clock
 from .drop import Drop
 from .router_card import RouterCard, RouterInfo
-from .pynet_card import PynetInfo, PynetCard
+from .pynet_card import PynetCard, DNSInfo

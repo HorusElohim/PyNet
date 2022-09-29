@@ -51,7 +51,7 @@ class AbcSockUrl:
         self.sock_type = sock_type
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__}::{self.__call__()}>'
+        return f'<{self.__class__.__name__}/{self.sock_type.name}::{self.__call__()}>'
 
     def __call__(self) -> str:
         """

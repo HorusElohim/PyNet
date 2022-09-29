@@ -122,11 +122,13 @@ class HeartbeatRequester(Requester):
         self.rate = 1 / hertz
         self.thread = threading.Thread(target=self._heartbeat_thread_request_loop)
         self.thread.daemon = True
+        self.connected = False
         self.thread.start()
 
     def _heartbeat_thread_request_loop(self):
         while self.is_open:
             start = time_ns()
+            self.connected = False
             if self.send(HeartbeatRequest(self.info)):
                 if not self.receive() == self.RECV_ERROR:
                     self.connected = True
@@ -134,7 +136,8 @@ class HeartbeatRequester(Requester):
             if not self.connected:
                 break
             # Ensure processing hertz
-            sleep(self.rate - (time_ns() - start) * 1e-9)
+            self.log.debug(f'sleeping for {self.rate}s')
+            sleep(self.rate)
         # Close connection
         self.close()
 
@@ -168,6 +171,8 @@ class HeartbeatReplier(Replier):
                 self.socks.update({hb_req.sock.id: hb_req.sock})
                 self._lock.release()
                 self.send(HeartbeatReply())
+            else:
+                self.status[hb_req.sock.id] = False
 
     def _heartbeat_thread_check_alive(self):
         while self.is_open:
