@@ -1,6 +1,5 @@
 from ...common import Singleton
 from .. import UPNP
-from .data import SERVER_INFO, ClientInfo, ClientRequestRegistration, ClientReplyRegistration, ServerInfo, ClientsRegistered, ClientRegisteredEnum, \
-    KeepAliveRequest, KeepAliveReply
+from .data import URLS, DNS_PORT, HEARTBEAT_PORT, SERVER_IP
 from .client import Client
 from .server import Server

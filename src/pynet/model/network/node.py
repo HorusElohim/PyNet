@@ -10,9 +10,11 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
+from __future__ import annotations
 from .. import AbcEntity, oneshot_str_hexhashing
 from . import UPNP
 from . import Upnp
+from dataclasses import dataclass
 from .patterns import *
 from typing import Type
 from zmq import Context
@@ -22,6 +24,14 @@ import sys
 
 
 class Node(AbcEntity):
+    @dataclass
+    class Info:
+        id: int
+        name: str
+        start_time: int
+        close_time: int
+        socks: [Sock.Info]
+
     SERVER: Sock.SockUrl.SockType = Sock.SockUrl.SERVER
     CLIENT: Sock.SockUrl.SockType = Sock.SockUrl.CLIENT
     Sock: Type[Sock] = Sock
@@ -36,6 +46,7 @@ class Node(AbcEntity):
     Replier: Type[Replier] = Replier
     Pair: Type[Pair] = Pair
     Upnp: Type[Upnp] = Upnp
+    Nodes: Type[{int: Node.Info}]
 
     def _sigint_(self, sig: int, frame: object) -> None:
         self.log.info("CTRL-C Pressed. Cleaning resources.")
@@ -99,14 +110,12 @@ class Node(AbcEntity):
         return self._socks[-1]
 
     @property
-    def info(self) -> DDict:
-        return DDict(
-            id=oneshot_str_hexhashing(self.node_name + str(self.start_time)),
-            name=self.node_name,
-            start_time=self.start_time,
-            close_time=self.close_time,
-            socks=[s.info for s in self._socks]
-        )
+    def info(self) -> Info:
+        return self.Info(id=oneshot_str_hexhashing(self.node_name + str(self.start_time)),
+                         name=self.node_name,
+                         start_time=self.start_time,
+                         close_time=self.close_time,
+                         socks=[s.info for s in self._socks])
 
     @staticmethod
     def get_upnp():
@@ -121,3 +130,7 @@ class Node(AbcEntity):
 
     def __repr__(self):
         return f'Node({str(self.info)})'
+
+    @staticmethod
+    def stamp_ns():
+        return time_ns()

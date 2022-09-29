@@ -1,56 +1,25 @@
 from __future__ import annotations
-import time
 
-from .. import Node, Sock, UPNP
-from . import ClientRequestRegistration, ClientReplyRegistration, ClientInfo, ClientsRegistered, KeepAliveReply, KeepAliveRequest
+from .. import Node
+from . import URLS, HEARTBEAT_PORT, DNS_PORT
 
 
 class Client(Node):
-    requester_registration: Node.Requester
-    replier_alive: Node.Replier | None
+    def __init__(self, nat_ports=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hb_req = self.new_heartbeat_requester(URLS.client.heartbeat)
+        self.dns_req = self.new_requester(URLS.client.dns)
+        self.nodes: Node.Nodes = {}
+        if nat_ports:
+            self.get_upnp().new_port_mapping(self.get_upnp().local_ip, HEARTBEAT_PORT, HEARTBEAT_PORT)
+            self.get_upnp().new_port_mapping(self.get_upnp().local_ip, DNS_PORT, DNS_PORT)
 
-    def __init__(self, name: str):
-        Node.__init__(self, name)
-        self.info = ClientInfo(name=name, alive_port=28128, data_ports=[])
-        self.requester_registration = self.new_requester(self.info.get_registration_url(), flags=[(Sock.Flags.rcv_timeout, 3000), ])
-        self.clients = ClientsRegistered()
-        self.replier_alive = None
-        self.alive = True
+    def update_nodes(self):
+        self.dns_req.send(self.info)
+        reply = self.dns_req.receive()
+        if isinstance(reply, self.Nodes):
+            self.nodes = reply
 
-    def create_keep_alive_rep(self):
-        if self.replier_alive:
-            self.replier_alive.close()
-        time.sleep(0.1)
-        self.replier_alive = self.new_replier(self.info.get_alive_url_for_client(), flags=[(self.Sock.Flags.rcv_timeout, 3000)])
-
-    def update_ip(self):
-        self.info.update_ip()
-
-    def register(self) -> bool:
-        self.requester_registration.send(ClientRequestRegistration(self.info))
-        reply = self.requester_registration.receive()
-        self.log.debug(f"received: {reply}")
-        if isinstance(reply, ClientReplyRegistration):
-            self.clients = reply.clients
-            self.log.debug(f"received correctly list of clients: {self.clients}")
-            return True
-        else:
-            self.log.error(f"pynet-server reply error: {reply}")
-            return False
-
-    def upnp_map_alive_port(self):
-        return self.get_upnp().new_port_mapping(self.info.local_ip, self.info.alive_port, self.info.alive_port)
-
-    def _keep_alive_loop(self):
-        self.log.debug("starting keep_alive loop")
-        while self.alive:
-            msg = self.replier_alive.receive()
-            if msg == self.Sock.RECV_ERROR:
-                self.log.error('keep_alive client receive ERROR')
-            if isinstance(msg, KeepAliveRequest):
-                self.clients = msg.clients
-                res = self.replier_alive.send(KeepAliveReply())
-                if not res:
-                    self.log.error('keep_alive client sent ERROR')
-            else:
-                self.log.error('keep_alive server sent something wrong')
+    @property
+    def connected(self):
+        return self.hb_req.connected

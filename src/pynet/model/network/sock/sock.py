@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .client import SockClient
 from .server import SockServer
 

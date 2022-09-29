@@ -106,12 +106,12 @@ class Pair(PatternBase):
 
 # ______ CUSTOMS ______
 
-@dataclass(repr=True, frozen=True)
+@dataclass()
 class HeartbeatRequest:
-    sock_info: DDict
+    sock: Sock.Info
 
 
-@dataclass(repr=True, frozen=True)
+@dataclass()
 class HeartbeatReply:
     pass
 
@@ -120,7 +120,6 @@ class HeartbeatRequester(Requester):
     def __init__(self, hertz=1, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.rate = 1 / hertz
-        self.alive: bool = False
         self.thread = threading.Thread(target=self._heartbeat_thread_request_loop)
         self.thread.daemon = True
         self.thread.start()
@@ -130,9 +129,9 @@ class HeartbeatRequester(Requester):
             start = time_ns()
             if self.send(HeartbeatRequest(self.info)):
                 if not self.receive() == self.RECV_ERROR:
-                    self.alive = True
+                    self.connected = True
             # if Replier is not online exit
-            if not self.alive:
+            if not self.connected:
                 break
             # Ensure processing hertz
             sleep(self.rate - (time_ns() - start) * 1e-9)
@@ -147,23 +146,26 @@ class HeartbeatRequester(Requester):
 class HeartbeatReplier(Replier):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._lock = threading.Lock()
-        self.connections: DDict = DDict()
-
-        self.thread = threading.Thread(target=self._heartbeat_thread_replier_loop)
-        self.thread.daemon = True
+        self.socks: Replier.Socks = {}
+        self.status: {int, bool} = {}
+        self.thread_loop = threading.Thread(target=self._heartbeat_thread_replier_loop)
+        self.thread_loop.daemon = True
         self.thread_alive = threading.Thread(target=self._heartbeat_thread_check_alive)
         self.thread_alive.daemon = True
-        self.thread.start()
+        self._lock = threading.Lock()
+        self.thread_loop.start()
         self.thread_alive.start()
+
+    def is_connected(self, sock_id: int):
+        return self.status[sock_id]
 
     def _heartbeat_thread_replier_loop(self):
         while self.is_open:
             hb_req = self.receive()
             if not hb_req == self.RECV_ERROR and isinstance(hb_req, HeartbeatRequest):
                 self._lock.acquire()
-                self.connections[hb_req.sock_info.name] = hb_req.sock_info
-                self.connections[hb_req.sock_info.name].status = 'connected'
+                self.status[hb_req.sock.id] = True
+                self.socks.update({hb_req.sock.id: hb_req.sock})
                 self._lock.release()
                 self.send(HeartbeatReply())
 
@@ -172,19 +174,17 @@ class HeartbeatReplier(Replier):
             sleep(1)
             # update all connections status
             self._lock.acquire()
-            for name, conn in self.connections.items():
+            for sock_id, sock_info in self.socks.items():
                 # If the last update is more the 3 seconds old
-                time_delta = (time_ns() - conn.stamp) * 1e-9
+                time_delta = (time_ns() - sock_info.stamp) * 1e-9
                 self.log.debug(f'last heartbeat delta: {time_delta}s')
-                if (time_ns() - conn.stamp) * 1e-9 > 2:
+                if (time_ns() - sock_info.stamp) * 1e-9 > 2:
                     # Set status to disconnect
-                    conn.status = 'disconnected'
+                    self.status[sock_id] = False
                 else:
                     # Set to connected
-                    conn.status = 'connected'
+                    self.status[sock_id] = True
             self._lock.release()
 
     def __del__(self):
         self.close()
-        self.thread.join()
-        self.thread_alive.join()

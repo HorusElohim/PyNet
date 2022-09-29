@@ -416,22 +416,22 @@ def test_patterns_auto_open_pair_server_client_remote(test_case):
 
 # Test Heartbeat REQ/REP
 def test_patterns_heartbeat_requester_replier():
-    hb_rep = HeartbeatReplier(name='TestHeartbeatReplier', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=33132))
-    hb_req = HeartbeatRequester(name='TestHeartbeatRequester', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=33132))
+    hb_rep = HeartbeatReplier(name='TestHeartbeatReplier', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=33132), logger_other=TEST_LOG)
+    hb_req = HeartbeatRequester(name='TestHeartbeatRequester', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=33132), logger_other=TEST_LOG)
     sleep(1)
-    assert hb_req.alive
-    assert len(hb_rep.connections) == 1
-    assert hb_rep.connections['TestHeartbeatRequester.Sock'].status == 'connected'
+    assert hb_req.connected
+    assert len(hb_rep.socks) == 1
+    assert hb_rep.is_connected(hb_req.info.id)
     del hb_rep
     del hb_req
 
 
 def test_patterns_heartbeat_requester_replier_req_disconnection():
-    hb_rep = HeartbeatReplier(name='TestHeartbeatReplier', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=33133))
-    hb_req = HeartbeatRequester(name='TestHeartbeatRequester', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=33133))
+    hb_rep = HeartbeatReplier(name='TestHeartbeatReplier', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.SERVER, ip='*', port=33133), logger_other=TEST_LOG)
+    hb_req = HeartbeatRequester(name='TestHeartbeatRequester', sock_urls=Sock.SockUrl.Remote(Sock.SockUrl.CLIENT, port=33133), logger_other=TEST_LOG)
     sleep(1)
     hb_req.close()
-    assert len(hb_rep.connections) == 1
+    assert len(hb_rep.socks) == 1
     sleep(3)
-    assert hb_rep.connections['TestHeartbeatRequester.Sock'].status == 'disconnected'
+    assert not hb_rep.is_connected(hb_req.info.id)
     del hb_rep

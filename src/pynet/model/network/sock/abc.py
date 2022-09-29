@@ -21,9 +21,11 @@ from zmq import (
     EAGAIN, NOBLOCK,
     ENOTSUP, ENOTSUP, EFSM, ETERM, ENOTSOCK, EFAULT
 )  # https://pyzmq.readthedocs.io/en/latest/api/zmq.html
+
+from dataclasses import dataclass
 from time import time_ns
 from enum import IntEnum
-from ... import Size, AbcEntity, DDict
+from ... import Size, AbcEntity, DDict, oneshot_str_hexhashing
 from . import SockUrl
 from typing import Union, List, Tuple, Type
 import logging
@@ -81,6 +83,19 @@ class SockCannotBeClientAndServerError(Exception):
 
 
 class AbcSock(AbcEntity):
+    @dataclass
+    class Info:
+        id: int
+        name: str
+        type: AbcSock.Pattern
+        urls: [SockUrl]
+        flags: []
+        bytes_sent: int
+        bytes_recv: int
+        is_open: bool
+        stamp: int
+
+    Socks: Type[{int: AbcSock.Info}]
     SockUrl: Type[SockUrl] = SockUrl
     Pattern: Type[SockPatternType] = SockPatternType
     Flags: Type[SockFlags] = SockFlags
@@ -116,10 +131,11 @@ class AbcSock(AbcEntity):
         self.log.debug(f'{self} init')
 
     @property
-    def info(self) -> DDict:
-        return DDict(
+    def info(self) -> Info:
+        return self.Info(
+            id=oneshot_str_hexhashing(self._sock_name + str(self._sock_pattern_type.name)),
             name=self._sock_name,
-            type=self._sock_pattern_type.name,
+            type=self._sock_pattern_type,
             urls=self._sock_urls,
             flags=self._sock_flags,
             bytes_sent=self._sock_bytes_sent,
