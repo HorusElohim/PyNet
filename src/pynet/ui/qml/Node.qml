@@ -34,9 +34,9 @@ import QtQuick.Controls 2.15
             drag.target: nodeOuterRect
             drag.axis: Drag.XAndYAxis
             drag.minimumX: 0
-            drag.maximumX: appCanvas.width - 110
+            drag.maximumX: appWindow.width - 110
             drag.minimumY: 0
-            drag.maximumY: appCanvas.height - 110
+            drag.maximumY: appWindow.height - 110
         }
 
         Component.onCompleted: {

@@ -15,23 +15,24 @@ class ViewModel(QObject):
         self._router_card = RouterCard()
         self._router_card.logger_signal.connect(self._log.update_message)
         self._router_card.completed_signal.connect(self.router_completed_slot)
-        self._pynet_card = PynetCard()
-        self._pynet_card.logger_signal.connect(self._log.update_message)
+        # self._pynet_card = PynetCard()
+        # self._pynet_card.logger_signal.connect(self._log.update_message)
         ##################
         self._log_message_sig.connect(self._log.update_message)
         LOG.log.debug("VM Constructed")
 
     def start(self):
         self._router_card.visible_body = True
-        self._router_card.discover()
+        self._router_card.start()
 
     @Slot(bool)
     def router_completed_slot(self, val):
-        if val:
-            self._pynet_card.visible_body = True
-            self._pynet_card.discover()
-        else:
-            self._pynet_card.visible_body = False
+        # if val:
+        #     self._pynet_card.visible_body = True
+        #     self._pynet_card.discover()
+        # else:
+        #     self._pynet_card.visible_body = False
+        print(f'router completed: {val}')
 
     @Property(QObject, constant=True)
     def clock(self):

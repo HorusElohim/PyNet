@@ -31,17 +31,17 @@ import QtQuick.Controls
                     Layout.alignment: Qt.AlignCenter | Qt.AlignLeft
                     PNText {
                             id: routerModelText
-                            text: "Router: " + appVm.router_card.info.model
+                            text: "Router: " + appVm.router_card.data.model
                             font.pointSize: 11
                             }
                     PNText {
                             id: routerIpPubText
-                            text: "Public: " + appVm.router_card.info.public_ip
+                            text: "Public: " + appVm.router_card.data.public_ip
                             font.pointSize: 11
                     }
                     PNText {
                             id: routerIpLocalText
-                            text: "Local: " + appVm.router_card.info.local_ip
+                            text: "Local: " + appVm.router_card.data.local_ip
                             font.pointSize: 11
                     }
                 }
@@ -51,13 +51,13 @@ import QtQuick.Controls
 
                     PNText {
                         id: routerStatusText
-                        text: appVm.router_card.info.sip
+                        text: appVm.router_card.data.sip
                         font.pointSize: 11
                     }
 
                     PNText {
                         id: routerNatText
-                        text: appVm.router_card.info.nat
+                        text: appVm.router_card.data.nat
                         font.pointSize: 11
                     }
 

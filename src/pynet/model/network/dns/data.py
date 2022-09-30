@@ -1,7 +1,7 @@
 from ... import DDict
 from .. import Node
 
-SERVER_IP = "192.168.1.20"
+SERVER_IP = "192.168.1.14"
 HEARTBEAT_PORT = 33000
 DNS_PORT = 33100
 

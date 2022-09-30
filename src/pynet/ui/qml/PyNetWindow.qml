@@ -4,13 +4,13 @@ import QtQuick.Controls
 
 ApplicationWindow  {
     title: "PyNet"
-    width: 500
-    height: 360
+    width: 480
+    height: 400
     minimumWidth: 500
     minimumHeight: 200
     visible: true
 
-    opacity: 0.85
+    opacity: 0.95
     color: "transparent"
 
 //        flags: Qt.CustomizeWindowHint |  Qt.Window
@@ -21,4 +21,6 @@ ApplicationWindow  {
     }
 
     MouvableWindow {}
+
+
 }

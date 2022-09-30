@@ -37,8 +37,10 @@ class PynetCardWorker(QRunnable):
         super().__init__()
         self.signals = PynetCardWorkerSignals()
         self.dns_info = DNSInfo()
-        self.dns_client = dns.Client(node_name='Pynet-DNS-Client')
+        self.dns_client = dns.Client(node_name='Pynet.DNS.Client')
         self.active = True
+        self.log_once = True
+        self.retry_count = 0
 
     def run(self):
         self.signals.log.emit('Pynet DNS registration ...')
@@ -47,7 +49,7 @@ class PynetCardWorker(QRunnable):
         self.loop()
 
     def loop(self):
-        self.signals.log.emit('Starting client dns loop ...')
+        self.signals.log.emit('Contacting the Pynet DNS Server ... ')
 
         while self.active:
             sleep(1)
@@ -55,6 +57,7 @@ class PynetCardWorker(QRunnable):
             # Todo Add signal/slot for state and remove Info
             # Ask for all the nodes connected
             if self.dns_client.update_nodes():
+                self.retry_count = 0
                 # Ping
                 self.dns_info.ping_ms = self.dns_client.ping
                 # Update Last update
@@ -66,8 +69,13 @@ class PynetCardWorker(QRunnable):
                 # Nodes
                 self.dns_info.nodes = self.dns_client.nodes
                 self.dns_info.n_clients = len(self.dns_client.nodes)
+                if self.log_once:
+                    self.signals.log.emit('Connected to Pynet DNS Server')
+                    self.log_once = False
             else:
+                self.retry_count += 1
                 self.dns_info.server_status = FAILED
+                self.signals.log.emit(f'Pynet DNS Server lost. Retry {self.retry_count}')
 
             self.signals.info.emit(self.dns_info)
 
@@ -76,7 +84,7 @@ class PynetCard(Card):
     info = Property(DNSInfo())
 
     def __init__(self, parent=None):
-        Card.__init__(self, parent=parent)
+        Card.__init__(self, parent)
         self.warning_state()
         self.worker = PynetCardWorker()
         self.already_started = False

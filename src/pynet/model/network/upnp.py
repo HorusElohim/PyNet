@@ -18,12 +18,17 @@ class Upnp(AbcEntity):
     def __init__(self, auto_discover=False, **kwargs):
         AbcEntity.__init__(self, entity_name='Pynet.Upnp', **kwargs)
         self.devices = []
-        self.device = None
+        self._device = None
         self._pub_ip = ''
         self._local_ip = ''
         if auto_discover:
             self.discover()
         self.log.debug("done *")
+
+    @property
+    def device(self):
+        self.safe_check_discovery_needed()
+        return self._device
 
     @property
     def local_ip(self):
@@ -40,13 +45,13 @@ class Upnp(AbcEntity):
         return self._pub_ip
 
     def safe_check_discovery_needed(self):
-        if not self.device:
+        if not self._device:
             self.discover()
 
     def discover(self):
         self.log.debug("discovering routers ... (can takes some seconds)")
         self.devices = upnpclient.discover()
-        self.device = self.devices[0]
+        self._device = self.devices[0]
         if not self.device:
             raise UpnpDeviceIsNone(self)
 
