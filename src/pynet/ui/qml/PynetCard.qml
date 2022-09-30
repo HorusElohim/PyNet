@@ -33,17 +33,17 @@ import QtQuick.Controls
                     Layout.fillWidth: true
 
                     PNText {
-                        text: "Users: " + appVm.pynet_card.info.n_clients
+                        text: "Users: " + appVm.pynet_card.data.n_clients
                         font.pointSize: 11
                     }
 
                     PNText {
-                        text: "Ping: " + appVm.pynet_card.info.ping_ms + " ms"
+                        text: "Ping: " + appVm.pynet_card.data.ping_ms + " ms"
                         font.pointSize: 11
                     }
 
                     PNText {
-                        text: "Updated: " + appVm.pynet_card.info.last_update
+                        text: "Updated: " + appVm.pynet_card.data.last_update
                         font.pointSize: 11
                     }
 
@@ -54,7 +54,7 @@ import QtQuick.Controls
                     Layout.fillHeight: true
 
                     PNText {
-                        text: "Server: " + appVm.pynet_card.info.server_status
+                        text: "Server: " + appVm.pynet_card.data.server_status
                         font.pointSize: 11
                     }
                 }

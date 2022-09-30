@@ -31,10 +31,10 @@ PyNetWindow {
 
             VerticalLine {}
 
-//            PynetCard {
-//                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-//                Layout.fillWidth: true
-//            }
+            PynetCard {
+                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                Layout.fillWidth: true
+            }
 
             BotBar {
                 Layout.fillWidth: true

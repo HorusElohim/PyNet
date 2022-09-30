@@ -1,23 +1,21 @@
-import abc
-
 from PySide6.QtCore import QObject, Signal, Slot, QRunnable, QThreadPool
 from enum import Enum
 from ....utils import Property, PropertyMeta
 from ....utils.property import PROPERTY_CACHE
 
 
-class Status(Enum):
+class StatusEnum(Enum):
     warning = 'warning'
     success = 'success'
     failed = 'failed'
 
 
-class CardStatus(QObject):
-    status: Status
+class Status(QObject):
+    status: StatusEnum
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.status = Status.warning
+        self.status = StatusEnum.warning
 
 
 class Card(QObject, metaclass=PropertyMeta):
@@ -43,61 +41,30 @@ class Card(QObject, metaclass=PropertyMeta):
         th_pool = QThreadPool.globalInstance()
         th_pool.start(self.worker)
 
-    @Slot(CardStatus)
-    def status_slot(self, status: CardStatus):
+    @Slot(Status)
+    def status_slot(self, status: Status):
         print(type(status), status)
         completed = False
         # Warning State
-        if status.status == Status.warning:
+        if status.status == StatusEnum.warning:
             self.color = "#FFFF00"
         # Success State
-        elif status.status == Status.success:
+        elif status.status == StatusEnum.success:
             self.color = "#7CFC00"
             completed = True
-        elif status.status == Status.failed:
+        elif status.status == StatusEnum.failed:
             self.color = "#DC143C"
         # Emit completed signal
         self.completed_signal.emit(completed)
 
     @Slot(QObject)
     def data_slot(self, data: QObject):
-        print(f'SLOT-DATA: {type(data)} - {data}')
         self.data = data
-        PROPERTY_CACHE.save()
 
     @Slot(str)
     def log_message(self, msg):
         self.logger_signal.emit(msg)
 
-
-class CardWorkerData(QObject, metaclass=PropertyMeta):
-    pass
-
-
-class CardWorker(QRunnable):
-    class Signals(QObject):
-        log = Signal(str)
-        status = Signal(CardStatus)
-        data = Signal(CardWorkerData)
-
-    def __init__(self, worker_data_type):
-        # Init QRunnable
-        super().__init__()
-        self.signals = CardWorker.Signals()
-        self.active = False
-        self.status = CardStatus()
-        self.data = worker_data_type()
-        print(f"CardWorkerInit: status: {type(self.status)} - {self.status}")
-
-    def run(self):
-        self.signals.log.emit(f'Starting {self.__class__} worker')
-        self.active = True
-        while self.active:
-            self.status = self.task()
-            self.signals.status.emit(self.status)
-            self.signals.data.emit(self.data)
-            self.active = False
-
-    @abc.abstractmethod
-    def task(self) -> CardStatus:
-        pass
+    def __del__(self):
+        if self.worker:
+            self.worker.active = False

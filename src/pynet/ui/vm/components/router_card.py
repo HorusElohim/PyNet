@@ -1,11 +1,10 @@
 from ....model import UPNP
 from ...utils import Property
-from . import Card, CardStatus, CardWorker, Status, CardWorkerData
+from ...utils.property import PROPERTY_CACHE
+from . import card
 
-MAPPED_PORT = 28128
 
-
-class RouterData(CardWorkerData):
+class RouterData(card.WorkerData):
     model = Property('-', save=True)
     local_ip = Property('-', save=True)
     public_ip = Property('-', save=True)
@@ -15,26 +14,27 @@ class RouterData(CardWorkerData):
     upnp = Property('MAP: 🔴')
 
 
-class RouterCardWorker(CardWorker):
+class RouterCardWorker(card.Worker):
     def __init__(self):
         super().__init__(worker_data_type=RouterData)
 
-    def task(self) -> CardStatus:
+    def task(self) -> card.Status:
         self.signals.log.emit('Upnp router discovering ...')
         self.data.model = UPNP.device.model_name
         self.data.public_ip = UPNP.get_public_ip()
         self.data.local_ip = UPNP.get_local_ip()
         self.data.status = UPNP.get_status()
         nat, sip = UPNP.get_nat_sip()
-        self.data.nat = f'NAT: {"🟢" if nat else "🔴"}'
-        self.data.sip = f'SIP: {"🟢" if sip else "🔴"}'
+        self.data.nat = f'NAT: {card.status_str(nat)}'
+        self.data.sip = f'SIP: {card.status_str(sip)}'
         self.signals.log.emit('Upnp router discovering completed')
-        status = CardStatus()
-        status.status = Status.success
+        status = card.Status()
+        status.status = card.StatusEnum.success
+        PROPERTY_CACHE.save()
         return status
 
 
-class RouterCard(Card):
+class RouterCard(card.Card):
     data = Property(RouterData())
 
     def __init__(self, parent=None):
