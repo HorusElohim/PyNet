@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 
 from .. import Node
-from . import URLS, DNS_PORT
+from . import URLS, DNS_PORT, ReplyOk
 
 
 class Client(Node):
@@ -23,8 +23,11 @@ class Client(Node):
         reply = self.dns_req.receive()
         self.ping = (time.time_ns() - s) * 1e-6
 
-        if isinstance(reply, dict):
+        if isinstance(reply, Node.Nodes):
             self.nodes = reply
+            self.connected = True
+            return True
+        elif isinstance(reply, ReplyOk):
             self.connected = True
             return True
 

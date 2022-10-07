@@ -5,6 +5,11 @@ SERVER_IP = "192.168.1.14"
 HEARTBEAT_PORT = 33000
 DNS_PORT = 33100
 
+
+class ReplyOk:
+    pass
+
+
 URLS = DDict(
     server=DDict(
         dns=Node.Url.Remote(sock_type=Node.Url.SERVER, ip='*', port=DNS_PORT),

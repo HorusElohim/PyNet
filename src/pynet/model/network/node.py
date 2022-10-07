@@ -15,7 +15,7 @@ from .. import AbcEntity, oneshot_str_hexhashing
 from . import UPNP
 from . import Upnp
 from .patterns import *
-from typing import Type, TypedDict
+from typing import Type, TypeAlias, Dict
 from zmq import Context
 import time
 import signal
@@ -23,7 +23,6 @@ import sys
 
 
 class Node(AbcEntity):
-
     @dataclass
     class Info:
         id: int
@@ -31,6 +30,8 @@ class Node(AbcEntity):
         start_time: int
         close_time: int
         socks: [Sock.Info]
+
+    Nodes: TypeAlias = Dict[int, Info]
 
     SERVER: Sock.SockUrl.SockType = Sock.SockUrl.SERVER
     CLIENT: Sock.SockUrl.SockType = Sock.SockUrl.CLIENT
@@ -46,7 +47,6 @@ class Node(AbcEntity):
     Replier: Type[Replier] = Replier
     Pair: Type[Pair] = Pair
     Upnp: Type[Upnp] = Upnp
-    Nodes: Type[{int: Node.Info}]
 
     def _sigint_(self, sig: int, frame: object) -> None:
         self.log.info("CTRL-C Pressed. Cleaning resources.")
