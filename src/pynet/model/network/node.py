@@ -31,7 +31,7 @@ class Node(AbcEntity):
         close_time: int
         socks: [Sock.Info]
 
-    Nodes: TypeAlias = Dict[int, Info]
+    Nodes: Dict[int, Info] = Dict[int, Info]
 
     SERVER: Sock.SockUrl.SockType = Sock.SockUrl.SERVER
     CLIENT: Sock.SockUrl.SockType = Sock.SockUrl.CLIENT
