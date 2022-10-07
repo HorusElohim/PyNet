@@ -15,7 +15,7 @@ from .. import AbcEntity, oneshot_str_hexhashing
 from . import UPNP
 from . import Upnp
 from .patterns import *
-from typing import Type, Dict
+from typing import Type
 from zmq import Context
 import time
 import signal
@@ -31,7 +31,8 @@ class Node(AbcEntity):
         close_time: int
         socks: [Sock.Info]
 
-    Nodes: Dict[int, Info] = Dict[int, Info]
+    class Nodes(dict[int, Info]):
+        pass
 
     SERVER: Sock.SockUrl.SockType = Sock.SockUrl.SERVER
     CLIENT: Sock.SockUrl.SockType = Sock.SockUrl.CLIENT
@@ -111,7 +112,7 @@ class Node(AbcEntity):
 
     @property
     def info(self) -> Node.Info:
-        return self.Info(id=oneshot_str_hexhashing(self.node_name + str(self.start_time)),
+        return Node.Info(id=oneshot_str_hexhashing(self.node_name + str(self.start_time)),
                          name=self.node_name,
                          start_time=self.start_time,
                          close_time=self.close_time,

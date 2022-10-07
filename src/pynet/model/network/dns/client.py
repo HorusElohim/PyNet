@@ -10,7 +10,7 @@ class Client(Node):
     def __init__(self, nat_ports=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dns_req = self.new_requester(URLS.client.dns, flags=[(self.Sock.Flags.rcv_timeout, 3000), (self.Sock.Flags.snd_timeout, 3000)])
-        self.nodes: Node.Nodes = {}
+        self.nodes = Node.Nodes()
         self.dns_nat_port = False
         self.connected = False
         self.ping = 0

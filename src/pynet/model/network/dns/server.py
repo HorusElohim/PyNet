@@ -7,7 +7,7 @@ class Server(Node):
     def __init__(self, nat_ports=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dns_rep = self.new_replier(URLS.server.dns, flags=[(self.Sock.Flags.rcv_timeout, 3000), (self.Sock.Flags.snd_timeout, 3000)])
-        self.nodes: Node.Nodes = {}
+        self.nodes = Node.Nodes()
         self.need_update: {int: bool} = {}
         if nat_ports:
             self.get_upnp().new_port_mapping(self.get_upnp().local_ip, DNS_PORT, DNS_PORT)
