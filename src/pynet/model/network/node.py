@@ -15,7 +15,7 @@ from .. import AbcEntity, oneshot_str_hexhashing
 from . import UPNP
 from . import Upnp
 from .patterns import *
-from typing import Type, TypeAlias, Dict
+from typing import Type, Dict
 from zmq import Context
 import time
 import signal
